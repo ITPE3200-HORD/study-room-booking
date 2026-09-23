@@ -1,5 +1,5 @@
 using System;
-namespace study_room_booking
+namespace study_room_booking.Models
 {
     public class study_room_booking
     {
