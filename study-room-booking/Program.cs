@@ -1,10 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using study_room_booking.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
-var app = builder.Build();
+builder.Services.AddDbContext<RoomDbContext>(options =>
+{
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("RoomDbContextConnection"));
+});
 
+var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {

@@ -6,9 +6,16 @@ namespace study_room_booking.Controllers;
 
 public class RoomController : Controller
 {
+
+    private readonly RoomDbContext _roomDbContext;
+
+    public RoomController(RoomDbContext roomDbContext)
+    {
+        _roomDbContext = roomDbContext;
+    }
     public IActionResult Table()
     {
-        var rooms = GetRooms();
+        List<Room> rooms = _roomDbContext.Rooms.ToList();
         var roomsViewModel = new RoomsViewModel(rooms, "Table");
         return View(roomsViewModel);
     }
