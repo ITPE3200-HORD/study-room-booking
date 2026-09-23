@@ -1,0 +1,18 @@
+@model RoomsViewModel
+
+<h1>List of Rooms (@Model.CurrentViewName View)</h1>>
+
+<div class="container"> 
+    <table class="table table-striped">
+        <tr><th>RoomId</th><th>Room Name</th><th>Location</th><th>Capacity</th><th>Is active</th></tr>            
+        @foreach (var Room in Model.Rooms)
+                {
+                    <tr>
+                        <td>@Room.RoomId</td>
+                        <td>@Room.RoomName</td>
+                        <td>@Room.Location</td>
+                        <td>@Room.Capacity</td>
+                    </tr>
+                }
+            </table>
+    </div>
