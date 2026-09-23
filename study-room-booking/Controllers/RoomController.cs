@@ -5,21 +5,14 @@ namespace study_room_booking.Controllers;
 
 public class RoomController : Controller
 {
-    public IActionResult Room()
+    private readonly RoomDbContext _roomDbContext;
+    
+    public RoomController(RoomDbContext roomDbContext)
     {
-        var rooms = new List<Room>();
-
-        var room1 = new Room
-        {
-            RoomId = 1,
-            RoomName = "Steinar",
-            Location = "Pilstredet 35, 3. etg",
-            Capacity = 5
-        };
-
-        rooms.Add(room1);
-
-        ViewBag.CurrenttViewName = "List of rooms";
-        return View(rooms);
+        _roomDbContext = roomDbContext;
     }
+       public IActionResult Room()
+    {
+        List<Room> rooms = _roomDbContext.Rooms.ToList();
+        return View(RoomViewModel);
 }
