@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "study-room-booking/1.0.0": {
+        "runtime": {
+          "study-room-booking.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "study-room-booking/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
