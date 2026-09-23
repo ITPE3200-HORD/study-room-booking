@@ -1,0 +1,29 @@
+using study_room_booking.Models
+@model IEnumerable<Room>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.cs" />
+    <title>Book a study Room</title>
+</head>
+<body>
+    <div clss="container">
+        <h1>@ViewBag.CurrentViewName</h1>
+        <table class="table table-striped">
+            <tr><th>RoomId</th><th>Room Name</th><th>Location</th><th>Capacity</th><th>Is active</th></tr>
+            @foreach (var Room in Model)
+                {
+                    <tr>
+                        <td>@Room.RoomId</td>
+                        <td>@Room.RoomName</td>
+                        <td>@Room.Location</td>
+                        <td>@Room.Capacity</td>
+                    </tr>
+                }
+            </table>
+    </div>
+</body>
+</html>
