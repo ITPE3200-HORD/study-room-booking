@@ -1,6 +1,7 @@
 @model RoomsViewModel
 
-<h1>List of Rooms (@Model.CurrentViewName View)</h1>>
+<h1>List of Rooms (@Model.CurrentViewName View)</h1> @* Fixed: removed extra > *@
+<a asp-action="Create" class="btn btn-primary mb-3">Create new room</a> @*Added a 'create-new-room'-button *@
 
 <div class="container"> 
     <table class="table table-striped">
@@ -12,6 +13,7 @@
                         <td>@Room.RoomName</td>
                         <td>@Room.Location</td>
                         <td>@Room.Capacity</td>
+                        <td>@Room.IsActve</td> @* Added: shows IsActve value *@ 
                     </tr>
                 }
             </table>

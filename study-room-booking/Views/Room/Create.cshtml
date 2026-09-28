@@ -1,0 +1,31 @@
+@model Room
+
+<h1>Create new room</h1>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="RoomName" class="form-label">Room name</label>
+        <input asp-for="RoomName" class="form-control" />
+        <span asp-validation-for="RoomName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Location" class="form-label">Location</label>
+        <input asp-for="Location" class="form-control" />
+        <span asp-validation-for="Location" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Capacity" class="form-label">Capacity</label>
+        <input asp-for="Capacity" class="form-control" />
+        <span asp-validation-for="Capacity" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 form-check">
+        <input asp-for="IsActve" class="form-check-input" />
+        <label asp-for="IsActve" class="form-check-label">Is active</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-action="Table" class="btn btn-secondary">Cancel</a>
+</form>

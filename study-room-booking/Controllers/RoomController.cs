@@ -20,6 +20,28 @@ public class RoomController : Controller
         return View(roomsViewModel);
     }
 
+    // GET: /Room/Create
+    // Shows the empty form for creating a new room
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    // POST: /Room/Create
+    // Saves the new room to the database if the form is valid
+    [HttpPost]
+    public IActionResult Create(Room room)
+    {
+        if (ModelState.IsValid)
+        {
+            _roomDbContext.Rooms.Add(room);
+            _roomDbContext.SaveChanges();
+            return RedirectToAction(nameof(Table)); // back to the room list
+        }
+        return View(room); // show the form again with errors
+    }
+
     public List<Room> GetRooms()
     {
         var rooms = new List<Room>();
