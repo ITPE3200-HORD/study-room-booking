@@ -1,0 +1,7 @@
+bin/
+obj/
+.vs/
+
+# SQLite databases and journal files
+*.db
+*.db-*
