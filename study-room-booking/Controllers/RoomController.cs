@@ -10,12 +10,12 @@ namespace study_room_booking.Controllers;
 
 public class RoomController : Controller
 {
-    private readonly IRoomRepository _roomRepository;
+    private readonly RoomDbContext _roomDbContext;
     private readonly ILogger<RoomController> _logger;
 
-    public RoomController(IRoomRepository roomRepository, ILogger<RoomController> logger)
+    public RoomController(RoomDbContext roomDbContext, ILogger<RoomController> logger)
     {
-        _roomRepository = roomRepository;
+        _roomDbContext = roomDbContext;
         _logger = logger;
     }
 
@@ -23,7 +23,7 @@ public class RoomController : Controller
     // Shows all rooms in a table
     public async Task<IActionResult> Table()
     {
-        var rooms = await _roomRepository.GetAll();
+        var rooms = await RoomDbContext.GetAll();
         if (rooms == null)
         {
             _logger.LogError("[RoomController] Room list not found while executing GetAll()");
@@ -48,13 +48,56 @@ public class RoomController : Controller
     {
         if (ModelState.IsValid)
         {
-            bool created = await _roomRepository.Create(room);
-            if (created)
-            {
-                return RedirectToAction(nameof(Table)); // back to the room list
-            }
+            _roomDbContext.Rooms.Add(room);
+            _roomDbContext.SaveChanges();
+            return RedirectToAction(nameof(Table));
         }
+        return View(room);   
         _logger.LogWarning("[RoomController] Room creation failed {@room}", room);
         return View(room); // show the form again with errors
+    }
+    [HttpGet]
+    public async Task<IActionResult> Update(int id)
+    {
+        var room = _roomDbContext.Rooms.Find(id);
+        if (room == null)
+        {
+            return NotFound();
+        }
+        return View(room);
+    }
+    [HttpPost]
+    public async Task<IActionResult> Update (Room room)
+    {
+        if (ModelState.IsValid)
+        {
+            _roomDbContext.Rooms.Update(room);
+            _roomDbContext.SaveChanges();
+            return RedirectToAction(nameof(Table));
+        }
+        return View(room);
+    }
+    [HttpGet]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var room = _roomDbContext.Rooms.Find(id);
+        if (room == null)
+        {
+            return NotFound();
+        }
+        return View(room);
+    }
+
+    [HttpPost]
+    public IActionResult DeleteConfirmed(int id)
+    {
+        var room = _roomDbContext.Rooms.Find(id);
+        if (room == null)
+        {
+            return NotFound();
+        }
+        _roomDbContext.Rooms.Remove(room);
+        _roomDbContext.SaveChanges();
+        return RedirectToAction(nameof(Table));
     }
 }
