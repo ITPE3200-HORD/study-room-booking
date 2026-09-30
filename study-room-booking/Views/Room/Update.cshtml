@@ -4,29 +4,25 @@
 
 <form asp-action="Update">
     <input type="hidden" asp-for="RoomId">
-    <div class="form-group">
-        <label asp-for="RoomId"></label>
-        <input asp-for="RoomId" class="form-control"/>
-        <span asp-validation-for="RoomId" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="RoomName"></label>
+        <label asp-for="RoomName">Room Name</label>
             <input asp-for="RoomName" class="form-control"/>
             <span asp-validation-for="RoomName"></span>
     </div>
      <div class="form-group">
-        <label asp-for=Location"></label>
+        <label asp-for="Location">Location</label>
         <input asp-for="Location" class="form-control"/>
         <span asp-validation-for="Location"></span>
-       
+    </div>
      <div class="form-group">
-        <label asp-for="Capacity"></label>
+        <label asp-for="Capacity">Capacity</label>
         <input asp-for="Capacity" class="form-control"/>
         <span asp-validation-for="Capacity"></span>
      </div>
      <div class="form-group">
-        <label asp-for="IsActve"></label>
-        <input asp-for="IsActve" class="form-control"/>   
+        <label asp-for="IsActve">Is active</label>
+        <input asp-for="IsActve" type ="checkbox" class="form-control"/>   
         <span asp-validation-for="IsActve"></span>
     </div>
     <button type="submit" class="btn btn-primary">Save Changes</button>

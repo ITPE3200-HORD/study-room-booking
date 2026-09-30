@@ -21,16 +21,11 @@ public class RoomController : Controller
 
     // GET: /Room/Table
     // Shows all rooms in a table
-    public async Task<IActionResult> Table()
+    public IActionResult Table()
     {
-        var rooms = await RoomDbContext.GetAll();
-        if (rooms == null)
-        {
-            _logger.LogError("[RoomController] Room list not found while executing GetAll()");
-            return NotFound("Room list not found");
-        }
-        var roomsViewModel = new RoomsViewModel(rooms.ToList(), "Table");
-        return View(roomsViewModel);
+        List<Room> rooms = _roomDbContext.Rooms.ToList();
+        var roomListViewModel = new RoomsViewModel(rooms, "Table");
+        return View(roomListViewModel);
     }
 
     // GET: /Room/Create
@@ -53,8 +48,6 @@ public class RoomController : Controller
             return RedirectToAction(nameof(Table));
         }
         return View(room);   
-        _logger.LogWarning("[RoomController] Room creation failed {@room}", room);
-        return View(room); // show the form again with errors
     }
     [HttpGet]
     public async Task<IActionResult> Update(int id)
