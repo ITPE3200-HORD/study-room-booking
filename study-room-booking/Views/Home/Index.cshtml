@@ -1,9 +1,85 @@
-﻿@{
+﻿@model Room
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <a asp-controller="Room" asp-action="Table" class="btn btn-primary">View rooms</a>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Welcome!</h1>
 </div>
+
+@if (Model is not null)
+{
+    // Inspiration taken from: https://getbootstrap.com/docs/4.0/examples/carousel/
+    // Carousel to display the first active room. Should be updated to display all active rooms
+<div id="myCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-wrap="true">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="room-carousel-image">
+                <img src="~/images/study1.jpg" class="d-block w-100 h-100" alt="Study Room 1">
+            </div>
+            <div class="container">
+                <div class="carousel-caption text-left">
+                    <h2>Room: @Model.RoomName</h2>
+                    <p>Location: @Model.Location</p>
+                    <p>Capacity: @Model.Capacity</p>
+                    <p>
+                        <a class="btn btn-lg btn-primary" asp-controller="Room" asp-action="Table">Book now!</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="room-carousel-image">
+                <img src="~/images/study2.jpg" class="d-block w-100 h-100" alt="Study Room 2">
+            </div>
+            <div class="container">
+                <div class="carousel-caption text-left">
+                    <h2>Room: @Model.RoomName</h2>
+                    <p>Location: @Model.Location</p>
+                    <p>Capacity: @Model.Capacity</p>
+                    <p>
+                        <a class="btn btn-lg btn-primary" asp-controller="Room" asp-action="Table">Book now!</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="room-carousel-image">
+                <img src="~/images/study3.jpg" class="d-block w-100 h-100" alt="Study Room 3">
+            </div>
+            <div class="container">
+                <div class="carousel-caption text-left">
+                    <h2>Room: @Model.RoomName</h2>
+                    <p>Location: @Model.Location</p>
+                    <p>Capacity: @Model.Capacity</p>
+                    <p>
+                        <a class="btn btn-lg btn-primary" asp-controller="Room" asp-action="Table">Book now!</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>    
+
+    <!-- Left and right controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+}
+else
+{
+    <div class="text-center mt-4">
+        <h2>No active rooms available</h2>
+    </div>
+}

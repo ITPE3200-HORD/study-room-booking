@@ -6,14 +6,17 @@ namespace study_room_booking.Controllers;
 
 public class HomeController : Controller
 {
-    public IActionResult Index()
+    private readonly RoomDbContext _roomDbContext;
+
+    public HomeController(RoomDbContext roomDbContext)
     {
-        return View();
+        _roomDbContext = roomDbContext;
     }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    // First active room is displayed on the home page
+    public IActionResult Index()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        var room = _roomDbContext.Rooms.FirstOrDefault(room => room.IsActve);
+        return View(room);
     }
 }
