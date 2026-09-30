@@ -19,9 +19,9 @@
         <input asp-for="Capacity" class="form-control"/>
         <span asp-validation-for="Capacity"></span>
      </div>
-     <div class="form-group">
-        <label asp-for="IsActve">Is active</label>
-        <input asp-for="IsActve" type ="checkbox" class="form-control"/>   
+     <div class="form-check">
+        <input asp-for="IsActve" class="form-check-input" />
+        <label asp-for="IsActve" class="form-check-label">Is active</label>
         <span asp-validation-for="IsActve"></span>
     </div>
     <button type="submit" class="btn btn-primary">Save Changes</button>
