@@ -1,4 +1,8 @@
+// Here we define the controller for rooms, which handles requests from the browser
+// and decides which view to show. All database access goes through the Room repository.
+
 using Microsoft.AspNetCore.Mvc;
+using study_room_booking.DAL;
 using study_room_booking.Models;
 using study_room_booking.ViewModels;
 
@@ -6,17 +10,26 @@ namespace study_room_booking.Controllers;
 
 public class RoomController : Controller
 {
+    private readonly IRoomRepository _roomRepository;
+    private readonly ILogger<RoomController> _logger;
 
-    private readonly RoomDbContext _roomDbContext;
-
-    public RoomController(RoomDbContext roomDbContext)
+    public RoomController(IRoomRepository roomRepository, ILogger<RoomController> logger)
     {
-        _roomDbContext = roomDbContext;
+        _roomRepository = roomRepository;
+        _logger = logger;
     }
-    public IActionResult Table()
+
+    // GET: /Room/Table
+    // Shows all rooms in a table
+    public async Task<IActionResult> Table()
     {
-        List<Room> rooms = _roomDbContext.Rooms.ToList();
-        var roomsViewModel = new RoomsViewModel(rooms, "Table");
+        var rooms = await _roomRepository.GetAll();
+        if (rooms == null)
+        {
+            _logger.LogError("[RoomController] Room list not found while executing GetAll()");
+            return NotFound("Room list not found");
+        }
+        var roomsViewModel = new RoomsViewModel(rooms.ToList(), "Table");
         return View(roomsViewModel);
     }
 
@@ -31,40 +44,17 @@ public class RoomController : Controller
     // POST: /Room/Create
     // Saves the new room to the database if the form is valid
     [HttpPost]
-    public IActionResult Create(Room room)
+    public async Task<IActionResult> Create(Room room)
     {
         if (ModelState.IsValid)
         {
-            _roomDbContext.Rooms.Add(room);
-            _roomDbContext.SaveChanges();
-            return RedirectToAction(nameof(Table)); // back to the room list
+            bool created = await _roomRepository.Create(room);
+            if (created)
+            {
+                return RedirectToAction(nameof(Table)); // back to the room list
+            }
         }
+        _logger.LogWarning("[RoomController] Room creation failed {@room}", room);
         return View(room); // show the form again with errors
-    }
-
-    public List<Room> GetRooms()
-    {
-        var rooms = new List<Room>();
-        var room1 = new Room
-        {
-            RoomId = 1,
-            RoomName = "Stainar",
-            Location = "P35, 3. etg",
-            Capacity = 5,
-            IsActve = true
-        };
-
-        var room2 = new Room
-        {
-            RoomId = 2,
-            RoomName = "Marianne",
-            Location = "P32, 2. etg",
-            Capacity = 4,
-            IsActve = false
-        };
-
-        rooms.Add(room1);
-        rooms.Add(room2);
-        return rooms;
     }
 }
