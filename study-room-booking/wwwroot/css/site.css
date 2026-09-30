@@ -29,3 +29,8 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+.room-carousel-image {
+    height: 600px;
+    object-fit: cover;
+}
