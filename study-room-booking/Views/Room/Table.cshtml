@@ -5,7 +5,14 @@
 
 <div class="container"> 
     <table class="table table-striped">
-        <tr><th>RoomId</th><th>Room Name</th><th>Location</th><th>Capacity</th><th>Is active</th></tr>            
+        <tr>
+            <th>RoomId</th>
+            <th>Room Name</th>
+            <th>Location</th>
+            <th>Capacity</th>
+            <th>Is active</th>
+            <th>Actions</th>
+        </tr>            
         @foreach (var Room in Model.Rooms)
                 {
                     <tr>
@@ -14,6 +21,10 @@
                         <td>@Room.Location</td>
                         <td>@Room.Capacity</td>
                         <td>@Room.IsActve</td> @* Added: shows IsActve value *@ 
+                        <td>
+                            <a asp-action="Update" asp-route-id="@Room.RoomId">Update</a>
+                            <a asp-action="Delete" asp-route-id="@Room.RoomId">Delete</a>
+                        </td>
                     </tr>
                 }
             </table>
