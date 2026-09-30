@@ -1,4 +1,8 @@
+// Here we define the controller for rooms, which handles requests from the browser
+// and decides which view to show. All database access goes through the Room repository.
+
 using Microsoft.AspNetCore.Mvc;
+using study_room_booking.DAL;
 using study_room_booking.Models;
 using study_room_booking.ViewModels;
 
@@ -6,18 +10,22 @@ namespace study_room_booking.Controllers;
 
 public class RoomController : Controller
 {
-
     private readonly RoomDbContext _roomDbContext;
+    private readonly ILogger<RoomController> _logger;
 
-    public RoomController(RoomDbContext roomDbContext)
+    public RoomController(RoomDbContext roomDbContext, ILogger<RoomController> logger)
     {
         _roomDbContext = roomDbContext;
+        _logger = logger;
     }
+
+    // GET: /Room/Table
+    // Shows all rooms in a table
     public IActionResult Table()
     {
         List<Room> rooms = _roomDbContext.Rooms.ToList();
-        var roomsViewModel = new RoomsViewModel(rooms, "Table");
-        return View(roomsViewModel);
+        var roomListViewModel = new RoomsViewModel(rooms, "Table");
+        return View(roomListViewModel);
     }
 
     // GET: /Room/Create
@@ -31,40 +39,58 @@ public class RoomController : Controller
     // POST: /Room/Create
     // Saves the new room to the database if the form is valid
     [HttpPost]
-    public IActionResult Create(Room room)
+    public async Task<IActionResult> Create(Room room)
     {
         if (ModelState.IsValid)
         {
             _roomDbContext.Rooms.Add(room);
             _roomDbContext.SaveChanges();
-            return RedirectToAction(nameof(Table)); // back to the room list
+            return RedirectToAction(nameof(Table));
         }
-        return View(room); // show the form again with errors
+        return View(room);   
+    }
+    [HttpGet]
+    public async Task<IActionResult> Update(int id)
+    {
+        var room = _roomDbContext.Rooms.Find(id);
+        if (room == null)
+        {
+            return NotFound();
+        }
+        return View(room);
+    }
+    [HttpPost]
+    public async Task<IActionResult> Update (Room room)
+    {
+        if (ModelState.IsValid)
+        {
+            _roomDbContext.Rooms.Update(room);
+            _roomDbContext.SaveChanges();
+            return RedirectToAction(nameof(Table));
+        }
+        return View(room);
+    }
+    [HttpGet]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var room = _roomDbContext.Rooms.Find(id);
+        if (room == null)
+        {
+            return NotFound();
+        }
+        return View(room);
     }
 
-    public List<Room> GetRooms()
+    [HttpPost]
+    public IActionResult DeleteConfirmed(int id)
     {
-        var rooms = new List<Room>();
-        var room1 = new Room
+        var room = _roomDbContext.Rooms.Find(id);
+        if (room == null)
         {
-            RoomId = 1,
-            RoomName = "Stainar",
-            Location = "P35, 3. etg",
-            Capacity = 5,
-            IsActve = true
-        };
-
-        var room2 = new Room
-        {
-            RoomId = 2,
-            RoomName = "Marianne",
-            Location = "P32, 2. etg",
-            Capacity = 4,
-            IsActve = false
-        };
-
-        rooms.Add(room1);
-        rooms.Add(room2);
-        return rooms;
+            return NotFound();
+        }
+        _roomDbContext.Rooms.Remove(room);
+        _roomDbContext.SaveChanges();
+        return RedirectToAction(nameof(Table));
     }
 }

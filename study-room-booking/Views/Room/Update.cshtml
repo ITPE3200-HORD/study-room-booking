@@ -1,0 +1,30 @@
+@model Room
+
+<h2>Update Room</h2>
+
+<form asp-action="Update">
+    <input type="hidden" asp-for="RoomId">
+    </div>
+    <div class="form-group">
+        <label asp-for="RoomName">Room Name</label>
+            <input asp-for="RoomName" class="form-control"/>
+            <span asp-validation-for="RoomName"></span>
+    </div>
+     <div class="form-group">
+        <label asp-for="Location">Location</label>
+        <input asp-for="Location" class="form-control"/>
+        <span asp-validation-for="Location"></span>
+    </div>
+     <div class="form-group">
+        <label asp-for="Capacity">Capacity</label>
+        <input asp-for="Capacity" class="form-control"/>
+        <span asp-validation-for="Capacity"></span>
+     </div>
+     <div class="form-group">
+        <label asp-for="IsActve">Is active</label>
+        <input asp-for="IsActve" type ="checkbox" class="form-control"/>   
+        <span asp-validation-for="IsActve"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-action="Table" class="btn btn-secondary">Cancel</a>
+</form>
