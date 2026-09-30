@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\odaho\\study-room-booking\\study-room-booking\\study-room-booking.csproj": {}
+    "/Users/helene/Documents/GitHub/study-room-booking/study-room-booking/study-room-booking.csproj": {}
   },
   "projects": {
-    "C:\\Users\\odaho\\study-room-booking\\study-room-booking\\study-room-booking.csproj": {
+    "/Users/helene/Documents/GitHub/study-room-booking/study-room-booking/study-room-booking.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\odaho\\study-room-booking\\study-room-booking\\study-room-booking.csproj",
+        "projectUniqueName": "/Users/helene/Documents/GitHub/study-room-booking/study-room-booking/study-room-booking.csproj",
         "projectName": "study-room-booking",
-        "projectPath": "C:\\Users\\odaho\\study-room-booking\\study-room-booking\\study-room-booking.csproj",
-        "packagesPath": "C:\\Users\\odaho\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\odaho\\study-room-booking\\study-room-booking\\obj\\",
+        "projectPath": "/Users/helene/Documents/GitHub/study-room-booking/study-room-booking/study-room-booking.csproj",
+        "packagesPath": "/Users/helene/.nuget/packages/",
+        "outputPath": "/Users/helene/Documents/GitHub/study-room-booking/study-room-booking/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\odaho\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/Users/helene/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -76,7 +76,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/10.0.400/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
