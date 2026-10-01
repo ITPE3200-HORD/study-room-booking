@@ -45,8 +45,14 @@ public class RoomController : Controller
         {
             _roomDbContext.Rooms.Add(room);
             _roomDbContext.SaveChanges();
+
+            // Log that the room was successfully created
+            _logger.LogInformation("[RoomController] Room created: {RoomId} {RoomName}", room.RoomId, room.RoomName);
             return RedirectToAction(nameof(Table));
         }
+
+        // Log a warning if the form input was invalid, so the error can be traced
+        _logger.LogWarning("[RoomController] Room creation failed, ModelState invalid {RoomName}", room.RoomName);
         return View(room);   
     }
     [HttpGet]
