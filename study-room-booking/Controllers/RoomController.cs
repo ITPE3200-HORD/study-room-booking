@@ -55,12 +55,18 @@ public class RoomController : Controller
         _logger.LogWarning("[RoomController] Room creation failed, ModelState invalid {RoomName}", room.RoomName);
         return View(room);   
     }
+    
+    // GET: Room/Update/{id}
+    // Shows the form for updating an existing room
     [HttpGet]
     public async Task<IActionResult> Update(int id)
     {
         var room = _roomDbContext.Rooms.Find(id);
         if (room == null)
         {
+
+            // Log a warning if no room with the given id exists
+            _logger.LogWarning("[RoomController] Room not found for update, RoomId: {RoomId}", id);
             return NotFound();
         }
         return View(room);
@@ -85,27 +91,41 @@ public class RoomController : Controller
         _logger.LogWarning("[RoomController] Room update failed, ModelState invalid {RoomName} {RoomId}", room.RoomName, room.RoomId);
         return View(room);
     }
+
+    // GET: /Room/Delete/{id}
+    // Shows the confirmation page for deleting a room
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
         var room = _roomDbContext.Rooms.Find(id);
         if (room == null)
         {
+
+            // Log a warning if no room with the given id exists
+            _logger.LogWarning("[RoomController] Room not found for deletion, RoomId: {RoomId}", id);
             return NotFound();
         }
         return View(room);
     }
 
+    // POST: /Room/DeleteConfirmed/{id}
+    // Deletes a room from the database
     [HttpPost]
     public IActionResult DeleteConfirmed(int id)
     {
         var room = _roomDbContext.Rooms.Find(id);
         if (room == null)
         {
+
+            // Log a warning if no room with the given id exists
+            _logger.LogWarning("[RoomController] Room not found when confirming deletion, RoomId: {RoomId}", id);
             return NotFound();
         }
         _roomDbContext.Rooms.Remove(room);
         _roomDbContext.SaveChanges();
+
+        // Log that the room was successfully deleted
+        _logger.LogInformation("[RoomController] Room deleted: {RoomId} {RoomName}", room.RoomId, room.RoomName);
         return RedirectToAction(nameof(Table));
     }
 }
