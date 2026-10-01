@@ -75,7 +75,7 @@ public class RoomController : Controller
     [HttpGet]
     public async Task<IActionResult> Update(int id)
     {
-        var room = _roomDbContext.Rooms.Find(id);
+        var room = await _roomRepository.GetRoomById(id);
         if (room == null)
         {
             // Log a warning if no room with the given id exists
@@ -92,9 +92,14 @@ public class RoomController : Controller
     {
         if (ModelState.IsValid)
         {
-            _roomDbContext.Rooms.Update(room);
-            _roomDbContext.SaveChanges();
- 
+            bool returnOk = await _roomRepository.Update(room);
+            if (!returnOk)
+            {
+                // Log an error and show a message to the user if the repository failed to update the room
+                _logger.LogError("[RoomController] Failed to update room in repository: {RoomId} {RoomName}", room.RoomId, room.RoomName); // Terminal log for debugging
+                ModelState.AddModelError(string.Empty, "Could not update the room. Please try again."); // Message to user
+                return View(room);
+            }
             // Log that the room was successfully updated
             _logger.LogInformation("[RoomController] Room updated: {RoomId} {RoomName}", room.RoomId, room.RoomName);
             return RedirectToAction(nameof(Table));

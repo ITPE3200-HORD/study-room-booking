@@ -3,8 +3,9 @@
 <h1>Create new room</h1>
 
 <form asp-action="Create" method="post">
-     @* Shows errors that are not tied to a specific field, e.g. if the database fails *@
+    @* Shows errors that are not tied to a specific field, e.g. if the database fails *@
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
     
     <div class="mb-3">
         <label asp-for="RoomName" class="form-label">Room name</label>
