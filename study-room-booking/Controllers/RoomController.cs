@@ -65,6 +65,9 @@ public class RoomController : Controller
         }
         return View(room);
     }
+
+    // POST: /Room/Update
+    // Updates an existing room in the database if the form is valid
     [HttpPost]
     public async Task<IActionResult> Update (Room room)
     {
@@ -72,8 +75,14 @@ public class RoomController : Controller
         {
             _roomDbContext.Rooms.Update(room);
             _roomDbContext.SaveChanges();
+
+            // Log that the room was successfully updated
+            _logger.LogInformation("[RoomController] Room updated: {RoomId} {RoomName}", room.RoomId, room.RoomName);
             return RedirectToAction(nameof(Table));
         }
+
+        // Log a warning if the form input was invalid, so the error can be traced
+        _logger.LogWarning("[RoomController] Room update failed, ModelState invalid {RoomName} {RoomId}", room.RoomName, room.RoomId);
         return View(room);
     }
     [HttpGet]
