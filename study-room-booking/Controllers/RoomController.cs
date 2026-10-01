@@ -44,21 +44,27 @@ public class RoomController : Controller
         return View();
     }
  
-    // POST: /Room/Create
+        // POST: /Room/Create
     // Saves the new room to the database if the form is valid
     [HttpPost]
     public async Task<IActionResult> Create(Room room)
     {
         if (ModelState.IsValid)
         {
-            _roomDbContext.Rooms.Add(room);
-            _roomDbContext.SaveChanges();
- 
+            bool returnOk = await _roomRepository.Create(room);
+            if (!returnOk)
+            {
+                // Log an error and show a message to the user if the repository failed to save the room
+                _logger.LogError("[RoomController] Failed to create room in repository: {RoomName}", room.RoomName); // Terminal log for debugging
+                ModelState.AddModelError(string.Empty, "Could not save the room. Please try again."); // Message to user
+                return View(room);
+            }
+
             // Log that the room was successfully created
             _logger.LogInformation("[RoomController] Room created: {RoomId} {RoomName}", room.RoomId, room.RoomName);
             return RedirectToAction(nameof(Table));
         }
- 
+
         // Log a warning if the form input was invalid, so the error can be traced
         _logger.LogWarning("[RoomController] Room creation failed, ModelState invalid {RoomName}", room.RoomName);
         return View(room);
