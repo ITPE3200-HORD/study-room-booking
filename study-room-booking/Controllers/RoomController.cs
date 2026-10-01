@@ -1,26 +1,25 @@
 // Here we define the controller for rooms, which handles requests from the browser
 // and decides which view to show. All database access goes through the Room repository.
- 
+
 using Microsoft.AspNetCore.Mvc;
 using study_room_booking.DAL;
 using study_room_booking.Models;
 using study_room_booking.ViewModels;
- 
+
 namespace study_room_booking.Controllers;
- 
+
 public class RoomController : Controller
 {
-    private readonly RoomDbContext _roomDbContext; // temporary, will be removed when all methods use the repository
     private readonly IRoomRepository _roomRepository;
     private readonly ILogger<RoomController> _logger;
- 
-    public RoomController(RoomDbContext roomDbContext, IRoomRepository roomRepository, ILogger<RoomController> logger)
+
+    public RoomController(IRoomRepository roomRepository, ILogger<RoomController> logger)
     {
-        _roomDbContext = roomDbContext;
         _roomRepository = roomRepository;
         _logger = logger;
     }
- 
+
+
     // GET: /Room/Table
     // Shows all rooms in a table
     public async Task<IActionResult> Table()
@@ -35,7 +34,7 @@ public class RoomController : Controller
         var roomListViewModel = new RoomsViewModel(rooms.ToList(), "Table");
         return View(roomListViewModel);
     }
- 
+
     // GET: /Room/Create
     // Shows the empty form for creating a new room
     [HttpGet]
@@ -43,8 +42,8 @@ public class RoomController : Controller
     {
         return View();
     }
- 
-        // POST: /Room/Create
+
+    // POST: /Room/Create
     // Saves the new room to the database if the form is valid
     [HttpPost]
     public async Task<IActionResult> Create(Room room)
@@ -69,7 +68,7 @@ public class RoomController : Controller
         _logger.LogWarning("[RoomController] Room creation failed, ModelState invalid {RoomName}", room.RoomName);
         return View(room);
     }
- 
+
     // GET: /Room/Update/{id}
     // Shows the form for updating an existing room
     [HttpGet]
@@ -84,7 +83,7 @@ public class RoomController : Controller
         }
         return View(room);
     }
- 
+
     // POST: /Room/Update
     // Updates an existing room in the database if the form is valid
     [HttpPost]
@@ -104,12 +103,12 @@ public class RoomController : Controller
             _logger.LogInformation("[RoomController] Room updated: {RoomId} {RoomName}", room.RoomId, room.RoomName);
             return RedirectToAction(nameof(Table));
         }
- 
+
         // Log a warning if the form input was invalid, so the error can be traced
         _logger.LogWarning("[RoomController] Room update failed, ModelState invalid {RoomName} {RoomId}", room.RoomName, room.RoomId);
         return View(room);
     }
- 
+
     // GET: /Room/Delete/{id}
     // Shows the confirmation page for deleting a room
     [HttpGet]
@@ -124,7 +123,7 @@ public class RoomController : Controller
         }
         return View(room);
     }
- 
+
     // POST: /Room/DeleteConfirmed/{id}
     // Deletes a room from the database
     [HttpPost]
