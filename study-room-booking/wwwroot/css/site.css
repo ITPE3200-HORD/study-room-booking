@@ -8,8 +8,8 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+a .nav-link{
+  color: whitesmoke;
 }
 
 html {
@@ -19,8 +19,12 @@ html {
 
 body {
   margin-bottom: 60px;
+  background-color: lightgray;
 }
 
+.navbar, .nav-brand, .navbar-expand-sm .navbar-toggleable-sm .mb-3{
+  background-color: #2b1450;
+}
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;
@@ -33,4 +37,8 @@ body {
 .room-carousel-image {
     height: 600px;
     object-fit: cover;
+}
+
+.navbar .navbar-brand {
+    color: aliceblue;
 }
