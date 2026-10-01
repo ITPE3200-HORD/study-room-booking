@@ -42,3 +42,8 @@ body {
 .navbar .navbar-brand {
     color: aliceblue;
 }
+
+.btn-primary{
+  background-color: #2b1450;
+  border-color: #2b1450;
+}
