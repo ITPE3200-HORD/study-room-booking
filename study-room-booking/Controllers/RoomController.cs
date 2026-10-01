@@ -115,7 +115,7 @@ public class RoomController : Controller
     [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
-        var room = _roomDbContext.Rooms.Find(id);
+        var room = await _roomRepository.GetRoomById(id);
         if (room == null)
         {
             // Log a warning if no room with the given id exists
@@ -128,20 +128,18 @@ public class RoomController : Controller
     // POST: /Room/DeleteConfirmed/{id}
     // Deletes a room from the database
     [HttpPost]
-    public IActionResult DeleteConfirmed(int id)
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var room = _roomDbContext.Rooms.Find(id);
-        if (room == null)
+        bool returnOk = await _roomRepository.Delete(id);
+        if (!returnOk)
         {
-            // Log a warning if no room with the given id exists
-            _logger.LogWarning("[RoomController] Room not found when confirming deletion, RoomId: {RoomId}", id);
-            return NotFound();
+            // Log an error if the repository failed to delete the room (not found or database error)
+            _logger.LogError("[RoomController] Failed to delete room in repository, RoomId: {RoomId}", id);
+            return BadRequest("Room deletion failed");
         }
-        _roomDbContext.Rooms.Remove(room);
-        _roomDbContext.SaveChanges();
- 
+
         // Log that the room was successfully deleted
-        _logger.LogInformation("[RoomController] Room deleted: {RoomId} {RoomName}", room.RoomId, room.RoomName);
+        _logger.LogInformation("[RoomController] Room deleted, RoomId: {RoomId}", id);
         return RedirectToAction(nameof(Table));
     }
 }
