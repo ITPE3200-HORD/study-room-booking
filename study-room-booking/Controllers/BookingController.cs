@@ -72,6 +72,77 @@ public class BookingController : Controller
         return View(booking);
     }
 
+        // GET: /Booking/Update/5
+    // Shows the form filled with the existing booking
+    [HttpGet]
+    public async Task<IActionResult> Update(int id)
+    {
+        var booking = await _bookingRepository.GetBookingById(id);
+        if (booking == null)
+        {
+            _logger.LogError("[BookingController] Booking not found when updating BookingId {id}", id);
+            return BadRequest("Booking not found for the BookingId");
+        }
+        await PopulateRooms();
+        return View(booking);
+    }
+
+    // POST: /Booking/Update
+    // Validates the changes, checks for overlap and saves
+    [HttpPost]
+    public async Task<IActionResult> Update(Booking booking)
+    {
+        if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
+        {
+            ModelState.AddModelError("", "Rommet er allerede booket i dette tidsrommet");
+        }
+
+        if (ModelState.IsValid)
+        {
+            bool updated = await _bookingRepository.Update(booking);
+            if (updated)
+            {
+                _logger.LogInformation("[BookingController] Booking updated: {id}", booking.BookingId);
+                return RedirectToAction(nameof(Table));
+            }
+
+            ModelState.AddModelError("", "Noe gikk galt ved oppdatering av bookingen. Prøv igjen.");
+        }
+
+        _logger.LogWarning("[BookingController] Booking update failed {@booking}", booking);
+        await PopulateRooms();
+        return View(booking);
+    }
+
+    // GET: /Booking/Delete/5
+    // Shows a confirmation page before deleting
+    [HttpGet]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var booking = await _bookingRepository.GetBookingById(id);
+        if (booking == null)
+        {
+            _logger.LogError("[BookingController] Booking not found for BookingId {id}", id);
+            return BadRequest("Booking not found for the BookingId");
+        }
+        return View(booking);
+    }
+
+    // POST: /Booking/DeleteConfirmed
+    // Deletes the booking after the user has confirmed
+    [HttpPost]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        bool deleted = await _bookingRepository.Delete(id);
+        if (!deleted)
+        {
+            _logger.LogError("[BookingController] Booking deletion failed for BookingId {id}", id);
+            return BadRequest("Booking deletion failed");
+        }
+        _logger.LogInformation("[BookingController] Booking deleted: {id}", id);
+        return RedirectToAction(nameof(Table));
+    }
+
     // Fills the room dropdown in the Create and Update views
     private async Task PopulateRooms()
     {
