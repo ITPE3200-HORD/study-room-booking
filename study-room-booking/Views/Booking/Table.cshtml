@@ -14,6 +14,7 @@
             <th>Beskrivelse</th>
             <th>Start</th>
             <th>Slutt</th>
+            <th>Handlinger</th>
         </tr>
     </thead>
     <tbody>
@@ -25,6 +26,10 @@
                 <td>@booking.Description</td>
                 <td>@booking.StartTime.ToString("dd.MM.yyyy HH:mm")</td>
                 <td>@booking.EndTime.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>
+                    <a asp-action="Update" asp-route-id="@booking.BookingId">Endre</a>
+                    <a asp-action="Delete" asp-route-id="@booking.BookingId">Slett</a>
+                </td>
             </tr>
         }
     </tbody>

@@ -1,0 +1,21 @@
+@model Booking
+
+@* Confirmation page before deleting a booking *@
+
+<h2>Slett booking</h2>
+
+<p>Er du sikker på at du vil slette denne bookingen?</p>
+
+<table class="table">
+    <tr><th>Rom</th><td>@Model.Room?.RoomName</td></tr>
+    <tr><th>Navn</th><td>@Model.UserName</td></tr>
+    <tr><th>Beskrivelse</th><td>@Model.Description</td></tr>
+    <tr><th>Start</th><td>@Model.StartTime.ToString("dd.MM.yyyy HH:mm")</td></tr>
+    <tr><th>Slutt</th><td>@Model.EndTime.ToString("dd.MM.yyyy HH:mm")</td></tr>
+</table>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" name="id" value="@Model.BookingId" />
+    <button type="submit" class="btn btn-danger">Slett</button>
+    <a asp-action="Table" class="btn btn-secondary">Avbryt</a>
+</form>
