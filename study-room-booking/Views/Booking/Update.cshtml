@@ -1,0 +1,47 @@
+@model Booking
+
+@* Form for updating an existing booking *@
+
+<h2>Update Booking</h2>
+
+<form asp-action="Update" method="post">
+    @* Hidden field so we know which booking is being updated *@
+    <input type="hidden" asp-for="BookingId" />
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="RoomId" class="form-label">Room</label>
+        <select asp-for="RoomId" asp-items="ViewBag.Rooms" class="form-select">
+            <option value="0">-- Select room --</option>
+        </select>
+        <span asp-validation-for="RoomId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="UserName" class="form-label">Name</label>
+        <input asp-for="UserName" class="form-control" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label">Description</label>
+        <input asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="StartTime" class="form-label">Start time</label>
+        <input asp-for="StartTime" class="form-control" />
+        <span asp-validation-for="StartTime" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EndTime" class="form-label">End time</label>
+        <input asp-for="EndTime" class="form-control" />
+        <span asp-validation-for="EndTime" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save changes</button>
+    <a asp-action="Table" class="btn btn-secondary">Cancel</a>
+</form>
