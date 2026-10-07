@@ -15,6 +15,7 @@ builder.Services.AddDbContext<RoomDbContext>(options =>
 
 // Registers the Room repository so it can be injected into controllers
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 var app = builder.Build();
 
