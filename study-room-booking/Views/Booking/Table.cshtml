@@ -2,19 +2,19 @@
 
 @* Shows all bookings in a table *@
 
-<h2>Bookinger</h2>
+<h2>List of Bookings</h2>
 
-<a asp-action="Create" class="btn btn-primary mb-3">Ny booking</a>
+<a asp-action="Create" class="btn btn-primary mb-3">Create new booking</a>
 
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Rom</th>
-            <th>Navn</th>
-            <th>Beskrivelse</th>
+            <th>Room</th>
+            <th>Name</th>
+            <th>Description</th>
             <th>Start</th>
-            <th>Slutt</th>
-            <th>Handlinger</th>
+            <th>End</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -27,8 +27,8 @@
                 <td>@booking.StartTime.ToString("dd.MM.yyyy HH:mm")</td>
                 <td>@booking.EndTime.ToString("dd.MM.yyyy HH:mm")</td>
                 <td>
-                    <a asp-action="Update" asp-route-id="@booking.BookingId">Endre</a>
-                    <a asp-action="Delete" asp-route-id="@booking.BookingId">Slett</a>
+                    <a asp-action="Update" asp-route-id="@booking.BookingId">Update</a>
+                    <a asp-action="Delete" asp-route-id="@booking.BookingId">Delete</a>
                 </td>
             </tr>
         }

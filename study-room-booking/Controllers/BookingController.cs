@@ -51,7 +51,7 @@ public class BookingController : Controller
         // Business rule: a room cannot be double-booked
         if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
         {
-            ModelState.AddModelError("", "Rommet er allerede booket i dette tidsrommet");
+            ModelState.AddModelError("", "The room is already booked in this time period");
         }
 
         if (ModelState.IsValid)
@@ -64,7 +64,7 @@ public class BookingController : Controller
             }
 
             // The repository failed (database error) – tell the user instead of failing silently
-            ModelState.AddModelError("", "Noe gikk galt ved lagring av bookingen. Prøv igjen.");
+            ModelState.AddModelError("", "Something went wrong while saving the booking. Please try again.");
         }
 
         _logger.LogWarning("[BookingController] Booking creation failed {@booking}", booking);
@@ -94,7 +94,7 @@ public class BookingController : Controller
     {
         if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
         {
-            ModelState.AddModelError("", "Rommet er allerede booket i dette tidsrommet");
+            ModelState.AddModelError("", "The room is already booked in this time period");
         }
 
         if (ModelState.IsValid)
@@ -106,7 +106,7 @@ public class BookingController : Controller
                 return RedirectToAction(nameof(Table));
             }
 
-            ModelState.AddModelError("", "Noe gikk galt ved oppdatering av bookingen. Prøv igjen.");
+            ModelState.AddModelError("", "Something went wrong while updating the booking. Please try again.");
         }
 
         _logger.LogWarning("[BookingController] Booking update failed {@booking}", booking);
