@@ -1,17 +1,41 @@
 ﻿@model Room
-<head>
-    <link rel="stylesheet" href="~/css/index.css" asp-append-asp-append-version="trye"/>
-</head>
+
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Find a study room";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome!</h1>
-</div>
+<section class="home-intro" aria-labelledby="home-title">
+    <div class="home-intro-content">
+        <div class="eyebrow">STUDY TOGETHER, YOUR WAY</div>
+        <h1>Find a study room for your group work</h1>
+        <p>Find a available room, meet other students and make the study session a little easier.</p>
+        <a class="btn btn-primary btn-lg" asp-controller="Home" asp-action="Book">Book a room</a>
+    </div>
+    <div class="hero-art" aria-label="Illustration of a student studying in a study room">
+        <img src="~/images/studyroom.svg" alt="Illustration of a student studying in a study room" />
+    </div>
+</section>
 
-@if (Model is not null)
-{
+
+<section class="featured-room" aria-labelledby="featured-room-title">
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="admin-view-note" role="note">
+            <span>You are viewing this page as an administrator.</span>
+            <a asp-controller="Admin" asp-action="Index">Go to Admin overview →</a>
+        </div>
+    }
+    <div class="section-heading">
+        <img src="~/images/study1.jpg" alt="Studyroom with tables and chairs" />
+    </div>
+
+    <div class="featured-room-content">
+        <p class="eyebrow">Current room</p>
+        <h2 id="featured-room-title">@Model.RoomName</h2>
+    </div>
+
+
+</section>
     // Inspiration taken from: https://getbootstrap.com/docs/4.0/examples/carousel/
     // Carousel to display the first active room. Should be updated to display all active rooms
 <div id="myCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-wrap="true">
@@ -78,6 +102,7 @@
         <span class="visually-hidden">Next</span>
     </button>
 </div>
+
 }
 else
 {
