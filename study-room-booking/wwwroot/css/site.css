@@ -1,5 +1,10 @@
 html {
-  font-size: 14px;
+  font-size: 100%;
+}
+
+body {
+  color: #24332d;
+  line-height: 1.6;
 }
 
 @media (min-width: 768px) {
@@ -8,8 +13,15 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+:focus-visible {
+  outline: 3px solid #174ea6;
+  outline-offset: 3px;
+}
+
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-check-input:focus-visible {
+  box-shadow: none;
 }
 
 html {

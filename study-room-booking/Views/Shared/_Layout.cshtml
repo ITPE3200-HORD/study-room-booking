@@ -3,39 +3,51 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f8f4" />
     <title>@ViewData["Title"] - study_room_booking</title>
-    <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/study_room_booking.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body class="@(User.IsInRole("Admin") ? "admin-mode" : "")">
+    <a class="skip-link" href="#main">Skip to main content</a>
     <header class="topbar">
-        <nav class="navbar navbar-expand-sm navbar-light bg-white">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Study Room Booking</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Room" asp-action="Table">Rooms</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+        <a class="brand" asp-controller="Home" asp-action="Index" aria-label="To front page"> Study_Room_Booking</a>
+        <nav aria-label="Main menu" class="main-nav">
+            @if (User.IsInRole("Admin"))
+            {
+            <a asp-controller="Admin" asp-action="Index">Overview</a>
+            <a asp-controller="Admin" asp-action="Rooms">Room</a>
+            <a asp-controller="Admin" asp-action="Bookings">Bookings</a>
+            }
+            else
+            {
+            <a asp-controller="Home" asp-action="Index" asp-fragment="sessions">Find a study session</a>
+            <a asp-controller="Home" asp-action="Index" asp-fragment="how">This is how it works</a>    
+            }
         </nav>
+       @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="account-actions">
+                <a class="profile-link" asp-controller="@(User.IsInRole("Admin") ? "Admin" : "Home")" asp-action="@(User.IsInRole("Admin") ? "Index" : "Profile")">
+                    <span class="avatar" aria-hidden="true">@(User.Identity.Name?.Substring(0, 1).ToUpperInvariant() ?? "R")</span>
+                    <span>@(User.IsInRole("Admin") ? "Admin" : "Min side")</span>
+                    </a>
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        <button class="logout-button" type="submit">Logg ut</button>
+                    </form>
+            </div>
+        }
+        else
+        {
+            <a class="profile-link login-nav-link" asp-controller="Account" asp-action="Login"><span class="avatar" aria-hidden="true">↗</span><span>Logg inn</span></a>
+        }
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+
+    <main id="main" tabindex="-1">
+        @RenderBody()
+    </main>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
