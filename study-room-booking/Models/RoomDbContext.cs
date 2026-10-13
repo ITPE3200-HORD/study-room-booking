@@ -12,4 +12,5 @@ public class RoomDbContext : DbContext
 
 public DbSet<Room> Rooms {get; set;}
 public DbSet<Booking> Bookings { get; set; }
+public DbSet<User> Users { get; set; }
 }
