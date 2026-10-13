@@ -1,0 +1,25 @@
+@model UserViewModel
+
+<h1>List of Users (@Model.CurrentViewName View)</h1>
+
+<div class="container"> 
+    <table class="table table-striped">
+        <tr>
+            <th>UserId</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Is active</th>
+            <th>Actions</th>
+        </tr>            
+        @foreach (var User in Model.Users)
+        {
+            <tr>
+                <td>@User.UserId</td>
+                <td>@User.FullName</td>
+                <td>@User.Email</td>
+                <td>@User.IsActive</td>
+                <td></td>
+            </tr>
+        }
+    </table>
+</div>
