@@ -4,32 +4,39 @@
 
 <form asp-action="Create" method="post">
     @* Shows errors that are not tied to a specific field, e.g. if the database fails *@
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div asp-validation-summary="All" class="text-danger"></div>
 
     
-    <div class="mb-3">
-        <label asp-for="RoomName" class="form-label">Room name</label>
-        <input asp-for="RoomName" class="form-control" />
-        <span asp-validation-for="RoomName" class="text-danger"></span>
-    </div>
-
     <div class="mb-3">
         <label asp-for="Location" class="form-label">Location</label>
         <input asp-for="Location" class="form-control" />
         <span asp-validation-for="Location" class="text-danger"></span>
     </div>
-
+    <div class="mb-3">
+        <label asp-for="RoomNumber" class="form-label">Room number</label>
+        <input asp-for="RoomNumber" class="form-control" />
+        <span asp-validation-for="RoomNumber" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="RoomType" class="form-label">Room type</label>
+        <select asp-for="RoomType" class="form-select">
+            <option value="">-- Select room type--</option>
+            <option value="Group Study Room">Group Study Room</option>
+            <option value="Class Room">Class Room</option>
+            <option value="Auditorium">Auditorium</option>
+        </select>
+        <span asp-validation-for="RoomType" class="text-danger"></span>
+    </div>
     <div class="mb-3">
         <label asp-for="Capacity" class="form-label">Capacity</label>
         <input asp-for="Capacity" class="form-control" />
         <span asp-validation-for="Capacity" class="text-danger"></span>
     </div>
 
-    <div class="mb-3 form-check">
-        <input asp-for="IsActve" class="form-check-input" />
-        <label asp-for="IsActve" class="form-check-label">Is active</label>
-    </div>
-
     <button type="submit" class="btn btn-primary">Create</button>
     <a asp-action="Table" class="btn btn-secondary">Cancel</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

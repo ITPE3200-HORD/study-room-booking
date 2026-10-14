@@ -54,18 +54,18 @@ public class RoomController : Controller
             if (!returnOk)
             {
                 // Log an error and show a message to the user if the repository failed to save the room
-                _logger.LogError("[RoomController] Failed to create room in repository: {RoomName}", room.RoomName); // Terminal log for debugging
+                _logger.LogError("[RoomController] Failed to create room in repository: {RoomNumber}", room.RoomNumber); // Terminal log for debugging
                 ModelState.AddModelError(string.Empty, "Could not save the room. Please try again."); // Message to user
                 return View(room);
             }
 
             // Log that the room was successfully created
-            _logger.LogInformation("[RoomController] Room created: {RoomId} {RoomName}", room.RoomId, room.RoomName);
+            _logger.LogInformation("[RoomController] Room created: {RoomId} {RoomNumber}", room.RoomId, room.RoomNumber);
             return RedirectToAction(nameof(Table));
         }
 
         // Log a warning if the form input was invalid, so the error can be traced
-        _logger.LogWarning("[RoomController] Room creation failed, ModelState invalid {RoomName}", room.RoomName);
+        _logger.LogWarning("[RoomController] Room creation failed, ModelState invalid {RoomNumber}", room.RoomNumber);
         return View(room);
     }
 
@@ -95,17 +95,17 @@ public class RoomController : Controller
             if (!returnOk)
             {
                 // Log an error and show a message to the user if the repository failed to update the room
-                _logger.LogError("[RoomController] Failed to update room in repository: {RoomId} {RoomName}", room.RoomId, room.RoomName); // Terminal log for debugging
+                _logger.LogError("[RoomController] Failed to update room in repository: {RoomId} {RoomNumber}", room.RoomId, room.RoomNumber); // Terminal log for debugging
                 ModelState.AddModelError(string.Empty, "Could not update the room. Please try again."); // Message to user
                 return View(room);
             }
             // Log that the room was successfully updated
-            _logger.LogInformation("[RoomController] Room updated: {RoomId} {RoomName}", room.RoomId, room.RoomName);
+            _logger.LogInformation("[RoomController] Room updated: {RoomId} {RoomNumber}", room.RoomId, room.RoomNumber);
             return RedirectToAction(nameof(Table));
         }
 
         // Log a warning if the form input was invalid, so the error can be traced
-        _logger.LogWarning("[RoomController] Room update failed, ModelState invalid {RoomName} {RoomId}", room.RoomName, room.RoomId);
+        _logger.LogWarning("[RoomController] Room update failed, ModelState invalid {RoomNumber} {RoomId}", room.RoomNumber, room.RoomId);
         return View(room);
     }
 

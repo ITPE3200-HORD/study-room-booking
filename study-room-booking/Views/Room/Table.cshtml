@@ -6,21 +6,23 @@
 <div class="container"> 
     <table class="table table-striped">
         <tr>
-            <th>RoomId</th>
-            <th>Room Name</th>
+            <th>Room Id</th>
             <th>Location</th>
+            <th>Room Number</th>
+            <th>Room Type</th>
             <th>Capacity</th>
-            <th>Is active</th>
+            <th>Availability</th>
             <th>Actions</th>
         </tr>            
         @foreach (var Room in Model.Rooms)
                 {
                     <tr>
                         <td>@Room.RoomId</td>
-                        <td>@Room.RoomName</td>
                         <td>@Room.Location</td>
+                        <td>@Room.RoomNumber</td>
+                        <td>@Room.RoomType</td>
                         <td>@Room.Capacity</td>
-                        <td>@Room.IsActve</td> @* Added: shows IsActve value *@ 
+                        <td>@Room.Status</td>
                         <td>
                             <a asp-action="Update" asp-route-id="@Room.RoomId">Update</a>
                             <a asp-action="Delete" asp-route-id="@Room.RoomId">Delete</a>

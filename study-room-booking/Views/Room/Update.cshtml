@@ -7,26 +7,37 @@
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <input type="hidden" asp-for="RoomId">
-    <div class="form-group">
-        <label asp-for="RoomName">Room Name</label>
-        <input asp-for="RoomName" class="form-control"/>
-        <span asp-validation-for="RoomName" class="text-danger"></span>
-    </div>
+
     <div class="form-group">
         <label asp-for="Location">Location</label>
         <input asp-for="Location" class="form-control"/>
         <span asp-validation-for="Location" class="text-danger"></span>
     </div>
     <div class="form-group">
+        <label asp-for="RoomNumber">Room Number</label>
+        <input asp-for="RoomNumber" class="form-control"/>
+        <span asp-validation-for="RoomNumber" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="RoomType" class="form-label">Room type</label>
+        <select asp-for="RoomType" class="form-select">
+            <option value="">-- Select room type--</option>
+            <option value="Group Study Room">Group Study Room</option>
+            <option value="Class Room">Class Room</option>
+            <option value="Auditorium">Auditorium</option>
+        </select>
+        <span asp-validation-for="RoomType" class="text-danger"></span>
+    </div>
+    <div class="form-group">
         <label asp-for="Capacity">Capacity</label>
         <input asp-for="Capacity" class="form-control"/>
         <span asp-validation-for="Capacity" class="text-danger"></span>
     </div>
-    <div class="form-check">
-        <input asp-for="IsActve" class="form-check-input" />
-        <label asp-for="IsActve" class="form-check-label">Is active</label>
-        <span asp-validation-for="IsActve" class="text-danger"></span>
-    </div>
+    
     <button type="submit" class="btn btn-primary">Save Changes</button>
     <a asp-action="Table" class="btn btn-secondary">Cancel</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
