@@ -7,19 +7,27 @@ namespace study_room_booking.Models
     {
         public int RoomId {get; set;}
 
-        // Room name is required and must be 2-50 characters (letters, numbers, spaces, dots and dashes)
-        [Required(ErrorMessage = "Room name is required")]
-        [RegularExpression(@"^[a-zA-ZæøåÆØÅ0-9 .-]{2,50}$", ErrorMessage = "Room name must be 2-50 characters (letters, numbers, spaces, dots and dashes)")]
-        public String RoomName {get; set;} = string.Empty;
-
         // Location is optional, but if filled in it must be 2-100 characters (letters, numbers, spaces and . , / -)
-        [RegularExpression(@"^[a-zA-ZæøåÆØÅ0-9 .,/-]{2,100}$", ErrorMessage = "Location must be 2-100 characters (letters, numbers, spaces and . , / -)")]
-        public String? Location {get; set;} //building/floor
+        [RegularExpression(@"^[A-ZÆØÅ0-9]{2,5}$", ErrorMessage = "Location must be 2-5 characters (Capital letters and numbers)")]
+        public String? Location {get; set;} //building
+
+        [Required(ErrorMessage = "Room number is required")]
+        [RegularExpression(@"^[A-ZÆØÅ0-9]{2,10}$", ErrorMessage = "Room number must be 2-10 characters (Capital letters,and numbers)")]
+        public String RoomNumber {get; set;} = string.Empty;
+
+        //Dont need regex due to drop-down menu
+        public String RoomType {get; set;} = string.Empty;
 
         // Capacity must be between 1 and 50 people
-        [Range(1, 50, ErrorMessage = "Capacity must be between 1 and 50")]
+        [Range(1, 250, ErrorMessage = "Capacity must be between 1 and 250")]
         public int Capacity {get; set;}
 
-        public bool IsActve {get; set;} //can the room be booked?
+        public enum Availability
+        {
+            Available,
+            NotAvailable
+        }
+
+        public Availability Status {get; set;} = Availability.Available;
     }
 }
