@@ -11,8 +11,8 @@ using study_room_booking.Models;
 namespace study_room_booking.Migrations
 {
     [DbContext(typeof(RoomDbContext))]
-    [Migration("20261014103653_AddRoomNumber")]
-    partial class AddRoomNumber
+    [Migration("20261014105554_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -80,6 +80,28 @@ namespace study_room_booking.Migrations
                     b.HasKey("RoomId");
 
                     b.ToTable("Rooms");
+                });
+
+            modelBuilder.Entity("study_room_booking.Models.User", b =>
+                {
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("study_room_booking.Models.Booking", b =>

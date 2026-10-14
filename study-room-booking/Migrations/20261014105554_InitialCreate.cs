@@ -6,27 +6,42 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace study_room_booking.Migrations
 {
     /// <inheritdoc />
-    public partial class AddRoomNumber : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "RoomName",
-                table: "Rooms",
-                newName: "RoomType");
+            migrationBuilder.CreateTable(
+                name: "Rooms",
+                columns: table => new
+                {
+                    RoomId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Location = table.Column<string>(type: "TEXT", nullable: true),
+                    RoomNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    RoomType = table.Column<string>(type: "TEXT", nullable: false),
+                    Capacity = table.Column<int>(type: "INTEGER", nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rooms", x => x.RoomId);
+                });
 
-            migrationBuilder.RenameColumn(
-                name: "IsActve",
-                table: "Rooms",
-                newName: "Status");
-
-            migrationBuilder.AddColumn<string>(
-                name: "RoomNumber",
-                table: "Rooms",
-                type: "TEXT",
-                nullable: false,
-                defaultValue: "");
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    FullName = table.Column<string>(type: "TEXT", nullable: false),
+                    Email = table.Column<string>(type: "TEXT", nullable: false),
+                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.UserId);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Bookings",
@@ -64,19 +79,11 @@ namespace study_room_booking.Migrations
             migrationBuilder.DropTable(
                 name: "Bookings");
 
-            migrationBuilder.DropColumn(
-                name: "RoomNumber",
-                table: "Rooms");
+            migrationBuilder.DropTable(
+                name: "Users");
 
-            migrationBuilder.RenameColumn(
-                name: "Status",
-                table: "Rooms",
-                newName: "IsActve");
-
-            migrationBuilder.RenameColumn(
-                name: "RoomType",
-                table: "Rooms",
-                newName: "RoomName");
+            migrationBuilder.DropTable(
+                name: "Rooms");
         }
     }
 }

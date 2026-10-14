@@ -79,6 +79,28 @@ namespace study_room_booking.Migrations
                     b.ToTable("Rooms");
                 });
 
+            modelBuilder.Entity("study_room_booking.Models.User", b =>
+                {
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("study_room_booking.Models.Booking", b =>
                 {
                     b.HasOne("study_room_booking.Models.Room", "Room")
