@@ -4,4 +4,4 @@ obj/
 
 # SQLite databases and journal files
 *.db
-*.db-*
+*.db-*RoomDatabase.db
