@@ -5,4 +5,3 @@ obj/
 # SQLite databases and journal files
 *.db
 *.db-*
-RoomDatabase.db
