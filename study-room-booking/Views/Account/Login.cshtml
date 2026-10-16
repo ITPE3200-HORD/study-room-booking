@@ -1,24 +1,30 @@
 @model LoginViewModel
 @{
-    ViewData["Title"] = "Logg inn";
+    ViewData["Title"] = "Login";
 }
 
 <section class="auth-page" aria-labelledby="login-title">
     <div class="auth-card">
         <a class="auth-back" asp-controller="Home" asp-action="Index">← To front page</a>
+        
         <!--<div class="auth-mark" aria-hidden=""> evt. logo her </div> -->
-        <h1 id="login-title">Logg inn</h1>
-        <p class="auth-description">Logg inn med ditt brukernavn og passord</p>
+        <h1 id="login-title">Login</h1>
+        <p class="auth-description">Log in with your username and password</p>
+        
         <form asp-action="Login" method="post" class="auth-form">
             <input asp-for="ReturnUrl" type="hidden" />
             <div asp-validation-summary="ModelOnly" class="auth-validation" role="alert"></div>
-            <label asp-for="Username" class="control-label" autocomplete="username" placeholder="username"></label>
+            <label asp-for="Username" class="control-label" autocomplete="username" placeholder="Username"></label>
             <input asp-for="Username" class="form-control" />
             <span asp-validation-for="Username" class="text-danger"></span>
             <label asp-for="Password" class="control-label"></label>
-            <input asp-for="Password" class="form-control" autocomplete="current-password" placeholder="Passord" type="password" />
+            <input asp-for="Password" class="form-control" autocomplete="current-password" placeholder="Password" type="password" />
             <span asp-validation-for="Password" class="text-danger"></span>
             <button class="btn btn-primary" type="submit">Log in</button>
         </form>
     </div>>
 </section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

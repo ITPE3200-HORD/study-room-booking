@@ -1,6 +1,6 @@
 // Controller for bookings. Handles requests from the user and uses the repositories
 // to access the database. Failed operations are logged instead of crashing the app.
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using study_room_booking.DAL;
@@ -37,6 +37,7 @@ public class BookingController : Controller
     // GET: /Booking/Create
     // Shows the empty form for creating a new booking
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> Create()
     {
         await PopulateRooms();
@@ -46,6 +47,7 @@ public class BookingController : Controller
     // POST: /Booking/Create
     // Validates the input, checks for overlapping bookings and saves the booking
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Create(Booking booking)
     {
         // Business rule: a room cannot be double-booked
@@ -75,6 +77,7 @@ public class BookingController : Controller
         // GET: /Booking/Update/5
     // Shows the form filled with the existing booking
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> Update(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
@@ -90,6 +93,7 @@ public class BookingController : Controller
     // POST: /Booking/Update
     // Validates the changes, checks for overlap and saves
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Update(Booking booking)
     {
         if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
@@ -117,6 +121,7 @@ public class BookingController : Controller
     // GET: /Booking/Delete/5
     // Shows a confirmation page before deleting
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
@@ -131,6 +136,7 @@ public class BookingController : Controller
     // POST: /Booking/DeleteConfirmed
     // Deletes the booking after the user has confirmed
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         bool deleted = await _bookingRepository.Delete(id);
