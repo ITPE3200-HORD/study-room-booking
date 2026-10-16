@@ -18,22 +18,7 @@
             <a asp-controller="Home" asp-action="Index" asp-fragment="sessions">Find a study session</a>
             <a asp-controller="Room" asp-action="Table">Rooms</a>
         </nav>
-       @if (User.Identity?.IsAuthenticated == true)
-        {
-            <div class="account-actions">
-                <span class="profile-link">
-                    <span class="avatar" aria-hidden="true">@(User.Identity.Name?.Substring(0, 1).ToUpperInvariant() ?? "R")</span>
-                    <span>@User.Identity.Name</span>
-                </span>
-                    <form asp-controller="Account" asp-action="Logout" method="post">
-                        <button class="logout-button" type="submit">Logg ut</button>
-                    </form>
-            </div>
-        }
-        else
-        {
-            <a class="profile-link login-nav-link" asp-controller="Account" asp-action="Login"><span class="avatar" aria-hidden="true">↗</span><span>Logg inn</span></a>
-        }
+       <partial name="_LoginPartial" />
         </div>
     </header>
 

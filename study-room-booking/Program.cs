@@ -18,6 +18,20 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     options.SignIn.RequireConfirmedAccount = false; // Disable email confirmation
 }).AddEntityFrameworkStores<RoomDbContext>();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login"; // Redirect to login page if not authenticated
+    options.LogoutPath = "/Account/Logout"; // Redirect to logout page
+    options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect to access denied page
+});
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Set session timeout
+    options.Cookie.HttpOnly = true; // Make the session cookie HTTP only
+    options.Cookie.IsEssential = true; // Make the session cookie essential
+});
+
 // Registers the Room repository so it can be injected into controllers
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
@@ -37,6 +51,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseStaticFiles();
+app.UseSession(); // Enable session middleware
 
 app.UseAuthentication();
 app.UseAuthorization();
