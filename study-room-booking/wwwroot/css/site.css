@@ -461,6 +461,133 @@ a {
   justify-content: space-between
 }
 
+.booking-page {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 30px 0 70px
+}
+
+.booking-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin: 22px 0 24px
+}
+
+.booking-heading h1 {
+  font: 700 34px 'Manrope';
+  letter-spacing: -1.2px;
+  margin: 6px 0 4px
+}
+
+.booking-heading p {
+  color: #738078;
+  font-size: 13px;
+  margin: 0
+}
+
+.booking-campus {
+  background: #fff;
+  border: 1px solid #e5ebe4;
+  padding: 10px 13px;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #596f60
+}
+
+.booking-layout {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 310px;
+  gap: 22px;
+  align-items: start
+}
+
+.booking-field label {
+  display: block;
+  font-size: 10px;
+  color: #66766d;
+  font-weight: 700;
+  margin-bottom: 5px
+}
+
+.booking-field input,.booking-field select,.sort-control select {
+  height: 39px;
+  width: 100%;
+  border: 1px solid #dfe7df;
+  border-radius: 7px;
+  background: #fff;
+  color: #344c3f;
+  padding: 0 9px;
+  font-size: 11px
+}
+
+.booking-field input:focus,.booking-field select:focus,.sort-control select:focus {
+  outline: 3px solid #e5c870;
+  outline-offset: 1px
+}
+
+.room-options {
+  border: 0;
+  border-top: 1px solid #edf0ec;
+  margin: 15px 0 0;
+  padding: 12px 0 0;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap
+}
+
+.room-options legend {
+  float: left;
+  margin-right: 13px;
+  padding: 0;
+  color: #66766d;
+  font-size: 10px;
+  font-weight: 700
+}
+
+.room-options legend span {
+  font-weight: 400;
+  color: #8e9991
+}
+
+.room-options label {
+  font-size: 10px;
+  color: #6d7c73;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer
+}
+
+.room-options input {
+  accent-color: #28704f;
+  width: 14px;
+  height: 14px;
+  margin: 0
+}
+
+.booking-steps {
+    padding: 12px;
+    gap: 8px
+}
+
+.booking-steps li {
+  gap: 6px
+}
+
+.booking-steps li small {
+  display: none
+}
+
+.booking-steps li:not(:last-child):after {
+  right: 2px;
+  transform: translateX(25px)
+}
+
+.booking-layout {
+    grid-template-columns: 1fr
+}
+
 .footer {
   border-top: 1px solid #e5e9e2;
   max-width: 1160px;

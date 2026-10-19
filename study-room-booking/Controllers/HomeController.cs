@@ -19,4 +19,10 @@ public class HomeController : Controller
         var room = _roomDbContext.Rooms.FirstOrDefault(r => r.Status == Room.Availability.Available);
         return View(room);
     }
+
+    [HttpGet]
+    public IActionResult Book()
+    {
+        return View();
+    }
 }

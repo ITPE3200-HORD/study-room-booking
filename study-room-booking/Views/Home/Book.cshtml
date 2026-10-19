@@ -1,0 +1,64 @@
+@model BookViewModel
+
+@{
+    ViewData["Title"] = "Book a study session";
+}
+<section class="booking-page" aria-labelledby="booking-title">
+    <a class="back-link" asp-controller="Home" asp-action="Index"><span aria-hidden="true">←</span> Back to main page</a>
+    <div class="booking-heading">
+        <div>
+            <div class="eyebrow muted">CREATE A STUDY SESSION</div>
+            <h1 id="booking-title">Find a suitable room</h1>
+            <p>Select the time and group size, and we will show you the rooms available on campus.</p>
+        </div>
+        <div class="booking-campus">OsloMet - Pilestredet</div>
+    </div>
+    <ol class="booking-steps" aria-label="Steps in the ordering process">
+        <li>
+            <span>1</span>
+            <div><b>Choose a room</b><small>Find a available room</small></div>
+        </li>
+        <li>
+            <span>2</span>
+            <div><b>create study session</b><small>Invite other students</small></div>
+        </li>
+        <li>
+            <span>3</span>
+            <div><b>Confirm</b><small>Review the booking</small></div>
+        </li>
+    </ol>
+
+    <div class="booking-layout">
+        <div class="room-finder">
+            <section class="room-search-panel" aria-labelledby="search-rooms-title">
+                <div class="booking-field"><label for="bookingDate">Date</label><input type="date" id="bookingDate" /></div>
+                <div class="booking-field"><label for="bookingStart">Start time</label><select id="bookingStart"><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>12:00</option><option>13:00</option><option selected>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option></select></div>
+                <div class="booking-field"><label for="bookingDuration">Duration</label><select id="bookingDuration"><option value="60">1 hour</option><option value="90">1,5 hours</option><option value="120" selected>2 hours</option><option value="180">3 hours</option></select></div>
+                <div class="booking-field"><label for="bookingGroup">Group size</label><select id="bookingGroup"><option value="2">2 people</option><option value="4" selected>4 people</option><option value="6">6 people</option><option value="8">8 people</option></select></div>
+                <fieldset class="room-options"><legend>Room preferences <span>(optional)</span></legend>
+                    <label><input type="checkbox" id="whiteboardFilter" /> Whiteboard</label>
+                    <label><input type="checkbox" id="accessibleFilter" /> Accessible entrance</label>
+                    <label><input type="checkbox" id="screenFilter" /> Screen </label>
+                </fieldset>            
+            </section>
+
+            <div class="room-results-heading">
+                <div>
+                    <!--
+                    <h2>Available rooms <span class="count-pill" id="roomCount"></span></h2>
+                    <p id="roomResultSummary" aria-live="polite">Checking availability for the selected period...</p>-->
+                </div>
+                <label class=sort-control><span class="sr-only">Sort rooms</span>
+                    <select id=roomSort>
+                        <option value="recommended">Recommended</option>
+                        <option value="capacity">Capacity</option>
+                        <option value="name">Roomname</option>
+                    </select>
+                </label>
+            </div>
+            
+        </div>
+
+    </div>
+
+</section>
