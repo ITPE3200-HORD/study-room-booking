@@ -1,0 +1,21 @@
+@model study_room_booking.ViewModels.StudentViewModel
+
+<h1>Students (@Model.CurrentViewName)</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Student ID</th>
+            <th>Identity account</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var student in Model.Students)
+        {
+            <tr>
+                <td>@student.StudentId</td>
+                <td>@(student.IdentityUser?.Email ?? student.IdentityUser?.UserName ?? "No linked account")</td>
+            </tr>
+        }
+    </tbody>
+</table>

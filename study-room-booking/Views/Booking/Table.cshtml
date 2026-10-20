@@ -1,0 +1,36 @@
+@model IEnumerable<Booking>
+
+@* Shows all bookings in a table *@
+
+<h2>List of Bookings</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Create new booking</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Room</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var booking in Model)
+        {
+            <tr>
+                <td>@booking.Room?.RoomNumber</td>
+                <td>@booking.UserName</td>
+                <td>@booking.Description</td>
+                <td>@booking.StartTime.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>@booking.EndTime.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>
+                    <a asp-action="Update" asp-route-id="@booking.BookingId">Update</a>
+                    <a asp-action="Delete" asp-route-id="@booking.BookingId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

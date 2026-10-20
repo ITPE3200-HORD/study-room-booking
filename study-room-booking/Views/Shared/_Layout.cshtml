@@ -9,39 +9,17 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/study_room_booking.styles.css" asp-append-version="true" />
 </head>
-<body class="@(User.IsInRole("Admin") ? "admin-mode" : "")">
+<body>
     <a class="skip-link" href="#main">Skip to main content</a>
-    <header class="topbar">
-        <a class="brand" asp-controller="Home" asp-action="Index" aria-label="To front page"> Study_Room_Booking</a>
+    <header>
+        <div class="topbar">
+        <a class="brand" asp-controller="Home" asp-action="Index" aria-label="To front page">Study Room Booking</a>
         <nav aria-label="Main menu" class="main-nav">
-            @if (User.IsInRole("Admin"))
-            {
-            <a asp-controller="Admin" asp-action="Index">Overview</a>
-            <a asp-controller="Admin" asp-action="Rooms">Room</a>
-            <a asp-controller="Admin" asp-action="Bookings">Bookings</a>
-            }
-            else
-            {
             <a asp-controller="Home" asp-action="Index" asp-fragment="sessions">Find a study session</a>
-            <a asp-controller="Home" asp-action="Index" asp-fragment="how">This is how it works</a>    
-            }
+            <a asp-controller="Room" asp-action="Table">Rooms</a>
         </nav>
-       @if (User.Identity?.IsAuthenticated == true)
-        {
-            <div class="account-actions">
-                <a class="profile-link" asp-controller="@(User.IsInRole("Admin") ? "Admin" : "Home")" asp-action="@(User.IsInRole("Admin") ? "Index" : "Profile")">
-                    <span class="avatar" aria-hidden="true">@(User.Identity.Name?.Substring(0, 1).ToUpperInvariant() ?? "R")</span>
-                    <span>@(User.IsInRole("Admin") ? "Admin" : "Min side")</span>
-                    </a>
-                    <form asp-controller="Account" asp-action="Logout" method="post">
-                        <button class="logout-button" type="submit">Logg ut</button>
-                    </form>
-            </div>
-        }
-        else
-        {
-            <a class="profile-link login-nav-link" asp-controller="Account" asp-action="Login"><span class="avatar" aria-hidden="true">↗</span><span>Logg inn</span></a>
-        }
+       <partial name="_LoginPartial" />
+        </div>
     </header>
 
     <main id="main" tabindex="-1">

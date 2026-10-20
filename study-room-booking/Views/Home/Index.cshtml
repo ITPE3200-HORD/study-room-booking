@@ -1,4 +1,6 @@
-﻿@{
+﻿@model Room
+
+@{
     ViewData["Title"] = "Find a study room";
 }
 
@@ -6,27 +8,52 @@
     <div class="home-intro-content">
         <div class="eyebrow">STUDY TOGETHER, YOUR WAY</div>
         <h1>Find a study room for your group work</h1>
-        <p>Find a available room, meet other students and make the study session a little easier.</p>
+        <p>Find an available room, meet other students and make the study session a little easier.</p>
         <a class="btn btn-primary btn-lg" asp-controller="Home" asp-action="Book">Book a room</a>
     </div>
-    <div class="hero-art" aria-label="Illustration of a student studying in a study room">
-        <img src="~/images/study3.jpg" alt="Illustration of a student studying in a study room" />
-    </div>
+    @if (Model is not null)
+    {
+        <div class="hero-art room-feature" aria-label="Available study room">
+            <img src="~/images/study3.jpg" alt="A study room" />
+            <div class="room-feature-card">
+                <div class="eyebrow muted">AVAILABLE ROOM</div>
+                <h2>Room @Model.RoomNumber</h2>
+                @if (!string.IsNullOrWhiteSpace(Model.Location))
+                {
+                    <p>Location: @Model.Location</p>
+                }
+                <p>Capacity: @Model.Capacity</p>
+                <a class="outline-button" asp-controller="Room" asp-action="Table">View rooms</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="hero-art room-feature" aria-label="Illustration of a study room">
+            <img src="~/images/study3.jpg" alt="A study room" />
+            <div class="room-feature-card">
+                <h2>No available rooms</h2>
+                <p>Check back later or browse all rooms.</p>
+                <a class="outline-button" asp-controller="Home" asp-action="Book">View rooms</a>
+            </div>
+        </div>
+    }
 </section>
 
 <section id="sessions" class="sessions-section" aria-labelledby="sessions-title">
     @if (User.IsInRole("Admin"))
     {
-        <div class="admin-view-note" role="note">
-            <span>You are viewing this page as an administrator.</span>
-            <a asp-controller="Admin" asp-action="Index">Go to Admin overview →</a>
+        <div class="admin-view-note" role="note"><strong>Admin view</strong><span>You can view open study sessions, but only students can join available sessions.</span>
+        <a asp-controller="Admin" asp-action="Index">Go to admin overview →</a>
         </div>
     }
     <div class="section-heading">
-        <div class="section-heading"><div><div class="eyebrow muted">FIND OTHER STUDENTS</div>
-        <h2 id="sessions-title">Open study sessions</h2>
-        <p>Small groups, shared goals and space for you.</p></div>
-        @if (!User.IsInRole("Admin")) { <a class="outline-button create-link" asp-controller="Home" asp-action="Book"><span aria-hidden="true">＋</span> Create session</a> }</div>
+        <div>
+            <div class="eyebrow muted">FIND OTHER STUDENTS</div>
+            <h2 id="sessions-title">Open study sessions</h2>
+            <p>Small groups, shared goals and space for you.</p>
+        </div>
+        <!--<a class="outline-button create-link" asp-controller="Book" asp-action="Table"><span aria-hidden="true">＋</span> Browse rooms</a>-->
     </div>
     <form class="filters" role="search" aria-label="Search and filter study sessions" onsubmit="return false">
     <label class="search-field"><span class="sr-only">Search for subjects, topics, or rooms</span><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Search for subjects, topics, or rooms" /></label>
@@ -42,39 +69,38 @@
             <div class="card-top"><span class="course-tag lavender">WEB APPLICATION</span><button class="save-button" aria-label="Lagre økt: JavaScript og React" aria-pressed="false">♡</button></div>
             <h3>JavaScript og React</h3><p class="session-description">Learn to build dynamic web applications with JavaScript and React.</p>
             <div class="session-info"><span aria-hidden="true">◷</span><span>I dag, 14:00–16:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Pilestredet · P35, rom 214</span></div>
-            <div class="card-bottom"><div class="attendees"><div class="mini-avatars" aria-hidden="true"><span>J</span><span>L</span><span>A</span></div><span><b>3</b> av 5 plasser</span></div><button class="join-button" type="button" data-session="Algoritmer uten stress">Bli med <span aria-hidden="true">→</span></button></div>
+            <div class="card-bottom"><div class="attendees"><span><b>3</b> av 5 plasser</span></div><button class="btn btn-primary" type="button" data-session="Algoritmer uten stress">Bli med <span aria-hidden="true">→</span></button></div>
         </article>
         <article class="session-card" data-course="Økonomi" data-time="today" data-search="økonomi mikroøkonomi eksamenslesing bibliotek">
             <div class="card-top"><span class="course-tag peach">ØKONOMI</span><button class="save-button" aria-label="Lagre økt: Mikroøkonomi eksamenslesing" aria-pressed="false">♡</button></div>
             <h3>Mikroøkonomi eksamenslesing</h3><p class="session-description">Rolig pomodoro-økt. Ta med kaffe og spørsmål du sitter fast med.</p>
             <div class="session-info"><span aria-hidden="true">◷</span><span>I dag, 15:00–17:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Universitetsbiblioteket · 2. etasje</span></div>
-            <div class="card-bottom"><div class="attendees"><div class="mini-avatars" aria-hidden="true"><span>M</span><span>S</span></div><span><b>2</b> av 4 plasser</span></div><button class="join-button" type="button" data-session="Mikroøkonomi eksamenslesing">Bli med <span aria-hidden="true">→</span></button></div>
+            <div class="card-bottom"><div class="attendees"><span><b>2</b> av 4 plasser</span></div><button class="btn btn-primary" type="button" data-session="Mikroøkonomi eksamenslesing">Bli med <span aria-hidden="true">→</span></button></div>
         </article>
         <article class="session-card" data-course="Samfunnsvitenskap" data-time="tomorrow" data-search="samfunnsvitenskap metode kvalitativ analyse">
             <div class="card-top"><span class="course-tag sage">SAMFUNNSVITENSKAP</span><button class="save-button" aria-label="Lagre økt: Metodeverksted" aria-pressed="false">♡</button></div>
             <h3>Metodeverksted</h3><p class="session-description">Sparring på problemstilling og kvalitative intervjuer. Alle nivåer er velkomne.</p>
             <div class="session-info"><span aria-hidden="true">◷</span><span>I morgen, 10:00–12:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Pilestredet · P48, grupperom 3</span></div>
-            <div class="card-bottom"><div class="attendees"><div class="mini-avatars" aria-hidden="true"><span>E</span><span>T</span><span>O</span></div><span><b>3</b> av 6 plasser</span></div><button class="join-button" type="button" data-session="Metodeverksted">Bli med <span aria-hidden="true">→</span></button></div>
+            <div class="card-bottom"><div class="attendees"><span><b>3</b> av 6 plasser</span></div><button class="btn btn-primary" type="button" data-session="Metodeverksted">Bli med <span aria-hidden="true">→</span></button></div>
         </article>
         <article class="session-card" data-course="Matematikk" data-time="today" data-search="matematikk lineær algebra matriser">
             <div class="card-top"><span class="course-tag blue">MATEMATIKK</span><button class="save-button" aria-label="Lagre økt: Lineær algebra sammen" aria-pressed="false">♡</button></div>
             <h3>Lineær algebra sammen</h3><p class="session-description">Fra matriser til egenverdier – vi tar det steg for steg.</p>
             <div class="session-info"><span aria-hidden="true">◷</span><span>I dag, 16:30–18:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Pilestredet · P32, rom 410</span></div>
-            <div class="card-bottom"><div class="attendees"><div class="mini-avatars" aria-hidden="true"><span>K</span><span>N</span></div><span><b>2</b> av 4 plasser</span></div><button class="join-button" type="button" data-session="Lineær algebra sammen">Bli med <span aria-hidden="true">→</span></button></div>
+            <div class="card-bottom"><div class="attendees"><span><b>2</b> av 4 plasser</span></div><button class="btn btn-primary" type="button" data-session="Lineær algebra sammen">Bli med <span aria-hidden="true">→</span></button></div>
         </article>
         <article class="session-card" data-course="Informatikk" data-time="tomorrow" data-search="informatikk webutvikling react prosjekt">
             <div class="card-top"><span class="course-tag lavender">INFORMATIKK</span><button class="save-button" aria-label="Lagre økt: Bygg webprosjektet" aria-pressed="false">♡</button></div>
             <h3>Bygg webprosjektet</h3><p class="session-description">Jobb side om side med semesterprosjektet. Del tips, ikke stress.</p>
             <div class="session-info"><span aria-hidden="true">◷</span><span>I morgen, 12:00–15:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Holbergs plass · studenthuset</span></div>
-            <div class="card-bottom"><div class="attendees"><div class="mini-avatars" aria-hidden="true"><span>R</span><span>V</span></div><span><b>2</b> av 5 plasser</span></div><button class="join-button" type="button" data-session="Bygg webprosjektet">Bli med <span aria-hidden="true">→</span></button></div>
+            <div class="card-bottom"><div class="attendees"><span><b>2</b> av 5 plasser</span></div><button class="btn btn-primary" type="button" data-session="Bygg webprosjektet">Bli med <span aria-hidden="true">→</span></button></div>
         </article>
         <article class="session-card" data-course="Økonomi" data-time="tomorrow" data-search="økonomi bedriftsøkonomi regnskap">
             <div class="card-top"><span class="course-tag peach">ØKONOMI</span><button class="save-button" aria-label="Lagre økt: Bedriftsøkonomi" aria-pressed="false">♡</button></div>
             <h3>Bedriftsøkonomi</h3><p class="session-description">Vi går gjennom ukas oppgaver og hjelper hverandre i mål.</p>
             <div class="session-info"><span aria-hidden="true">◷</span><span>I morgen, 14:00–16:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Pilestredet · P46, rom 122</span></div>
-            <div class="card-bottom"><div class="attendees"><div class="mini-avatars" aria-hidden="true"><span>D</span><span>I</span><span>P</span></div><span><b>3</b> av 5 plasser</span></div><button class="join-button" type="button" data-session="Bedriftsøkonomi">Bli med <span aria-hidden="true">→</span></button></div>
+            <div class="card-bottom"><div class="attendees"><span><b>3</b> av 5 plasser</span></div><button class="btn btn-primary" type="button" data-session="Bedriftsøkonomi">Bli med <span aria-hidden="true">→</span></button></div>
         </article>
     </div>
     <div class="empty-state" id="emptyState" hidden><span aria-hidden="true">⌕</span><h3>No sessions fits your search</h3><p>Try an other search or remove the filters.</p><button class="outline-button" id="emptyReset" type="button">Show all sessions</button></div>
 </section>
-

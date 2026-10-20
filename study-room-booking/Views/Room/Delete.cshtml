@@ -7,20 +7,23 @@
     <h4>Room</h4>
     <hr />
     <dl class="row">
-        <dt class="col-sm-2">Item Id</dt>
+        <dt class="col-sm-2">Room Id</dt>
         <dd class="col-sm-10">@Model.RoomId</dd>
 
-        <dt class="col-sm-2">Room Name</dt>
-        <dd class="col-sm-10">@Model.RoomName</dd>
-
         <dt class="col-sm-2">Location</dt>
-        <dd class="col-sm-10">@Model.Location</dd> 
+        <dd class="col-sm-10">@Model.Location</dd>
+
+        <dt class="col-sm-2">Room number</dt>
+        <dd class="col-sm-10">@Model.RoomNumber</dd> 
+
+        <dt class="col-sm-2">Room Type</dt>
+        <dd class="col-sm-10">@Model.RoomType</dd>
 
         <dt class="col-sm-2">Capacity</dt>
         <dd class="col-sm-10">@Model.Capacity</dd>
 
-        <dt class="col-sm-2">Is Active</dt>
-        <dd class="col-sm-10">@Model.IsActve</dd>        
+        <dt class="col-sm-2">Availability</dt>
+        <dd class="col-sm-10">@Model.Status</dd>        
     </dl>
 
     <form asp-action="DeleteConfirmed" asp-route-id="@Model.RoomId" method="post">
@@ -28,3 +31,7 @@
         <a asp-action="Table" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

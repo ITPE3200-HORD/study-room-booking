@@ -13,10 +13,16 @@ public class HomeController : Controller
         _roomDbContext = roomDbContext;
     }
 
-    // First active room is displayed on the home page
+    // First available room is displayed on the home page
     public IActionResult Index()
     {
-        var room = _roomDbContext.Rooms.FirstOrDefault(room => room.IsActve);
+        var room = _roomDbContext.Rooms.FirstOrDefault(r => r.Status == Room.Availability.Available);
         return View(room);
+    }
+
+    [HttpGet]
+    public IActionResult Book()
+    {
+        return View();
     }
 }
