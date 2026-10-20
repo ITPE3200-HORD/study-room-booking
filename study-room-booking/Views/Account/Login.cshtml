@@ -21,9 +21,10 @@
             
             <div class="mb-3">
                 <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" class="form-control" autocomplete="username" autocapitalize="none" spellcheck="false"/>
+                <input asp-for="Username" class="form-control" autocomplete="username" autocapitalize="none" spellcheck="false" />
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
+            
             <div class="mb-3">
                 <label asp-for="Password" class="control-label"></label>
                 <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" />
@@ -32,7 +33,7 @@
             
             <button class="btn btn-primary" type="submit">Log in</button>
         </form>
-    </div>>
+    </div>
 </section>
 
 @section Scripts {

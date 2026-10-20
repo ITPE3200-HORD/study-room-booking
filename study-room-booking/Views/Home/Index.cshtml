@@ -6,62 +6,121 @@
 
 <section class="hero" aria-labelledby="home-title">
     <div class="home-intro-content">
-        <div class="eyebrow">STUDY TOGETHER, YOUR WAY</div>
-        <h1>Find a study room for your group work</h1>
-        <p>Find an available room, meet other students and make the study session a little easier.</p>
-        <a class="btn btn-primary btn-lg" asp-controller="Home" asp-action="Book">Book a room</a>
+        <div class="eyebrow">BOOK ROOMS AND STUDY TOGETHER</div>
+        <h1 id="home-title">Find a study room for your group work</h1>
+        <p>
+            Find an available room, meet other students and make the study session easier.
+        </p>
+        <a class="btn btn-primary btn-lg" 
+            asp-controller="Home" 
+            asp-action="Book">
+            Book a room
+        </a>
     </div>
+
     @if (Model is not null)
     {
-        <div class="hero-art room-feature" aria-label="Available study room">
-            <img src="~/images/study3.jpg" alt="A study room" />
+        <div class="hero-art room-feature">
+            <img src="~/images/study3.jpg" alt="Study room" />
             <div class="room-feature-card">
                 <div class="eyebrow muted">AVAILABLE ROOM</div>
                 <h2>Room @Model.RoomNumber</h2>
+
                 @if (!string.IsNullOrWhiteSpace(Model.Location))
                 {
                     <p>Location: @Model.Location</p>
                 }
+
                 <p>Capacity: @Model.Capacity</p>
-                <a class="outline-button" asp-controller="Room" asp-action="Table">View rooms</a>
+                <a class="outline-button" 
+                    asp-controller="Room" 
+                    asp-action="Table">
+                    View rooms
+                </a>
             </div>
         </div>
     }
     else
     {
-        <div class="hero-art room-feature" aria-label="Illustration of a study room">
-            <img src="~/images/study3.jpg" alt="A study room" />
+        <div class="hero-art room-feature">
+            <img src="~/images/study3.jpg" alt="Study room" />
             <div class="room-feature-card">
                 <h2>No available rooms</h2>
-                <p>Check back later or browse all rooms.</p>
-                <a class="outline-button" asp-controller="Home" asp-action="Book">View rooms</a>
+                <p>Try searching for a different date or time.</p>
+                <a class="outline-button" 
+                    asp-controller="Home" 
+                    asp-action="Book">
+                    Search for a room
+                </a>
             </div>
         </div>
     }
 </section>
 
-<section id="sessions" class="sessions-section" aria-labelledby="sessions-title">
+<section id="sessions" 
+        class="sessions-section" 
+        aria-labelledby="sessions-title">
+
     @if (User.IsInRole("Admin"))
     {
-        <div class="admin-view-note" role="note"><strong>Admin view</strong><span>You can view open study sessions, but only students can join available sessions.</span>
-        <a asp-controller="Admin" asp-action="Index">Go to admin overview →</a>
-        </div>
+        <aside class="admin-view-note" aria-label="Administrator information">
+            <strong>Admin view</strong>
+            <span>
+                You can view open study sessions, but only students can join them.
+            </span>
+            <a asp-controller="Admin" asp-action="Index">
+                Go to admin overview
+            </a>
+        </aside>
     }
+
     <div class="section-heading">
         <div>
             <div class="eyebrow muted">FIND OTHER STUDENTS</div>
             <h2 id="sessions-title">Open study sessions</h2>
             <p>Small groups, shared goals and space for you.</p>
         </div>
-        <!--<a class="outline-button create-link" asp-controller="Book" asp-action="Table"><span aria-hidden="true">＋</span> Browse rooms</a>-->
     </div>
-    <form class="filters" role="search" aria-label="Search and filter study sessions" onsubmit="return false">
-    <label class="search-field"><span class="sr-only">Search for subjects, topics, or rooms</span><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Search for subjects, topics, or rooms" /></label>
-    <label class="select-field"><span class="sr-only">Filter by subject</span><select id="courseFilter"><option value="">All subjects</option><option>Web Application</option><option>Data Security</option><option>Universal Design</option><option>Software Testing</option></select></label>
-    <label class="select-field"><span class="sr-only">Filter by time</span><select id="timeFilter"><option value="">Any time</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option></select></label>
-    <button type="button" class="filter-button" id="clearFilters">Reset</button>
+
+    <form class="filters" 
+        role="search" 
+        aria-label="Search and filter study sessions" 
+        onsubmit="return false">
+        <label class="search-field">
+            <span class="sr-only">Search for subjects, topics, or rooms</span>
+            <span aria-hidden="true">⌕</span>
+            <input id="searchInput" 
+                type="search" 
+                placeholder="Search for subjects, topics, or rooms" />
+        </label>
+
+        <label class="select-field">
+            <span class="sr-only">Filter by subject</span>
+            <select id="courseFilter">
+                <option value="">All subjects</option>
+                <option>Web Application</option>
+                <option>Data Security</option>
+                <option>Universal Design</option>
+                <option>Software Testing</option>
+            </select>
+        </label>
+
+        <label class="select-field">
+            <span class="sr-only">Filter by time</span>
+            <select id="timeFilter">
+                <option value="">Any time</option>
+                <option value="today">Today</option>
+                <option value="tomorrow">Tomorrow</option>
+            </select>
+        </label>
+
+        <button type="reset" class="filter-button" id="clearFilters">Reset</button>
     </form>
-    <div class="results-meta"><span id="resultCount" aria-live="polite">Shows 5 study sessions</span><span> Available spots</span></div>
+
+    <div class="results-meta">
+        <span id="resultCount" aria-live="polite">Showing 6 study sessions</span>
+        <span> Available spots</span>
+    </div>
 
 <!-- denne må gjøres dynamisk, men for nå er det hardkodet. -->
     <div class="session-grid" id="sessionGrid">
