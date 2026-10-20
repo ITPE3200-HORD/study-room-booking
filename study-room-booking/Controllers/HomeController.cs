@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using study_room_booking.Models;
+using study_room_booking.ViewModels;
 
 namespace study_room_booking.Controllers;
 
@@ -14,10 +15,20 @@ public class HomeController : Controller
     }
 
     // First available room is displayed on the home page
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        var room = _roomDbContext.Rooms.FirstOrDefault(r => r.Status == Room.Availability.Available);
-        return View(room);
+        var rooms = await _roomDbContext.Rooms
+            .AsNoTracking()
+            .OrderBy(room => room.Status)
+            .ThenBy(room => room.RoomNumber)
+            .ToListAsync();
+
+        var viewModel = new HomeIndexViewModel
+        {
+            Rooms = rooms
+        };
+
+        return View(viewModel);
     }
 
     [HttpGet]

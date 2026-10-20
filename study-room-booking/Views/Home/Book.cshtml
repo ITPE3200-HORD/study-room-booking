@@ -53,13 +53,13 @@
                 <form asp-controller="Home" asp-action="Book" method="get" class="row g-3 align-items-end">
                     <div asp-validation-summary="ModelOnly" class="col-12 text-danger" role="alert"></div>
                     
-                    <div class="col-12 col-sm-6 sol-lg-3">
+                    <div class="col-12 col-sm-6 col-lg-3">
                         <label asp-for="Date" class="form-label">Date</label>
                         <input asp-for="Date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
-                        <span asp-valisation-for="Date" class="text-danger"></span>
+                        <span asp-validation-for="Date" class="text-danger"></span>
                     </div>
 
-                    <div class="col-12 col-sm-6 sol-lg-3">
+                    <div class="col-12 col-sm-6 col-lg-3">
                         <label asp-for="StartTime" class="form-label">Start time</label>
                         <select asp-for="StartTime" class="form-select">
                             <option value="06:00">06:00</option>

@@ -1,4 +1,4 @@
-﻿@model Room
+﻿@model HomeIndexViewModel
 
 @{
     ViewData["Title"] = "Find a study room";
@@ -18,24 +18,24 @@
         </a>
     </div>
 
-    @if (Model is not null)
+    @if (Model.FeaturedAvailableRoom is { } featuredRoom)
     {
         <div class="hero-art room-feature">
             <img src="~/images/study3.jpg" alt="Study room" />
             <div class="room-feature-card">
-                <div class="eyebrow muted">AVAILABLE ROOM</div>
-                <h2>Room @Model.RoomNumber</h2>
+                <div class="eyebrow muted">ROOM STATUS: AVAILABLE</div>
+                <h2>Room @featuredRoom.RoomNumber</h2>
 
-                @if (!string.IsNullOrWhiteSpace(Model.Location))
+                @if (!string.IsNullOrWhiteSpace(featuredRoom.Location))
                 {
-                    <p>Location: @Model.Location</p>
+                    <p>Location: @featuredRoom.Location</p>
                 }
 
-                <p>Capacity: @Model.Capacity</p>
+                <p>Capacity: @featuredRoom.Capacity</p>
                 <a class="outline-button" 
-                    asp-controller="Room" 
-                    asp-action="Table">
-                    View rooms
+                    asp-controller="Home" 
+                    asp-action="Book">
+                    Check booking times
                 </a>
             </div>
         </div>
@@ -45,14 +45,78 @@
         <div class="hero-art room-feature">
             <img src="~/images/study3.jpg" alt="Study room" />
             <div class="room-feature-card">
-                <h2>No available rooms</h2>
-                <p>Try searching for a different date or time.</p>
-                <a class="outline-button" 
-                    asp-controller="Home" 
-                    asp-action="Book">
-                    Search for a room
+                <h2>No rooms are available</h2>
+                <p>You can still browse all rooms below.</p>
+                <a class="outline-button" href="#rooms">
+                    Browse rooms
                 </a>
             </div>
+        </div>
+    }
+</section>
+
+<section id="rooms" class="sessions-section" aria-labelledby="rooms-title">
+    <div class="section-heading">
+        <div>
+            <div class="eyebrow muted">ROOM DIRECTORY</div>
+            <h2 id="rooms-title">Rooms on campus</h2>
+            <p>
+                @Model.Rooms.Count
+                @(Model.Rooms.Count == 1 ? "room" : "rooms")
+                listed in the system.
+            </p>
+        </div>
+    </div>
+
+    @if (Model.Rooms.Count == 0)
+    {
+        <div class="empty-state" role="status">
+            <h3>No rooms have been added yet</h3>
+            <p>Please check back later.</p>
+        </div>
+    }
+    else
+    {
+        <div class="session-grid">
+            @foreach (var room in Model.Rooms)
+            {
+                <article class="session-card">
+                    <div class="card-top">
+                        @if (room.Status == Room.Availability.Available)
+                        {
+                            <span class="course-tag sage">Available</span>
+                        }
+                        else
+                        {
+                            <span class="course-tag peach">Not available</span>
+                        }
+                    </div>
+
+                    <h3>Room @room.RoomNumber</h3>
+
+                    @if (!string.IsNullOrWhiteSpace(room.Location))
+                    {
+                        <p class="session-info">
+                            <span class="fw-semibold">Location:</span>
+                            @room.Location
+                        </p>
+                    }
+
+                    <p class="session-info">
+                        <span class="fw-semibold">Capacity:</span>
+                        @room.Capacity people
+                    </p>
+
+                    @if (room.Status == Room.Availability.Available)
+                    {
+                        <div class="card-bottom">
+                            <a class="btn btn-primary" asp-controller="Home" asp-action="Book">Check booking times
+                                <span class="visually-hidden">for room @room.RoomNumber</span>
+                            </a>
+                        </div>
+                    }
+                </article>
+            }
         </div>
     }
 </section>
