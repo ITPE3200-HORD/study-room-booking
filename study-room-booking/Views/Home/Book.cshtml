@@ -1,64 +1,193 @@
 @model BookViewModel
 
 @{
-    ViewData["Title"] = "Book a study session";
+    ViewData["Title"] = "Book a room";
+    var requestedDate = Model.Date.ToString("yyyy-MM-dd");
+    var requestedStartTime = Model.StartTime.ToString("HH:mm");
 }
+
 <section class="booking-page" aria-labelledby="booking-title">
-    <a class="back-link" asp-controller="Home" asp-action="Index"><span aria-hidden="true">←</span> Back to main page</a>
-    <div class="booking-heading">
+    <a class="back-link" asp-controller="Home" asp-action="Index">
+        <span aria-hidden="true">←</span> 
+        Back to main page
+    </a>
+
+    <header class="booking-heading">
         <div>
-            <div class="eyebrow muted">CREATE A STUDY SESSION</div>
-            <h1 id="booking-title">Find a suitable room</h1>
-            <p>Select the time and group size, and we will show you the rooms available on campus.</p>
+            <div class="eyebrow muted">ROOM BOOKING</div>
+            <h1 id="booking-title">Find an available room</h1>
+            <p>Choose a date, time and group size to see suitable rooms.</p>
         </div>
-        <div class="booking-campus">OsloMet - Pilestredet</div>
-    </div>
-    <ol class="booking-steps" aria-label="Steps in the ordering process">
-        <li>
-            <span>1</span>
-            <div><b>Choose a room</b><small>Find a available room</small></div>
+        <p class="booking-campus">OsloMet - Pilestredet</p>
+    </header>
+
+    <ol class="booking-steps" aria-label="Booking steps">
+        <li aria-current="step">
+            <span aria-hidden="true">1</span>
+            <div>
+                <b>Choose a room</b>
+                <small>Find a room for your group</small>
+            </div>
         </li>
         <li>
-            <span>2</span>
-            <div><b>create study session</b><small>Invite other students</small></div>
+            <span aria-hidden="true">2</span>
+            <div>
+                <b>Enter booking details</b>
+                <small>Describe your study session</small>
+            </div>
         </li>
         <li>
-            <span>3</span>
-            <div><b>Confirm</b><small>Review the booking</small></div>
+            <span aria-hidden="true">3</span>
+            <div>
+                <b>Confirm</b>
+                <small>Review your booking</small>
+            </div>
         </li>
     </ol>
 
     <div class="booking-layout">
         <div class="room-finder">
             <section class="room-search-panel" aria-labelledby="search-rooms-title">
-                <div class="booking-field"><label for="bookingDate">Date</label><input type="date" id="bookingDate" /></div>
-                <div class="booking-field"><label for="bookingStart">Start time</label><select id="bookingStart"><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>12:00</option><option>13:00</option><option selected>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option></select></div>
-                <div class="booking-field"><label for="bookingDuration">Duration</label><select id="bookingDuration"><option value="60">1 hour</option><option value="90">1,5 hours</option><option value="120" selected>2 hours</option><option value="180">3 hours</option></select></div>
-                <div class="booking-field"><label for="bookingGroup">Group size</label><select id="bookingGroup"><option value="2">2 people</option><option value="4" selected>4 people</option><option value="6">6 people</option><option value="8">8 people</option></select></div>
-                <fieldset class="room-options"><legend>Room preferences <span>(optional)</span></legend>
-                    <label><input type="checkbox" id="whiteboardFilter" /> Whiteboard</label>
-                    <label><input type="checkbox" id="accessibleFilter" /> Accessible entrance</label>
-                    <label><input type="checkbox" id="screenFilter" /> Screen </label>
-                </fieldset>            
+                <h2 id="search-rooms-title">Search for a room</h2>
+
+                <form asp-controller="Home" asp-action="Book" method="get" class="row g-3 align-items-end">
+                    <div asp-validation-summary="ModelOnly" class="col-12 text-danger" role="alert"></div>
+                    
+                    <div class="col-12 col-sm-6 sol-lg-3">
+                        <label asp-for="Date" class="form-label">Date</label>
+                        <input asp-for="Date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
+                        <span asp-valisation-for="Date" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12 col-sm-6 sol-lg-3">
+                        <label asp-for="StartTime" class="form-label">Start time</label>
+                        <select asp-for="StartTime" class="form-select">
+                            <option value="06:00">06:00</option>
+                            <option value="07:00">07:00</option>
+                            <option value="08:00">08:00</option>
+                            <option value="09:00">09:00</option>
+                            <option value="10:00">10:00</option>
+                            <option value="11:00">11:00</option>
+                            <option value="12:00">12:00</option>
+                            <option value="13:00">13:00</option>
+                            <option value="14:00">14:00</option>
+                            <option value="15:00">15:00</option>
+                            <option value="16:00">16:00</option>
+                            <option value="17:00">17:00</option>
+                            <option value="18:00">18:00</option>
+                            <option value="19:00">19:00</option>
+                            <option value="20:00">20:00</option>
+                            <option value="21:00">21:00</option>
+                            <option value="22:00">22:00</option>
+                        </select>
+                        <span asp-validation-for="StartTime" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <label asp-for="DurationMinutes" class="form-label">Duration</label>
+                        <select asp-for="DurationMinutes" class=form-select>
+                            <option value="60">1 hour</option>
+                            <option value="90">1.5 hours</option>
+                            <option value="120">2 hours</option>
+                            <option value="180">3 hours</option>
+                        </select>
+                        <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <label asp-for="GroupSize" class="form-label">Group size</label>
+                        <select asp-for="GroupSize" class="form-select">
+                            <option value="2">2 people</option>
+                            <option value="4">4 people</option>
+                            <option value="6">6 people</option>
+                            <option value="8">8 people</option>
+                        </select>
+                        <span asp-validation-for="GroupSize" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            Search available rooms
+                        </button>
+                    </div>
+                </form>         
             </section>
 
-            <div class="room-results-heading">
-                <div>
-                    <!--
-                    <h2>Available rooms <span class="count-pill" id="roomCount"></span></h2>
-                    <p id="roomResultSummary" aria-live="polite">Checking availability for the selected period...</p>-->
-                </div>
-                <label class=sort-control><span class="sr-only">Sort rooms</span>
-                    <select id=roomSort>
-                        <option value="recommended">Recommended</option>
-                        <option value="capacity">Capacity</option>
-                        <option value="name">Roomname</option>
-                    </select>
-                </label>
-            </div>
-            
+            @if (ViewData.ModelState.IsValid)
+            {
+                <section class="room-results" aria-labelledby="available-rooms-title">
+                    <div class="room-results-heading">
+                        <div>
+                            <h2 id="available-rooms-title">Available rooms</h2>
+                            <p aria-live="polite">
+                                @Model.AvailableRoomCount
+                                @(Model.AvailableRoomCount == 1 ? "room" : "rooms")
+                                available for your search.
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (Model.AvailableRoomCount == 0)
+                    {
+                        <div class="alert alert-info" role="status">
+                            <h3 class="h5">No rooms found</h3>
+                            <p class="mb-0">
+                                Try another date, time or group size
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-3">
+                            @foreach (var room in Model.AvailableRooms)
+                            {
+                                <div class="col-12 col-md-6">
+                                    <article class="card h-100 shadow-sm">
+                                        <div class="card-body">
+                                            <p class="text-success fw-semibold mb-2">Available</p>
+                                            <h3 class="card-title h5">Room @room.RoomNumber</h3>
+
+                                            @if (!string.IsNullOrWhiteSpace(room.Location))
+                                            {
+                                                <p class="card-text">
+                                                    <span class="fw-semibold">Location:</span>
+                                                    @room.Location
+                                                </p>
+                                            }
+
+                                            <p class="card-text">
+                                                <span class="fw-semibold">Room type:</span>
+                                                @room.RoomType
+                                            </p>
+                                            <p class="card-text">
+                                                <span class="fw-semibold">Capacity:</span>
+                                                @room.Capacity people
+                                            </p>
+
+                                            <a asp-controller="Booking" 
+                                                asp-action="Creation" 
+                                                asp-route-roomId="@room.RoomId" 
+                                                asp-route-date="@requestedDate" 
+                                                asp-route-startTime="@requestedStartTime" 
+                                                asp-route-durationMinutes="@Model.DurationMinutes" 
+                                                class="btn btn-primary">
+                                                Continue to booking
+                                                <span class="visually-hidden">
+                                                    for room @room.RoomNumber
+                                                </span>
+                                            </a>
+                                        </div>
+                                    </article>
+                                </div>
+                            }
+                        </div>
+                    }
+                </section>
+            }
         </div>
-
     </div>
-
 </section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
