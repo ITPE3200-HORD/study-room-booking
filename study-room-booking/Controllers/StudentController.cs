@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using study_room_booking.DAL;
 using study_room_booking.ViewModels;
+using study_room_booking.Models;
 
 namespace study_room_booking.Controllers;
 
@@ -28,5 +29,11 @@ public class StudentController : Controller
         }
 
         return View(new StudentViewModel(students, "Table"));
+    }
+
+    // GET: /Student/Create
+    public IActionResult Create()
+    {
+        return View();
     }
 }

@@ -6,7 +6,8 @@
     <thead>
         <tr>
             <th>Student ID</th>
-            <th>Identity account</th>
+            <th>User account</th>
+            <th>Email</th>
         </tr>
     </thead>
     <tbody>
@@ -14,7 +15,8 @@
         {
             <tr>
                 <td>@student.StudentId</td>
-                <td>@(student.IdentityUser?.Email ?? student.IdentityUser?.UserName ?? "No linked account")</td>
+                <td>student.IdentityUser.UserName</td>
+                <td>student.IdentityUser?.Email</td>
             </tr>
         }
     </tbody>
