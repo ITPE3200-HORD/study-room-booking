@@ -16,7 +16,9 @@ builder.Services.AddDbContext<RoomDbContext>(options => {
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false; // Disable email confirmation
-}).AddEntityFrameworkStores<RoomDbContext>();
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<RoomDbContext>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -39,10 +41,12 @@ builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateAsyncScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<RoomDbContext>();
-    db.Database.Migrate();
+    await db.Database.MigrateAsync();
+
+    await DbSeeder.SeedAdminAsync(scope.ServiceProvider, builder.Configuration);
 }
 
 if (app.Environment.IsDevelopment())

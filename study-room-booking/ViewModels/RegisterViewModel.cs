@@ -13,6 +13,10 @@ public class RegisterViewModel
     public string Username { get; set; } = string.Empty;
 
     [Required]
+    [Display(Name = "Full Name")]
+    public string FullName { get; set; } = string.Empty;
+
+    [Required]
     [DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 

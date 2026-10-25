@@ -6,8 +6,10 @@
     <thead>
         <tr>
             <th>Student ID</th>
-            <th>User account</th>
+            <th>Full Name</th>
+            <th>Username</th>
             <th>Email</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -15,8 +17,13 @@
         {
             <tr>
                 <td>@student.StudentId</td>
-                <td>student.IdentityUser.UserName</td>
-                <td>student.IdentityUser?.Email</td>
+                <td>@student.FullName</td>
+                <td>@student.IdentityUser?.UserName</td>
+                <td>@student.IdentityUser?.Email</td>
+                <td>
+                    <a asp-action="Update" asp-route-id="@student.StudentId" class="btn btn-primary">Update</a>
+                    <a asp-action="Delete" asp-route-id="@student.StudentId" class="btn btn-danger">Delete</a>
+                </td>
             </tr>
         }
     </tbody>
