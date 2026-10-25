@@ -39,6 +39,12 @@ public class StudentController : Controller
 
     // No Create as students are created when registering as user. Admin can update student information, but not create new students.
 
+    // The Student profile and Identity account are saved separately.
+    // If the second save fails, the operation may be only partly completed.
+    // Update saves the Identity account first; Delete removes the Student profile first.
+
+    // GET: /Student/Update
+    [HttpGet]
     public async Task<IActionResult> Update(int id)
     {
         var student = await _studentRepository.GetById(id);
