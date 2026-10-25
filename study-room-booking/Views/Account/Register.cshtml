@@ -19,6 +19,12 @@
                 <input asp-for="Username" class="form-control" autocomplete="username" autocapitalize="none" spellcheck="false" />
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
+
+            <div class="mb-3">
+                <label asp-for="FullName" class="control-label">Full name</label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
             
             <div class="mb-3">
                 <label asp-for="Email" class="control-label"></label>
