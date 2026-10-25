@@ -16,7 +16,9 @@ builder.Services.AddDbContext<RoomDbContext>(options => {
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false; // Disable email confirmation
-}).AddEntityFrameworkStores<RoomDbContext>();
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<RoomDbContext>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
