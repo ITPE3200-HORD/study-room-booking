@@ -1,33 +1,79 @@
 @model RoomsViewModel
 
-<h1>List of Rooms (@Model.CurrentViewName View)</h1> @* Fixed: removed extra > *@
-<a asp-action="Create" class="btn btn-primary mb-3">Create new room</a> @*Added a 'create-new-room'-button *@
+@{
+    ViewData["Title"] = "Rooms";
+}
 
-<div class="container"> 
-    <table class="table table-striped">
-        <tr>
-            <th>Room Id</th>
-            <th>Location</th>
-            <th>Room Number</th>
-            <th>Room Type</th>
-            <th>Capacity</th>
-            <th>Availability</th>
-            <th>Actions</th>
-        </tr>            
-        @foreach (var Room in Model.Rooms)
-                {
+<section class="container py-4" aria-labelledby="rooms-title">
+    <header class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 id="rooms-title" class="h2 mb-0">Rooms</h1>
+
+        <a asp-action="Create" class="btn btn-primary">
+            Add a room
+        </a>
+    </header>
+
+    @if (Model.Rooms.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <caption class="visually-hidden">
+                    Rooms with their location, type, capacity, availability and management actions.
+                </caption>
+                <thead class="table-light">
                     <tr>
-                        <td>@Room.RoomId</td>
-                        <td>@Room.Location</td>
-                        <td>@Room.RoomNumber</td>
-                        <td>@Room.RoomType</td>
-                        <td>@Room.Capacity</td>
-                        <td>@Room.Status</td>
-                        <td>
-                            <a asp-action="Update" asp-route-id="@Room.RoomId">Update</a>
-                            <a asp-action="Delete" asp-route-id="@Room.RoomId">Delete</a>
-                        </td>
+                        <th scope="col">Room number</th>
+                        <th scope="col">Location</th>
+                        <th scope="col">Room type</th>
+                        <th scope="col">Capacity</th>
+                        <th scope="col">Availability</th>
+                        <th scope="col">Actions</th>
                     </tr>
-                }
+                </thead>
+                <tbody>
+                    @foreach (var room in Model.Rooms)
+                    {
+                        <tr>
+                            <th scope="row">@room.RoomNumber</th>
+                            <td>@(room.Location ?? "—")</td>
+                            <td>@room.RoomType</td>
+                            <td>@room.Capacity people</td>
+                            <td>
+                                @if (room.Status == Room.Availability.Available)
+                                {
+                                    <span class="badge bg-success">Available</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Not available</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a asp-action="Update"
+                                       asp-route-id="@room.RoomId"
+                                       class="btn btn-primary btn-sm">
+                                        Edit
+                                    </a>
+                                    <a asp-action="Delete"
+                                       asp-route-id="@room.RoomId"
+                                       class="btn btn-outline-danger btn-sm">
+                                        Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
             </table>
-    </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state" role="status">
+            <h2 class="h4">No rooms have been added yet</h2>
+            <p>Start by adding the first room.</p>
+            <a asp-action="Create" class="outline-button">Add a room</a>
+        </div>
+    }
+</section>

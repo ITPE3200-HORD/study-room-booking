@@ -21,7 +21,7 @@
     @if (Model.FeaturedAvailableRoom is { } featuredRoom)
     {
         <div class="hero-art room-feature">
-            <img src="~/images/study3.jpg" alt="Study room" />
+            <img src="~/images/study3.jpg" alt="" />
             <div class="room-feature-card">
                 <div class="eyebrow muted">ROOM STATUS: AVAILABLE</div>
                 <h2>Room @featuredRoom.RoomNumber</h2>
@@ -43,7 +43,7 @@
     else
     {
         <div class="hero-art room-feature">
-            <img src="~/images/study3.jpg" alt="Study room" />
+            <img src="~/images/study3.jpg" alt="" />
             <div class="room-feature-card">
                 <h2>No rooms are available</h2>
                 <p>You can still browse all rooms below.</p>
@@ -225,5 +225,11 @@
             <div class="card-bottom"><div class="attendees"><span><b>3</b> av 5 plasser</span></div><button class="btn btn-primary" type="button" data-session="Bedriftsøkonomi">Bli med <span aria-hidden="true">→</span></button></div>
         </article>
     </div>
-    <div class="empty-state" id="emptyState" hidden><span aria-hidden="true">⌕</span><h3>No sessions fits your search</h3><p>Try an other search or remove the filters.</p><button class="outline-button" id="emptyReset" type="button">Show all sessions</button></div>
+    <div class="empty-state" id="emptyState" hidden>
+        <span aria-hidden="true">⌕</span>
+        <h3>No sessions match your search</h3>
+        <p>Try another search or clear your filters.</p>
+        <button class="outline-button" id="emptyReset" type="button">
+            Show all sessions
+        </button></div>
 </section>
