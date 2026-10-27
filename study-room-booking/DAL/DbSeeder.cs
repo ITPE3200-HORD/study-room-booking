@@ -50,4 +50,21 @@ public static class DbSeeder
             throw new InvalidOperationException("Could not assign Admin role.");
         }
     }
+
+    public static async Task SeedRoomsAsync(RoomDbContext db)
+    {
+        if (await db.Rooms.AnyAsync())
+        {
+            return; // Rooms already seeded
+        }
+
+        db.Rooms.AddRange(
+            new Room { Location = "P35", RoomNumber = "101", RoomType = "Group Study Room", Capacity = 6, Status = Room.Availability.Available },
+            new Room { Location = "B2", RoomNumber = "202", RoomType = "Class Room", Capacity = 30, Status = Room.Availability.Available },
+            new Room { Location = "C3", RoomNumber = "303", RoomType = "Auditorium", Capacity = 120, Status = Room.Availability.NotAvailable }
+        );
+
+        await db.SaveChangesAsync();
+    }
+
 }
