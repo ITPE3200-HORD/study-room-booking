@@ -1,32 +1,58 @@
 @model study_room_booking.ViewModels.StudentUpdateViewModel
 
-<h2>Update Student</h2>
+@{
+    ViewData["Title"] = "Update student";
+}
 
-<form asp-action="Update" method="post">
-    @* Shows errors that are not tied to a specific field, e.g. if the database fails *@
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<section class="container py-4" aria-labelledby="update-student-title">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-7 col-xl-6">
+            <header class="mb-4">
+                <h1 id="update-student-title" class="h2">Update student</h1>
+                <p class="text-body-secondary mb-0">
+                    Edit the student details and save your changes.
+                </p>
+            </header>
 
-    <input type="hidden" asp-for="StudentId">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-action="Update" method="post" class="d-grid gap-3">
+                        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
-    <div class="form-group">
-        <label asp-for="FullName">Full Name</label>
-        <input asp-for="FullName" class="form-control"/>
-        <span asp-validation-for="FullName" class="text-danger"></span>
+                        <input type="hidden" asp-for="StudentId" />
+
+                        <div>
+                            <label asp-for="FullName" class="form-label"></label>
+                            <input asp-for="FullName" class="form-control" autocomplete="name" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" type="email" autocomplete="email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Username" class="form-label"></label>
+                            <input asp-for="Username"
+                                   class="form-control"
+                                   autocomplete="username"
+                                   autocapitalize="none"
+                                   spellcheck="false" />
+                            <span asp-validation-for="Username" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 pt-2">
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                            <a asp-action="Table" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label asp-for="Email">Email</label>
-        <input asp-for="Email" class="form-control"/>
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Username">Username</label>
-        <input asp-for="Username" class="form-control"/>
-        <span asp-validation-for="Username" class="text-danger"></span>
-    </div>
-    
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-    <a asp-action="Table" class="btn btn-secondary">Cancel</a>
-</form>
+</section>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

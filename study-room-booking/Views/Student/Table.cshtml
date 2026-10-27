@@ -1,30 +1,64 @@
 @model study_room_booking.ViewModels.StudentViewModel
 
-<h1>Students (@Model.CurrentViewName)</h1>
+@{
+    ViewData["Title"] = "Students";
+}
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Student ID</th>
-            <th>Full Name</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var student in Model.Students)
-        {
-            <tr>
-                <td>@student.StudentId</td>
-                <td>@student.FullName</td>
-                <td>@student.IdentityUser?.UserName</td>
-                <td>@student.IdentityUser?.Email</td>
-                <td>
-                    <a asp-action="Update" asp-route-id="@student.StudentId" class="btn btn-primary">Update</a>
-                    <a asp-action="Delete" asp-route-id="@student.StudentId" class="btn btn-danger">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<section class="container py-4" aria-labelledby="students-title">
+    <header class="mb-4">
+        <h1 id="students-title" class="h2">Students</h1>
+        <p class="text-body-secondary mb-0">View and manage registered students.</p>
+    </header>
+
+    @if (Model.Students.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <caption class="visually-hidden">
+                    Student names, account details and management actions.
+                </caption>
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Student ID</th>
+                        <th scope="col">Full name</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in Model.Students)
+                    {
+                        <tr>
+                            <td>@student.StudentId</td>
+                            <th scope="row">@student.FullName</th>
+                            <td>@(student.IdentityUser?.UserName ?? "—")</td>
+                            <td>@(student.IdentityUser?.Email ?? "—")</td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a asp-action="Update"
+                                       asp-route-id="@student.StudentId"
+                                       class="btn btn-primary btn-sm">
+                                        Edit
+                                    </a>
+                                    <a asp-action="Delete"
+                                       asp-route-id="@student.StudentId"
+                                       class="btn btn-outline-danger btn-sm">
+                                        Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state" role="status">
+            <h2 class="h4">No students found</h2>
+            <p>Registered students will appear here.</p>
+        </div>
+    }
+</section>
