@@ -4,18 +4,21 @@
   --surface-alt: #e9efe4;
   --border: #e7ebe5;
   --text: #203a33;
-  --muted: #728079;
+  --muted: #5d6d63;
   --green: #176653;
   --green-dark: #124d40;
   --shadow-sm: 0 8px 20px rgba(32, 58, 51, 0.08);
   --radius-md: 12px;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-heading: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 }
 
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
-  outline: 3px solid rgba(23, 102, 83, 0.25);
+select:focus-visible,
+main:focus-visible {
+  outline: 3px solid var(--green);
   outline-offset: 3px;
 }
 
@@ -32,7 +35,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--text);
-  font: 15px/1.55 'DM sans', sans-serif;
+  font: 15px/1.55 var(--font-body);
 }
 
 button,input,select,textarea {
@@ -58,7 +61,8 @@ a {
 }
 
 .topbar {
-  height: 76px;
+  min-height: 76px;
+  height: auto;
   padding: 0 max(calc((100vw - 1160px)/2),28px);
   display: flex;
   align-items: center;
@@ -72,23 +76,8 @@ a {
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  font: 800 22px 'Manrope',sans-serif;
+  font: 800 22px var(--font-heading);
   letter-spacing: -1px
-}
-
-.account-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.logout-button {
-  padding: 8px 0;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  cursor: pointer;
 }
 
 .main-nav {
@@ -100,7 +89,7 @@ a {
 
 .main-nav a {
   text-decoration: none;
-  color: #728079;
+  color: var(--muted);
   font-size: 14px;
   height: 100%;
   display: grid;
@@ -116,32 +105,12 @@ a {
 .main-nav a.active:after {
   content: '';
   height: 3px;
-  background: #3f9274;
+  background: var(--green);
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   border-radius: 4px 4px 0 0
-}
-
-.profile-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 600
-}
-
-.avatar {
-  width: 34px;
-  height: 34px;
-  background: #ead8c8;
-  color: #725446;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  font-weight: 700
 }
 
 .hero {
@@ -166,7 +135,7 @@ a {
 }
 
 .hero h1 {
-  font: 700 clamp(40px,5vw,57px)/1.12 'Manrope',sans-serif;
+  font: 700 clamp(40px, 5vw, 57px)/1.12 var(--font-heading);
   letter-spacing: -2.5px;
   margin: 21px 0 16px
 }
@@ -202,23 +171,18 @@ a {
   margin-bottom: 25px
 }
 
-.submit-button {
-  width: 100%;
-  margin-top: 4px
-}
-
 .muted {
-  color: #86938b
+  color: var(--muted);
 }
 
 .section-heading h2 {
-  font: 700 29px 'Manrope',sans-serif;
+  font: 700 29px var(--font-heading);
   letter-spacing: -.7px;
   margin: 7px 0 3px
 }
 
 .section-heading p {
-  color: #748179;
+  color: var(--muted);
   margin: 0;
   font-size: 14px
 }
@@ -240,12 +204,11 @@ a {
   gap: 10px;
   padding: 0 11px;
   flex: 1;
-  color: #7a8b80
+  color: var(--muted)
 }
 
 .search-field input {
   border: 0;
-  outline: 0;
   min-width: 80px;
   width: 100%;
   color: var(--text);
@@ -253,7 +216,7 @@ a {
 }
 
 .search-field input::placeholder {
-  color: #97a199
+  color: var(--muted);
 }
 
 .select-field select {
@@ -268,7 +231,7 @@ a {
 }
 
 .auth-page {
-  min-height: calc(100vh - 7gpx);
+  min-height: calc(100vh - 76px);
   display: grid;
   place-items: center;
   padding: 40px 20px;
@@ -322,6 +285,11 @@ a {
   outline: none;
 }
 
+.form-control:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 3px;
+}
+
 .btn-primary {
   height: 46px;
   border: none;
@@ -363,17 +331,8 @@ a {
   display: flex;
   justify-content: space-between;
   margin: 17px 2px 13px;
-  color: #849087;
+  color: var(--muted);
   font-size: 12px
-}
-
-.availability-key {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #65a77b;
-  margin: 0 5px 1px 0
 }
 
 .session-grid {
@@ -384,7 +343,7 @@ a {
 
 .session-card {
   background: white;
-  border: 1px solid #e7ebe5;
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 18px 19px 15px;
   min-height: 257px;
@@ -396,7 +355,7 @@ a {
 .session-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-sm);
-  border-color: rgba(23, 102, 83, 0.2);
+  border-color: var(--green);
 }
 
 .card-top {
@@ -406,11 +365,31 @@ a {
 }
 
 .course-tag {
-  font-size: 9px;
-  letter-spacing: .8px;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
   font-weight: 700;
   padding: 5px 8px;
   border-radius: 5px;
+}
+
+.course-tag.sage {
+  color: #28543d;
+  background: #e8f1e9;
+}
+
+.course-tag.peach {
+  color: #773b20;
+  background: #fce9df;
+}
+
+.course-tag.lavender {
+  color: #4e3d70;
+  background: #eee8f7;
+}
+
+.course-tag.blue {
+  color: #294d70;
+  background: #e6f0fa;
 }
 
 .save-button {
@@ -431,20 +410,20 @@ a {
 }
 
 .session-card h3 {
-  font: 700 16px 'Manrope',sans-serif;
+  font: 700 16px var(--font-heading);
   margin: 8px 0 4px;
   letter-spacing: -.2px;
 }
 
 .session-description {
   font-size: 12px;
-  color: #7a8780;
+  color: var(--muted);
   margin: 0 0 11px;
   min-height: 36px;
 }
 
 .session-info {
-  font-size: 11px;
+  font-size: 13px;
   color: #65756c;
   display: flex;
   gap: 9px;
@@ -461,10 +440,92 @@ a {
   justify-content: space-between
 }
 
+.outline-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--green);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--green-dark);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.outline-button:hover {
+  background: var(--green);
+  color: var(--surface);
+}
+
+.empty-state {
+  padding: 32px 24px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty-state > span {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-alt);
+  color: var(--green);
+  font-size: 1.4rem;
+}
+
+.empty-state h3 {
+  margin: 12px 0 6px;
+  color: var(--text);
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+.empty-state .outline-button {
+  margin-top: 16px;
+}
+
+.admin-view-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  margin-bottom: 24px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--green);
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+  color: var(--text);
+}
+
+.admin-view-note span {
+  flex: 1 1 240px;
+  color: var(--muted)
+}
+
+.admin-view-note a {
+  color: var(--green-dark);
+  font-weight: 700;
+}
+
+.admin-view-note a:hover {
+  color: var(--green);
+}
+
 .booking-page {
   max-width: 1160px;
   margin: 0 auto;
-  padding: 30px 0 70px
+  padding: 30px 24px 70px
 }
 
 .booking-heading {
@@ -475,13 +536,13 @@ a {
 }
 
 .booking-heading h1 {
-  font: 700 34px 'Manrope';
+  font: 700 34px var(--font-heading);
   letter-spacing: -1.2px;
   margin: 6px 0 4px
 }
 
 .booking-heading p {
-  color: #738078;
+  color: var(--muted);
   font-size: 13px;
   margin: 0
 }
@@ -497,112 +558,112 @@ a {
 
 .booking-layout {
   display: grid;
-  grid-template-columns: minmax(0,1fr) 310px;
+  grid-template-columns: 1fr;
   gap: 22px;
   align-items: start
 }
 
-.booking-field label {
-  display: block;
-  font-size: 10px;
-  color: #66766d;
+.room-finder {
+  display: grid;
+  gap: 24px;
+}
+
+.room-search-panel,
+.room-results {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.room-search-panel h2,
+.room-results-heading h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.25rem;
   font-weight: 700;
-  margin-bottom: 5px
 }
 
-.booking-field input,.booking-field select,.sort-control select {
-  height: 39px;
-  width: 100%;
-  border: 1px solid #dfe7df;
-  border-radius: 7px;
-  background: #fff;
-  color: #344c3f;
-  padding: 0 9px;
-  font-size: 11px
+.room-search-panel form {
+  margin-top: 18px;
 }
 
-.booking-field input:focus,.booking-field select:focus,.sort-control select:focus {
-  outline: 3px solid #e5c870;
-  outline-offset: 1px
+.room-results-heading {
+  margin-bottom: 18px;
 }
 
-.room-options {
-  border: 0;
-  border-top: 1px solid #edf0ec;
-  margin: 15px 0 0;
-  padding: 12px 0 0;
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap
+.room-results-heading p {
+  margin: 6px 0 0;
+  color: var(--muted);
 }
 
-.room-options legend {
-  float: left;
-  margin-right: 13px;
-  padding: 0;
-  color: #66766d;
-  font-size: 10px;
-  font-weight: 700
+.room-results .card {
+  border-color: var(--border);
+  border-radius: var(--radius-md);
 }
 
-.room-options legend span {
-  font-weight: 400;
-  color: #8e9991
-}
-
-.room-options label {
-  font-size: 10px;
-  color: #6d7c73;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer
-}
-
-.room-options input {
-  accent-color: #28704f;
-  width: 14px;
-  height: 14px;
-  margin: 0
+.room-results .card-body {
+  padding: 20px;
 }
 
 .booking-steps {
-    padding: 12px;
-    gap: 8px
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 24px;
+  padding: 0px;
+  list-style: none;
 }
 
 .booking-steps li {
-  gap: 6px
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.booking-steps li > span {
+  display: grid;
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  color: var(--text);
+  background: var(--surface-alt);
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.booking-steps li[aria-current="step"] {
+  color: var(--text);
+  border-color: var(--green);
+  box-shadow: var(--shadow-sm);
+}
+
+.booking-steps li[aria-current="step"] > span {
+  color: var(--surface);
+  background: var(--green);
+}
+
+.booking-steps li div {
+  display: grid;
+  gap: 4px;
+}
+
+.booking-steps li b {
+  font-size: 0.95rem;
 }
 
 .booking-steps li small {
-  display: none
-}
-
-.booking-steps li:not(:last-child):after {
-  right: 2px;
-  transform: translateX(25px)
-}
-
-.booking-layout {
-    grid-template-columns: 1fr
-}
-
-.footer {
-  border-top: 1px solid #e5e9e2;
-  max-width: 1160px;
-  margin: auto;
-  padding: 22px 0;
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  color: #87938b;
-  font-size: 11px;
-}
-
-.footer a {
-  margin-left: auto;
-  color: #63776a
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
 }
 
 .sr-only {
@@ -627,10 +688,15 @@ a {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  .btn-primary:hover,
+  .session-card:hover {
+    transform: none !important;
+  }
 }
 
 @media(max-width:1220px) {
-  .hero,.sessions-section,.host-banner,.footer {
+  .hero,.sessions-section {
     margin-left: 32px;
     margin-right: 32px
   }
@@ -647,20 +713,42 @@ a {
 
 @media(max-width:780px) {
   .topbar {
-    height: 66px;
-    padding: 0 20px
+    height: auto;
+    min-height: 66px;
+    padding: 10px 16px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+
+  .brand {
+    flex: 1 1 150px;
+    min-width: 0;
+    font-size: 18px;
+  }
+
+  .topbar > .navbar-nav {
+    order: 2;
+    flex: 0 1 auto;
+  }
+
+  .auth-page {
+    min-height: calc(100vh - 66px);
   }
 
   .main-nav {
-    gap: 16px
+    order: 3;
+    flex: 1 1 100%;
+    height: auto;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 16px;
   }
 
   .main-nav a {
-    font-size: 12px
-  }
-
-  .profile-link>span:last-child {
-    display: none
+    height: auto;
+    padding: 6px 0;
+    font-size: 12px;
   }
 
   .hero {
@@ -722,18 +810,23 @@ a {
     grid-template-columns: repeat(2,1fr)
   }
 
-  .host-banner {
-    margin: 0 22px 35px;
-    padding: 20px;
-    flex-wrap: wrap
+  .booking-page {
+    padding: 24px 20px 56px;
   }
 
-  .light-button {
-    margin-left: 60px
+  .booking-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 18px 0 20px;
   }
 
-  .footer {
-    margin: 0 22px
+  .booking-heading h1 {
+    font-size: clamp(1.75rem, 6vw, 2.125rem);
+  }
+
+  .booking-campus {
+    align-self: flex-start;
   }
 }
 
@@ -772,5 +865,25 @@ a {
   .room-feature-card {
     left: 16px;
     bottom: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .session-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-steps {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .booking-steps li {
+    padding: 12px;
+  }
+
+  .room-search-panel,
+  .room-results {
+    padding: 18px;
   }
 }
