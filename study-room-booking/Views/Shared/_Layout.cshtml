@@ -12,19 +12,50 @@
 <body>
     <a class="skip-link" href="#main">Skip to main content</a>
     <header>
-        <div class="topbar">
-        <a class="brand" asp-controller="Home" asp-action="Index" aria-label="To front page">Study Room Booking</a>
-        <nav aria-label="Main menu" class="main-nav">
-            <a asp-controller="Home" asp-action="Index" asp-fragment="rooms">View rooms</a>
-            <a asp-controller="Home" asp-action="Index" asp-fragment="sessions">Find a study session</a>
-            @if (User.IsInRole("Admin"))
-                {
-                    <a asp-controller="Student" asp-action="Table">Students</a>
-                    <a asp-controller="Room" asp-action="Table">Rooms</a>
-                }
+        <nav class="navbar navbar-expand-xl navbar-light topbar" aria-label="Main navigation">
+            <a class="brand"
+                asp-controller="Home"
+                asp-action="Index"
+                aria-label="To front page">
+                Study Room Booking
+            </a>
+
+            <button class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#primaryNavigation"
+                    aria-controls="primaryNavigation"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation menu">
+                <span class="navbar-toggler-icon" aria-hidden="true"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="primaryNavigation">
+                <ul class="navbar-nav main-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Index" asp-fragment="rooms">View rooms</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Index" asp-fragment="sessions">Find a study session</a>
+                    </li>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Student" asp-action="Table">Students</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Room" asp-action="Table">Rooms</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Booking" asp-action="Table">Bookings</a>
+                        </li>
+                    }
+                </ul>
+
+                <partial name="_LoginPartial" />
+            </div>
         </nav>
-       <partial name="_LoginPartial" />
-        </div>
     </header>
 
     <main id="main" tabindex="-1">

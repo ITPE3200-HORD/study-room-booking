@@ -153,6 +153,6 @@ public class BookingController : Controller
     private async Task PopulateRooms()
     {
         var rooms = await _roomRepository.GetAll() ?? new List<Room>();
-        ViewBag.Rooms = new SelectList(rooms, "RoomId", "RoomName");
+        ViewBag.Rooms = new SelectList(rooms, "RoomId", "RoomNumber");
     }
 }

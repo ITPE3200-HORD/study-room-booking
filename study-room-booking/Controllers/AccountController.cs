@@ -96,7 +96,7 @@ public async Task<IActionResult> Register(RegisterViewModel model)
     public async Task<IActionResult> Login(LoginViewModel model)
     {
         // Default to home page if ReturnUrl is null or empty
-        string targetUrl = string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) 
+        string targetUrl = !string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) 
             ? model.ReturnUrl 
             : Url.Action("Index", "Home") ?? "~/";
         
