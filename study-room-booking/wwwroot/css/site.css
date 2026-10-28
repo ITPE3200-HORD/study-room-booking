@@ -141,20 +141,64 @@ a {
 }
 
 .hero-art {
-  height: 325px;
   position: relative;
-  background: #e9efe4;
-  border-radius: 48% 44% 39% 51% / 48% 45% 53% 49%;
-  overflow: hidden;
-  max-width: 510px;
   width: 100%;
-  justify-self: end
+  max-width: 510px;
+  height: 325px;
+  justify-self: end;
+  overflow: hidden;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  box-shadow: var(--shadow-sm);
 }
 
 .hero-art img {
+  position: absolute;
+  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 55%;
+}
+
+.room-feature {
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+}
+
+.room-feature::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, transparent 45%, color-mix(in srgb, var(--text)) 28%, transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.room-feature-card {
+  position: absolute;
+  z-index: 2;
+  left: 20px;
+  bottom: 20px;
+  width: min(100% - 40%, 320px);
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--surface) 70%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(6px);
+}
+
+.room-feature-card h2 {
+  margin: 8px 0;
+}
+
+.room-feature-card p {
+  margin: 6px 0;
+  color: var(--muted);
 }
 
 .sessions-section {
@@ -767,9 +811,8 @@ a {
   }
 
   .hero-art {
-    height: 260px;
+    height: 280px;
     justify-self: center;
-    width: min(100%,480px)
   }
 
   .sessions-section {
@@ -830,32 +873,6 @@ a {
   }
 }
 
-.room-feature {
-  display: flex;
-  align-items: flex-end;
-  padding: 24px;
-}
-
-.room-feature-card {
-  position: absolute;
-  left: 24px;
-  bottom: 24px;
-  width: min(100%, 320px);
-  padding: 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: var(--shadow-sm);
-}
-
-.room-feature-card h2 {
-  margin: 8px 0;
-}
-
-.room-feature-card p {
-  margin: 6px 0;
-  color: var(--muted);
-}
 
 @media (max-width: 767px) {
   .room-feature {
@@ -885,5 +902,21 @@ a {
   .room-search-panel,
   .room-results {
     padding: 18px;
+  }
+
+  .hero-art {
+    height: 250px;
+    border-radius: 22px;
+  }
+
+  .room-feature {
+    padding: 14px;
+  }
+
+  .room-feature-card {
+    left: 14px;
+    bottom: 14px;
+    width: min(100% - 28px, 320px);
+    padding: 16px;
   }
 }
