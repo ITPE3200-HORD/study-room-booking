@@ -370,6 +370,19 @@ a {
   transform: translateY(-1px);
 }
 
+.crud-btn {
+  height: auto;
+  min-height: 0;
+  padding: 8px 14px;
+  line-height: 1.35;
+  border-radius: 8px;
+}
+
+.crud-btn.btn-sm {
+  padding: 5px 10px;
+}
+
+
 .text-danger {
   color: #b64747;
   font-size: 12px;
@@ -560,30 +573,25 @@ a {
 
 .admin-view-note {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 18px;
-  margin-bottom: 24px;
-  padding: 16px 18px;
+  align-items: baseline;
+  gap: 6px 12px;
+  margin-bottom: 28px;
+  padding: 12px 16px;
   border: 1px solid var(--border);
   border-left: 4px solid var(--green);
   border-radius: var(--radius-md);
   background: var(--surface-alt);
   color: var(--text);
+  text-align: left;
+}
+
+.admin-view-note strong {
+  flex: 0 0 auto;
+  color: var(--green-dark)
 }
 
 .admin-view-note span {
-  flex: 1 1 240px;
   color: var(--muted)
-}
-
-.admin-view-note a {
-  color: var(--green-dark);
-  font-weight: 700;
-}
-
-.admin-view-note a:hover {
-  color: var(--green);
 }
 
 .booking-page {
@@ -669,65 +677,6 @@ a {
 
 .room-results .card-body {
   padding: 20px;
-}
-
-.booking-steps {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin: 0 0 24px;
-  padding: 0px;
-  list-style: none;
-}
-
-.booking-steps li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  padding: 16px;
-  color: var(--muted);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-}
-
-.booking-steps li > span {
-  display: grid;
-  flex: 0 0 2rem;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  color: var(--text);
-  background: var(--surface-alt);
-  border-radius: 50%;
-  font-weight: 700;
-}
-
-.booking-steps li[aria-current="step"] {
-  color: var(--text);
-  border-color: var(--green);
-  box-shadow: var(--shadow-sm);
-}
-
-.booking-steps li[aria-current="step"] > span {
-  color: var(--surface);
-  background: var(--green);
-}
-
-.booking-steps li div {
-  display: grid;
-  gap: 4px;
-}
-
-.booking-steps li b {
-  font-size: 0.95rem;
-}
-
-.booking-steps li small {
-  display: block;
-  color: var(--muted);
-  font-size: 0.8rem;
 }
 
 .sr-only {
@@ -919,15 +868,6 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .booking-steps {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .booking-steps li {
-    padding: 12px;
-  }
-
   .room-search-panel,
   .room-results {
     padding: 18px;
@@ -947,6 +887,12 @@ a {
     bottom: 14px;
     width: min(calc(100% - 28px), 320px);
     padding: 16px;
+  }
+
+  .admin-view-note {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
   }
 }
 

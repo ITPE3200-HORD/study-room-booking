@@ -5,7 +5,7 @@
 }
 
 <section class="container py-4" aria-labelledby="students-title">
-    <header class="mb-4">
+    <header class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <h1 id="students-title" class="h2">Students</h1>
         <p class="text-body-secondary mb-0">View and manage registered students.</p>
     </header>
@@ -38,12 +38,12 @@
                                 <div class="d-flex flex-wrap gap-2">
                                     <a asp-action="Update"
                                        asp-route-id="@student.StudentId"
-                                       class="btn btn-primary btn-sm">
+                                       class="btn btn-primary btn-sm crud-btn">
                                         Edit
                                     </a>
                                     <a asp-action="Delete"
                                        asp-route-id="@student.StudentId"
-                                       class="btn btn-outline-danger btn-sm">
+                                       class="btn btn-outline-danger btn-sm crud-btn">
                                         Delete
                                     </a>
                                 </div>
