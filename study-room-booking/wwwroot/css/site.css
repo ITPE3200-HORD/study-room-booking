@@ -116,6 +116,19 @@ a {
   color: var(--green);
 }
 
+@media (min-width: 1200px) {
+  .main-nav {
+    gap: 0 20px;
+    margin-right: auto !important;
+    margin-left: auto !important;
+  }
+
+  .main-nav .nav-link {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+}
+
 .hero {
   max-width: 1160px;
   margin: auto;
