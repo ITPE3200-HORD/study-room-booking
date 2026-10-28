@@ -15,11 +15,12 @@
         <div class="topbar">
         <a class="brand" asp-controller="Home" asp-action="Index" aria-label="To front page">Study Room Booking</a>
         <nav aria-label="Main menu" class="main-nav">
+            <a asp-controller="Home" asp-action="Index" asp-fragment="rooms">View rooms</a>
             <a asp-controller="Home" asp-action="Index" asp-fragment="sessions">Find a study session</a>
-            <a asp-controller="Room" asp-action="Table">Rooms</a>
             @if (User.IsInRole("Admin"))
                 {
                     <a asp-controller="Student" asp-action="Table">Students</a>
+                    <a asp-controller="Room" asp-action="Table">Rooms</a>
                 }
         </nav>
        <partial name="_LoginPartial" />

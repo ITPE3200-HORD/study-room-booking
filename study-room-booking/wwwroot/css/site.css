@@ -726,6 +726,33 @@ a {
   display: none!important
 }
 
+.room-feature {
+  display: flex;
+  align-items: flex-end;
+  padding: 24px;
+}
+
+.room-feature-card {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  width: min(100%, 320px);
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow-sm);
+}
+
+.room-feature-card h2 {
+  margin: 8px 0;
+}
+
+.room-feature-card p {
+  margin: 6px 0;
+  color: var(--muted);
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -739,7 +766,7 @@ a {
   }
 }
 
-@media(max-width:1220px) {
+@media (max-width:1220px) {
   .hero,.sessions-section {
     margin-left: 32px;
     margin-right: 32px
