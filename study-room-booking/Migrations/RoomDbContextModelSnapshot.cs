@@ -257,6 +257,7 @@ namespace study_room_booking.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Location")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RoomNumber")

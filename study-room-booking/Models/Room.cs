@@ -7,9 +7,11 @@ namespace study_room_booking.Models
     {
         public int RoomId {get; set;}
 
-        // Location is optional, but if filled in it must be 2-100 characters (letters, numbers, spaces and . , / -)
-        [RegularExpression(@"^[A-ZÆØÅ0-9]{2,5}$", ErrorMessage = "Location must be 2-5 characters (Capital letters and numbers)")]
-        public String? Location {get; set;} //building
+        // Location is not optional, and it must be 2-100 characters (letters, numbers, spaces and . , / -)
+        [Required(ErrorMessage = "Location is required")]
+        [RegularExpression(@"^[A-ZÆØÅ0-9]{2,5}$", 
+            ErrorMessage = "Location must be 2-5 characters (Capital letters and numbers)")]
+        public String? Location {get; set;} = string.Empty;//building
 
         [Required(ErrorMessage = "Room number is required")]
         [RegularExpression(@"^[A-ZÆØÅ0-9]{2,10}$", ErrorMessage = "Room number must be 2-10 characters (Capital letters,and numbers)")]
