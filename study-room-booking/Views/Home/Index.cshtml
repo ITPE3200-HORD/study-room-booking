@@ -6,6 +6,16 @@
 
 <section class="hero" aria-labelledby="home-title">
     <div class="home-intro-content">
+        @if (User.IsInRole("Admin"))
+        {
+            <aside class="admin-view-note" aria-label="Administratorinformation">
+                <strong>Admin view</strong>
+                <span>
+                    You can view open study sessions. Only students can book rooms or join study sessions.
+                </span>
+            </aside>
+        }
+        
         <div class="eyebrow">BOOK ROOMS AND STUDY TOGETHER</div>
         <h1 id="home-title">Find a study room for your group work</h1>
         <p>
@@ -110,7 +120,7 @@
                     @if (room.Status == Room.Availability.Available)
                     {
                         <div class="card-bottom">
-                            <a class="btn btn-primary" asp-controller="Home" asp-action="Book">Check booking times
+                            <a class="btn btn-primary" asp-controller="Home" asp-action="Book">Book room
                                 <span class="visually-hidden">for room @room.RoomNumber</span>
                             </a>
                         </div>
@@ -124,16 +134,6 @@
 <section id="sessions" 
         class="sessions-section" 
         aria-labelledby="sessions-title">
-
-    @if (User.IsInRole("Admin"))
-    {
-        <aside class="admin-view-note" aria-label="Administrator information">
-            <strong>Admin view</strong>
-            <span>
-                You can view open study sessions, but only students can join them.
-            </span>
-        </aside>
-    }
 
     <div class="section-heading">
         <div>
