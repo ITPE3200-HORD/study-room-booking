@@ -62,55 +62,58 @@ a {
 
 .topbar {
   min-height: 76px;
-  height: auto;
   padding: 0 max(calc((100vw - 1160px)/2),28px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #fff;
-  border-bottom: 1px solid #ebeee9
+  background: var(--surface);
+  border-bottom: 1px solid var(--border)
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
   text-decoration: none;
+  white-space: nowrap;
   font: 800 22px var(--font-heading);
-  letter-spacing: -1px
+  letter-spacing: -1px;
 }
 
 .main-nav {
-  height: 100%;
-  display: flex;
-  gap: 36px;
-  align-items: center
+  gap: 0 12px;
 }
 
 .main-nav a {
-  text-decoration: none;
+  position: relative;
   color: var(--muted);
   font-size: 14px;
-  height: 100%;
-  display: grid;
-  align-items: center;
-  position: relative
+  text-decoration: none;
 }
 
 .main-nav a:hover,.main-nav a.active {
   color: var(--green);
-  font-weight: 700
+  font-weight: 700;
 }
 
 .main-nav a.active:after {
-  content: '';
-  height: 3px;
-  background: var(--green);
   position: absolute;
+  right: 0;
   bottom: 0;
   left: 0;
-  right: 0;
-  border-radius: 4px 4px 0 0
+  height: 3px;
+  border-radius: 4px 4px 0 0;
+  background: var(--green);
+  content: "";
+}
+
+.auth-nav form {
+  margin: 0;
+}
+
+.logout-button {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.logout-button:hover{
+  color: var(--green);
 }
 
 .hero {
@@ -121,7 +124,7 @@ a {
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
-  gap: 60px
+  gap: clamp(24px, 5vw, 60px);
 }
 
 .eyebrow {
@@ -166,14 +169,18 @@ a {
 .room-feature {
   display: flex;
   align-items: flex-end;
-  padding: 20px;
+  padding: 24px;
 }
 
 .room-feature::after {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(180deg, transparent 45%, color-mix(in srgb, var(--text)) 28%, transparent);
+  background: linear-gradient(
+    180deg,
+    transparent 45%,
+    color-mix(in srgb, var(--text) 28%, transparent) 100%
+  );
   content: "";
   pointer-events: none;
 }
@@ -183,7 +190,7 @@ a {
   z-index: 2;
   left: 20px;
   bottom: 20px;
-  width: min(100% - 40%, 320px);
+  width: min(calc(100% - 40px), 320px);
   padding: 20px;
   border: 1px solid color-mix(in srgb, var(--surface) 70%, transparent);
   border-radius: var(--radius-md);
@@ -726,33 +733,6 @@ a {
   display: none!important
 }
 
-.room-feature {
-  display: flex;
-  align-items: flex-end;
-  padding: 24px;
-}
-
-.room-feature-card {
-  position: absolute;
-  left: 24px;
-  bottom: 24px;
-  width: min(100%, 320px);
-  padding: 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: var(--shadow-sm);
-}
-
-.room-feature-card h2 {
-  margin: 8px 0;
-}
-
-.room-feature-card p {
-  margin: 6px 0;
-  color: var(--muted);
-}
-
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -782,44 +762,52 @@ a {
   }
 }
 
-@media(max-width:780px) {
+@media (max-width: 1199.98px) {
   .topbar {
-    height: auto;
-    min-height: 66px;
-    padding: 10px 16px;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 8px 12px;
+    padding: 12px 16px;
   }
 
-  .brand {
-    flex: 1 1 150px;
-    min-width: 0;
-    font-size: 18px;
-  }
-
-  .topbar > .navbar-nav {
-    order: 2;
-    flex: 0 1 auto;
-  }
-
-  .auth-page {
-    min-height: calc(100vh - 66px);
+  .navbar-collapse {
+    flex-basis: 100%;
+    padding-top: 12px;
   }
 
   .main-nav {
-    order: 3;
-    flex: 1 1 100%;
-    height: auto;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 8px 16px;
+    align-items: stretch;
+    gap: 0;
   }
 
-  .main-nav a {
-    height: auto;
-    padding: 6px 0;
-    font-size: 12px;
+  .main-nav .nav-link {
+    padding: 8px 0;
+  }
+
+  .main-nav a.active::after {
+    display: none;
+  }
+
+  .auth-nav {
+    align-items: stretch;
+    gap: 0;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .auth-nav .nav-item,
+  .auth-nav form {
+    width: 100%;
+  }
+
+  .logout-button {
+    width: 100%;
+    padding: 8px 0;
+    text-align: left;
+  }
+}
+
+@media (max-width: 780px) {
+  .auth-page {
+    min-height: calc(100vh - 66px);
   }
 
   .hero {
@@ -834,7 +822,8 @@ a {
   }
 
   .hero h1 {
-    font-size: 45px
+    font-size: clamp(2rem, 7vw, 2.8rem);
+    letter-spacing: -1.5px;
   }
 
   .hero-art {
@@ -943,7 +932,35 @@ a {
   .room-feature-card {
     left: 14px;
     bottom: 14px;
-    width: min(100% - 28px, 320px);
+    width: min(calc(100% - 28px), 320px);
     padding: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero,
+  .sessions-section {
+    margin-right: 16px;
+    margin-left: 16px;
+  }
+
+  .hero {
+    gap: 22px;
+    padding-top: 36px;
+  }
+
+  .brand {
+    font-size: 18px;
+  }
+
+  .hero-art {
+    height: 230px;
+  }
+
+  .room-feature-card {
+    left: 12px;
+    bottom: 12px;
+    width: min(calc(100% - 24px), 320px);
+    padding: 14px;
   }
 }
