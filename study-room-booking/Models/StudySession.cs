@@ -16,7 +16,7 @@ namespace study_room_booking.Models {
     [Range(1, 50)]
     public int MaxParticipants { get; set; }
 
-    public bool IsOpen { get; set } = true; // Indicates if the session is open for new participants
+    public bool IsOpen { get; set; } = true; // Indicates if the session is open for new participants
 
     public virtual List<SessionParticipant> Participants { get; set; } = new();
 

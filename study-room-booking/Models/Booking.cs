@@ -9,6 +9,7 @@ namespace study_room_booking.Models
         [Range(1, int.MaxValue, ErrorMessage = "Please select a room")]
         public int RoomId { get; set; }
         public virtual Room? Room { get; set; }
+        public virtual StudySession? StudySession { get; set; }
 
         public string? UserId { get; set; }
 
