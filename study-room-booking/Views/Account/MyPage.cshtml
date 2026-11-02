@@ -1,0 +1,88 @@
+@model MyPageViewModel
+@{
+    ViewData["Title"] = "My page";
+}
+
+<section class="container py-4" aria-labelledby="my-page-title">
+    <header class="mb-4">
+        <h1 id="my-page-title" class="h2">My page</h1>
+        <p class="text-body-secondary">Here you can find and manage your bookings and study sessions</p>
+    </header>
+
+    <section class="mb-5" aria-labelledby="my-bookings-title">
+        <h2 id="my-bookings-title" class="h3">My bookings</h2>
+
+        @if (Model.Bookings.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Room</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">From</th>
+                            <th scope="col">To</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var booking in Model.Bookings)
+                        {
+                            <tr>
+                                <th scope="row">@(booking.Room?.RoomNumber ?? "-")</th>
+                                <td>@(booking.Description ?? "-")</td>
+                                <td>@booking.StartTime.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@booking.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p role="status">You have no upcoming bookings.</p>
+        }
+        
+    </section>
+
+    <section aria-labelledby="my-sessions-title">
+        <h2 id="my-sessions-title" class="h3">My study sessions</h2>
+
+        @if (!Model.HasStudentProfile)
+        {
+            <p role="status">You need to create a student profile before you can see your study sessions.</p>
+        }
+        else if (Model.StudySessions.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Session</th>
+                            <th scope="col">Subject</th>
+                            <th scope="col">Room</th>
+                            <th scope="col">From</th>
+                            <th scope="col">To</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var session in Model.StudySessions)
+                        {
+                            <tr>
+                                <th scope="row">@session.Title</th>
+                                <td>@(session.Subject ?? "-")</td>
+                                <td>@(session.Booking.Room?.RoomNumber ?? "-")</td>
+                                <td>@session.Booking.StartTime.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@session.Booking.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p role="status">You have no upcoming study sessions.</p>
+        }
+    </section>
+</section>
