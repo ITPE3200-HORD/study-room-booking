@@ -65,6 +65,7 @@
     }
 </section>
 
+<!-- Room directory section -->
 <section id="rooms" class="sessions-section" aria-labelledby="rooms-title">
     <div class="section-heading">
         <div>
@@ -73,7 +74,7 @@
             <p>
                 @Model.Rooms.Count
                 @(Model.Rooms.Count == 1 ? "room" : "rooms")
-                listed in the system.
+                available in the system.
             </p>
         </div>
     </div>
@@ -81,7 +82,7 @@
     @if (Model.Rooms.Count == 0)
     {
         <div class="empty-state" role="status">
-            <h3>No rooms have been added yet</h3>
+            <h3>No rooms available</h3>
             <p>Please check back later.</p>
         </div>
     }
@@ -131,6 +132,7 @@
     }
 </section>
 
+
 <section id="sessions" 
         class="sessions-section" 
         aria-labelledby="sessions-title">
@@ -142,91 +144,65 @@
             <p>Small groups, shared goals and space for you.</p>
         </div>
     </div>
-
-    <form class="filters" 
-        role="search" 
-        aria-label="Search and filter study sessions" 
-        onsubmit="return false">
-        <label class="search-field">
-            <span class="sr-only">Search for subjects, topics, or rooms</span>
-            <span aria-hidden="true">⌕</span>
-            <input id="searchInput" 
-                type="search" 
-                placeholder="Search for subjects, topics, or rooms" />
-        </label>
-
-        <label class="select-field">
-            <span class="sr-only">Filter by subject</span>
-            <select id="courseFilter">
-                <option value="">All subjects</option>
-                <option>Web Application</option>
-                <option>Data Security</option>
-                <option>Universal Design</option>
-                <option>Software Testing</option>
-            </select>
-        </label>
-
-        <label class="select-field">
-            <span class="sr-only">Filter by time</span>
-            <select id="timeFilter">
-                <option value="">Any time</option>
-                <option value="today">Today</option>
-                <option value="tomorrow">Tomorrow</option>
-            </select>
-        </label>
-
-        <button type="reset" class="filter-button" id="clearFilters">Reset</button>
-    </form>
-
+    
     <div class="results-meta">
-        <span id="resultCount" aria-live="polite">Showing 6 study sessions</span>
+        <span id="resultCount" aria-live="polite">Showing @Model.OpenStudySessions.Count study sessions</span>
         <span> Available spots</span>
     </div>
 
-<!-- denne må gjøres dynamisk, men for nå er det hardkodet. -->
-    <div class="session-grid" id="sessionGrid">
-        <article class="session-card" data-course="Web Application" data-time="today" data-search="web application javascript react">
-            <div class="card-top"><span class="course-tag lavender">WEB APPLICATION</span><button class="save-button" aria-label="Lagre økt: JavaScript og React" aria-pressed="false">♡</button></div>
-            <h3>JavaScript og React</h3><p class="session-description">Learn to build dynamic web applications with JavaScript and React.</p>
-            <div class="session-info"><span aria-hidden="true">◷</span><span>I dag, 14:00–16:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Pilestredet · P35, rom 214</span></div>
-            <div class="card-bottom"><div class="attendees"><span><b>3</b> av 5 plasser</span></div><button class="btn btn-primary" type="button" data-session="Algoritmer uten stress">Bli med <span aria-hidden="true">→</span></button></div>
-        </article>
-        <article class="session-card" data-course="Økonomi" data-time="today" data-search="økonomi mikroøkonomi eksamenslesing bibliotek">
-            <div class="card-top"><span class="course-tag peach">ØKONOMI</span><button class="save-button" aria-label="Lagre økt: Mikroøkonomi eksamenslesing" aria-pressed="false">♡</button></div>
-            <h3>Mikroøkonomi eksamenslesing</h3><p class="session-description">Rolig pomodoro-økt. Ta med kaffe og spørsmål du sitter fast med.</p>
-            <div class="session-info"><span aria-hidden="true">◷</span><span>I dag, 15:00–17:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Universitetsbiblioteket · 2. etasje</span></div>
-            <div class="card-bottom"><div class="attendees"><span><b>2</b> av 4 plasser</span></div><button class="btn btn-primary" type="button" data-session="Mikroøkonomi eksamenslesing">Bli med <span aria-hidden="true">→</span></button></div>
-        </article>
-        <article class="session-card" data-course="Samfunnsvitenskap" data-time="tomorrow" data-search="samfunnsvitenskap metode kvalitativ analyse">
-            <div class="card-top"><span class="course-tag sage">SAMFUNNSVITENSKAP</span><button class="save-button" aria-label="Lagre økt: Metodeverksted" aria-pressed="false">♡</button></div>
-            <h3>Metodeverksted</h3><p class="session-description">Sparring på problemstilling og kvalitative intervjuer. Alle nivåer er velkomne.</p>
-            <div class="session-info"><span aria-hidden="true">◷</span><span>I morgen, 10:00–12:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Pilestredet · P48, grupperom 3</span></div>
-            <div class="card-bottom"><div class="attendees"><span><b>3</b> av 6 plasser</span></div><button class="btn btn-primary" type="button" data-session="Metodeverksted">Bli med <span aria-hidden="true">→</span></button></div>
-        </article>
-        <article class="session-card" data-course="Matematikk" data-time="today" data-search="matematikk lineær algebra matriser">
-            <div class="card-top"><span class="course-tag blue">MATEMATIKK</span><button class="save-button" aria-label="Lagre økt: Lineær algebra sammen" aria-pressed="false">♡</button></div>
-            <h3>Lineær algebra sammen</h3><p class="session-description">Fra matriser til egenverdier – vi tar det steg for steg.</p>
-            <div class="session-info"><span aria-hidden="true">◷</span><span>I dag, 16:30–18:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Pilestredet · P32, rom 410</span></div>
-            <div class="card-bottom"><div class="attendees"><span><b>2</b> av 4 plasser</span></div><button class="btn btn-primary" type="button" data-session="Lineær algebra sammen">Bli med <span aria-hidden="true">→</span></button></div>
-        </article>
-        <article class="session-card" data-course="Informatikk" data-time="tomorrow" data-search="informatikk webutvikling react prosjekt">
-            <div class="card-top"><span class="course-tag lavender">INFORMATIKK</span><button class="save-button" aria-label="Lagre økt: Bygg webprosjektet" aria-pressed="false">♡</button></div>
-            <h3>Bygg webprosjektet</h3><p class="session-description">Jobb side om side med semesterprosjektet. Del tips, ikke stress.</p>
-            <div class="session-info"><span aria-hidden="true">◷</span><span>I morgen, 12:00–15:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Holbergs plass · studenthuset</span></div>
-            <div class="card-bottom"><div class="attendees"><span><b>2</b> av 5 plasser</span></div><button class="btn btn-primary" type="button" data-session="Bygg webprosjektet">Bli med <span aria-hidden="true">→</span></button></div>
-        </article>
-        <article class="session-card" data-course="Økonomi" data-time="tomorrow" data-search="økonomi bedriftsøkonomi regnskap">
-            <div class="card-top"><span class="course-tag peach">ØKONOMI</span><button class="save-button" aria-label="Lagre økt: Bedriftsøkonomi" aria-pressed="false">♡</button></div>
-            <h3>Bedriftsøkonomi</h3><p class="session-description">Vi går gjennom ukas oppgaver og hjelper hverandre i mål.</p>
-            <div class="session-info"><span aria-hidden="true">◷</span><span>I morgen, 14:00–16:00</span></div><div class="session-info"><span aria-hidden="true">⌖</span><span>Pilestredet · P46, rom 122</span></div>
-            <div class="card-bottom"><div class="attendees"><span><b>3</b> av 5 plasser</span></div><button class="btn btn-primary" type="button" data-session="Bedriftsøkonomi">Bli med <span aria-hidden="true">→</span></button></div>
-        </article>
-    </div>
-    <div class="empty-state" id="emptyState" hidden>
-        <span aria-hidden="true">⌕</span>
-        <h3>No sessions match your search</h3>
-        <p>Try another search or clear your filters.</p>
-        <button class="outline-button" id="emptyReset" type="button">
-            Show all sessions
-        </button></div>
+<!-- Study session cards -->
+     @if (Model.OpenStudySessions.Count == 0)
+    {
+        <div class="empty-state" role="status">
+            <h3>There are no open study sessions available</h3>
+            <p>Please check back later or book a room to create a new study session <a asp-controller="Home" asp-action="Book">here</a>.</p>
+        </div>
+    }
+    else
+    {
+        <div class="session-grid">
+            @foreach (var session in Model.OpenStudySessions)
+            {
+                <article class="session-card" 
+                        data-subject="@session.Subject" 
+                        data-start="@session.Booking.StartTime.ToString("yyyy.MM.dd HH:mm")" 
+                        data-search="@($"{session.Title} {session.Subject} {session.Booking.Description} {session.Booking.Room?.RoomNumber} {session.Booking.Room?.Location}")">
+                    @* Card content *@
+                    <div class="card-top">
+                        <span class="course-tag sage">
+                            @session.Subject ?? "Study session"
+                        </span>
+                    </div>
+
+                    <h3>@session.Title</h3>
+
+                    <p class="session-description">
+                        @(session.Booking.Description ?? "No description provided.")
+                    </p>
+
+                    <div class="session-info">
+                        <span>
+                             @session.Booking.StartTime.ToString("yyyy.MM.dd HH:mm")
+                             -
+                             @session.Booking.EndTime.ToString("HH:mm")
+                        </span>
+                    </div>
+
+                    <div class="session-info">
+                        <span>
+                            Room @session.Booking.Room?.RoomNumber ?? "-"
+                        </span>
+                    </div>
+
+                    <div class="card-bottom">
+                        <div class="attendees">
+                            <span>
+                                <b>@(session.MaxParticipants - session.Participants.Count)</b> of @session.MaxParticipants spots available
+                            </span>
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+    }
 </section>

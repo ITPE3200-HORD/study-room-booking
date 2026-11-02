@@ -355,8 +355,13 @@ a {
 }
 
 .btn-primary {
-  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
   border: none;
+  line-height: 1.35;
+  padding: 6px 18px;
   border-radius: 10px;
   background: var(--green);
   color: #fff;
