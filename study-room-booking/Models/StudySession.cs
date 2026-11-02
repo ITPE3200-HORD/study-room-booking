@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 namespace study_room_booking.Models {
     public class StudySession
     {
-    public int SessionId { get; set; } // PK
+    public int StudySessionId { get; set; } // PK
 
     public int BookingId { get; set; } // FK to Booking
     public virtual Booking Booking { get; set; } = default!; // Navigation property to Booking

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using study_room_booking.DAL;
 using study_room_booking.Models;
+using System.Security.Claims;
 
 namespace study_room_booking.Controllers;
 
@@ -50,6 +51,7 @@ public class BookingController : Controller
     [Authorize]
     public async Task<IActionResult> Create(Booking booking)
     {
+        booking.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         // Business rule: a room cannot be double-booked
         if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
         {
