@@ -23,9 +23,22 @@ public class HomeController : Controller
             .ThenBy(room => room.RoomNumber)
             .ToListAsync();
 
+        var openStudySessions = await _roomDbContext.StudySessions
+            .AsNoTracking()
+            .Where(session =>
+                session.IsOpen &&
+                session.Booking.StartTime >= DateTime.Now &&
+                session.Participants.Count < session.MaxParticipants)
+            .Include(session => session.Booking)
+                .ThenInclude(booking => booking.Room)
+            .Include(session => session.Participants)
+            .OrderBy(session => session.Booking.StartTime)
+            .ToListAsync();
+
         var viewModel = new HomeIndexViewModel
         {
-            Rooms = rooms
+            Rooms = rooms,
+            OpenStudySessions = openStudySessions
         };
 
         return View(viewModel);

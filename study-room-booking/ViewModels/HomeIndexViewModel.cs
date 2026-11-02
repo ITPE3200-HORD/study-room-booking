@@ -11,4 +11,7 @@ public class HomeIndexViewModel
     public Room? FeaturedAvailableRoom =>
         Rooms.FirstOrDefault(room =>
             room.Status == Room.Availability.Available);
+
+    public IReadOnlyList<StudySession> OpenStudySessions { get; set; } = 
+        Array.Empty<StudySession>();
 }
