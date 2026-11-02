@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using study_room_booking.DAL;
 using study_room_booking.Models;
+using study_room_booking.ViewModels;
 
 namespace study_room_booking.Controllers;
 
@@ -34,14 +35,76 @@ public class BookingController : Controller
         return View(bookings);
     }
 
+    //GET: /Booking/Creation
+    //Confirmation page shown after the user picks a room from the search results
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> Creation (int roomId, DateTime date, TimeSpan startTime, int DurationMinutes)
+    {
+        var room = await _roomRepository.GetRoomById(roomId);
+        if (room == null) return NotFound();
+
+        var model = new BookingCreationViewModel
+        {
+            RoomId = roomId,
+            RoomNumber = room.RoomNumber,
+            Date = date,
+            StartTime = startTime,
+            DurationMinutes = DurationMinutes
+        };
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> Creation (BookingCreationViewModel model)
+    {
+        var start = model.Date.Date + model.StartTime;
+
+        var booking = new Booking
+        {
+            RoomId = model.RoomId,
+            Description = model.Description,
+            StartTime = start,
+            EndTime = start.AddMinutes(model.DurationMinutes)
+        };
+
+        if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
+            ModelState.AddModelError ("","The room is already booked");
+
+        if (ModelState.IsValid)
+        {
+            if(await _bookingRepository.Create(booking))
+            {
+                _logger.LogInformation("[BookingController] Booking create for room number {roomId}", booking.RoomId);
+                return RedirectToAction(nameof(Table)); //Bytte ut med egen bekreftelsesside???
+            }
+            ModelState.AddModelError("", "Something went wrong while saving the booking. Please try again.");
+        }   
+        return View(model);
+    }
+
+/*TRENGER VI DETTE???
     // GET: /Booking/Create
     // Shows the empty form for creating a new booking
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> Create()
+    public async Task<IActionResult> Create(int? roomId, DateTime? date, TimeSpan? startTime, int? durationMinutes)
     {
         await PopulateRooms();
-        return View();
+
+        var booking = new Booking();
+
+        if(roomId.HasValue)
+            booking.RoomId = roomId.Value;
+
+        if(date.HasValue && startTime.HasValue)
+        {
+            var start = date.Value.Date + startTime.Value;
+            booking.StartTime = start;
+            booking.EndTime = start.AddMinutes(durationMinutes ?? 60);
+        }
+        return View(booking);
     }
 
     // POST: /Booking/Create
@@ -73,6 +136,7 @@ public class BookingController : Controller
         await PopulateRooms();
         return View(booking);
     }
+    */
 
         // GET: /Booking/Update/5
     // Shows the form filled with the existing booking
