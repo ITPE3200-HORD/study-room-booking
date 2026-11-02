@@ -15,7 +15,7 @@ namespace study_room_booking.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -276,6 +276,24 @@ namespace study_room_booking.Migrations
                     b.ToTable("Rooms");
                 });
 
+            modelBuilder.Entity("study_room_booking.Models.SessionParticipant", b =>
+                {
+                    b.Property<int>("StudySessionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("StudySessionId", "StudentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("SessionParticipants");
+                });
+
             modelBuilder.Entity("study_room_booking.Models.Student", b =>
                 {
                     b.Property<int>("StudentId")
@@ -295,6 +313,38 @@ namespace study_room_booking.Migrations
                     b.HasIndex("IdentityUserId");
 
                     b.ToTable("Students");
+                });
+
+            modelBuilder.Entity("study_room_booking.Models.StudySession", b =>
+                {
+                    b.Property<int>("StudySessionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsOpen")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MaxParticipants")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("StudySessionId");
+
+                    b.HasIndex("BookingId")
+                        .IsUnique();
+
+                    b.ToTable("StudySessions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -359,6 +409,25 @@ namespace study_room_booking.Migrations
                     b.Navigation("Room");
                 });
 
+            modelBuilder.Entity("study_room_booking.Models.SessionParticipant", b =>
+                {
+                    b.HasOne("study_room_booking.Models.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("study_room_booking.Models.StudySession", "StudySession")
+                        .WithMany("Participants")
+                        .HasForeignKey("StudySessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("StudySession");
+                });
+
             modelBuilder.Entity("study_room_booking.Models.Student", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
@@ -368,6 +437,27 @@ namespace study_room_booking.Migrations
                         .IsRequired();
 
                     b.Navigation("IdentityUser");
+                });
+
+            modelBuilder.Entity("study_room_booking.Models.StudySession", b =>
+                {
+                    b.HasOne("study_room_booking.Models.Booking", "Booking")
+                        .WithOne("StudySession")
+                        .HasForeignKey("study_room_booking.Models.StudySession", "BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+                });
+
+            modelBuilder.Entity("study_room_booking.Models.Booking", b =>
+                {
+                    b.Navigation("StudySession");
+                });
+
+            modelBuilder.Entity("study_room_booking.Models.StudySession", b =>
+                {
+                    b.Navigation("Participants");
                 });
 #pragma warning restore 612, 618
         }
