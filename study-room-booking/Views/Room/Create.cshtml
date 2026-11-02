@@ -21,7 +21,12 @@
 
                         <div>
                             <label asp-for="Location" class="form-label">Location</label>
-                            <input asp-for="Location" class="form-control" />
+                            <select asp-for="Location" class="form-control" required>
+                                <option value="P35">P35</option>
+                                <option value="P32">P32</option>
+                                <option value="P46">P46</option>
+                                <option value="P48">P48</option>
+                            </select>
                             <span asp-validation-for="Location" class="text-danger"></span>
                         </div>
 
@@ -49,8 +54,8 @@
                         </div>
 
                         <div class="d-flex flex-wrap gap-2 pt-2">
-                            <button type="submit" class="btn btn-primary">Create room</button>
-                            <a asp-action="Table" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary crud-btn">Create room</button>
+                            <a asp-action="Table" class="btn btn-outline-secondary crud-btn">Cancel</a>
                         </div>
                     </form>
                 </div>

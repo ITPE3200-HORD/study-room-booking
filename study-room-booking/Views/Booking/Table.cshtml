@@ -11,7 +11,7 @@
             <p class="text-body-secondary mb-0">View and manage room bookings.</p>
         </div>
 
-        <a asp-action="Create" class="btn btn-primary">Create booking</a>
+        <a asp-action="Create" class="btn btn-primary crud-btn">Create booking</a>
     </header>
 
     @if (Model.Any())
@@ -44,12 +44,12 @@
                                 <div class="d-flex flex-wrap gap-2">
                                     <a asp-action="Update"
                                        asp-route-id="@booking.BookingId"
-                                       class="btn btn-primary btn-sm">
+                                       class="btn btn-primary btn-sm crud-btn">
                                         Edit
                                     </a>
                                     <a asp-action="Delete"
                                        asp-route-id="@booking.BookingId"
-                                       class="btn btn-outline-danger btn-sm">
+                                       class="btn btn-outline-danger btn-sm crud-btn">
                                         Delete
                                     </a>
                                 </div>
@@ -65,7 +65,6 @@
         <div class="empty-state" role="status">
             <h2 class="h4">No bookings found</h2>
             <p>Room bookings will appear here.</p>
-            <a asp-action="Create" class="outline-button">Create a booking</a>
         </div>
     }
 </section>

@@ -47,6 +47,7 @@ using (var scope = app.Services.CreateAsyncScope())
     await db.Database.MigrateAsync();
 
     await DbSeeder.SeedAdminAsync(scope.ServiceProvider, builder.Configuration);
+    await DbSeeder.SeedStudentAsync(scope.ServiceProvider, builder.Configuration);
     await DbSeeder.SeedRoomsAsync(db);
 }
 
