@@ -8,33 +8,54 @@ namespace study_room_booking.Controllers;
 public class HomeController : Controller
 {
     private readonly RoomDbContext _roomDbContext;
+    private readonly ILogger<HomeController> _logger;
 
-    public HomeController(RoomDbContext roomDbContext)
+    public HomeController(RoomDbContext roomDbContext, ILogger<HomeController> logger)
     {
         _roomDbContext = roomDbContext;
+        _logger = logger;
     }
 
     // First available room is displayed on the home page
     public async Task<IActionResult> Index()
     {
-        var rooms = await _roomDbContext.Rooms
-            .AsNoTracking()
-            .OrderBy(room => room.Status)
-            .ThenBy(room => room.RoomNumber)
-            .ToListAsync();
+        List<Room> rooms;
+        List<StudySession> openStudySessions;
 
-        var openStudySessions = await _roomDbContext.StudySessions
-            .AsNoTracking()
-            .Where(session =>
-                session.IsOpen &&
-                session.Booking.StartTime >= DateTime.Now &&
-                session.Participants.Count < session.MaxParticipants)
-            .Include(session => session.Booking)
-                .ThenInclude(booking => booking.Room)
-            .Include(session => session.Participants)
-            .OrderBy(session => session.Booking.StartTime)
-            .ToListAsync();
+        try
+        {
+            rooms = await _roomDbContext.Rooms
+                .AsNoTracking()
+                .OrderBy(room => room.Status)
+                .ThenBy(room => room.RoomNumber)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[HomeController] Index failed to fetch rooms.");
+            return StatusCode(500, "Internal server error");
+        }
 
+        try{
+            openStudySessions = await _roomDbContext.StudySessions
+                .AsNoTracking()
+                .Where(session =>
+                    session.IsOpen &&
+                    session.Booking.StartTime >= DateTime.Now &&
+                    session.Participants.Count < session.MaxParticipants)
+                .Include(session => session.Booking)
+                    .ThenInclude(booking => booking.Room)
+                .Include(session => session.Participants)
+                .OrderBy(session => session.Booking.StartTime)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[HomeController] Index failed to fetch open study sessions.");
+            return StatusCode(500, "Internal server error");
+        }
+
+       
         var viewModel = new HomeIndexViewModel
         {
             Rooms = rooms,
@@ -62,19 +83,32 @@ public class HomeController : Controller
 
         var endTime = startTime.AddMinutes(model.DurationMinutes);
 
-        model.AvailableRooms = await _roomDbContext.Rooms
-            .AsNoTracking()
-            .Where(room =>
-                room.Status == Room.Availability.Available &&
-                room.Capacity >= model.GroupSize &&
-                !_roomDbContext.Bookings.Any(booking =>
-                    booking.RoomId == room.RoomId &&
-                    booking.StartTime < endTime &&
-                    startTime < booking.EndTime))
-            .OrderBy(room => room.Capacity)
-            .ThenBy(room => room.RoomNumber)
-            .ToListAsync();
+        try
+        {
+            model.AvailableRooms = await _roomDbContext.Rooms
+                .AsNoTracking()
+                .Where(room =>
+                    room.Status == Room.Availability.Available &&
+                    room.Capacity >= model.GroupSize &&
+                    !_roomDbContext.Bookings.Any(booking =>
+                        booking.RoomId == room.RoomId &&
+                        booking.StartTime < endTime &&
+                        startTime < booking.EndTime))
+                .OrderBy(room => room.Capacity)
+                .ThenBy(room => room.RoomNumber)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(
+                e,
+                "[HomeController] Book failed to fetch available rooms for date {Date}, start time {StartTime}, group size {GroupSize}.",
+                model.Date,
+                model.StartTime,
+                model.GroupSize);
 
+            return StatusCode(500, "Available rooms could not be retrieved. Please try again later.");
+        }
         return View(model);
     }
 }
