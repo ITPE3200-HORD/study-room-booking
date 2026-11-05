@@ -25,6 +25,7 @@ public class BookingController : Controller
 
     // GET: /Booking/Table
     // Shows all bookings in a table
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Table()
     {
         var bookings = await _bookingRepository.GetAll();
@@ -36,16 +37,16 @@ public class BookingController : Controller
         return View(bookings);
     }
 
-    //GET: /Booking/Creation
+    //GET: /Booking/Create
     //Confirmation page shown after the user picks a room from the search results
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> Creation(int roomId, DateTime date, TimeSpan startTime, int DurationMinutes)
+    public async Task<IActionResult> Create(int roomId, DateTime date, TimeSpan startTime, int DurationMinutes)
     {
         var room = await _roomRepository.GetRoomById(roomId);
         if (room == null) return NotFound();
 
-        var model = new BookingCreationViewModel
+        var model = new BookingCreateViewModel
         {
             RoomId = roomId,
             RoomNumber = room.RoomNumber,
@@ -59,7 +60,7 @@ public class BookingController : Controller
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Creation(BookingCreationViewModel model)
+    public async Task<IActionResult> Create(BookingCreateViewModel model)
     {
         if (!ModelState.IsValid) return View(model);
 
@@ -73,6 +74,17 @@ public class BookingController : Controller
             StartTime = start,
             EndTime = start.AddMinutes(model.DurationMinutes)
         };
+
+        if (model.CreateStudySession)
+        {
+            booking.StudySession = new StudySession
+            {
+                Title = model.SessionTitle!.Trim(),
+                Subject = model.SessionSubject,
+                MaxParticipants = model.SessionMaxParticipants,
+                IsOpen = true
+            };
+        }
 
         if (await _bookingRepository.IsOverlapping(booking))
         {
@@ -94,7 +106,7 @@ public class BookingController : Controller
             return View(model);
         }
         _logger.LogInformation("[BookingController] Booking created for Room {roomId}", booking.RoomId);
-        return RedirectToAction(nameof(Table));
+        return RedirectToAction("MyPage", "MyPage");
     }
 
     [HttpGet]
