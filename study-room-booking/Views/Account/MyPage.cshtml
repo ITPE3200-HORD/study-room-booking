@@ -22,6 +22,7 @@
                             <th scope="col">Description</th>
                             <th scope="col">From</th>
                             <th scope="col">To</th>
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -32,6 +33,19 @@
                                 <td>@(booking.Description ?? "-")</td>
                                 <td>@booking.StartTime.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>@booking.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-2">
+                                    <a asp-action="Update"
+                                       asp-route-id="@booking.BookingId"
+                                       class="btn btn-primary btn-sm crud-btn">
+                                        Edit
+                                    </a>
+                                    <a asp-action="Delete"
+                                       asp-route-id="@booking.BookingId"
+                                       class="btn btn-outline-danger btn-sm crud-btn">
+                                        Delete
+                                    </a>
+                                </td>
                             </tr>
                         }
                     </tbody>
