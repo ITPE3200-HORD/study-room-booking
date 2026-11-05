@@ -1,11 +1,13 @@
 // Controller for bookings. Handles requests from the user and uses the repositories
 // to access the database. Failed operations are logged instead of crashing the app.
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using study_room_booking.DAL;
 using study_room_booking.Models;
 using System.Security.Claims;
+using study_room_booking.ViewModels;
 
 namespace study_room_booking.Controllers;
 
@@ -35,23 +37,31 @@ public class BookingController : Controller
         return View(bookings);
     }
 
-    // GET: /Booking/Create
-    // Shows the empty form for creating a new booking
+    //GET: /Booking/Creation
+    //Confirmation page shown after the user picks a room from the search results
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> Create()
+    public async Task<IActionResult> Creation (int roomId, DateTime date, TimeSpan startTime, int DurationMinutes)
     {
-        await PopulateRooms();
-        return View();
+        var room = await _roomRepository.GetRoomById(roomId);
+        if (room == null) return NotFound();
+
+        var model = new BookingCreationViewModel
+        {
+            RoomId = roomId,
+            RoomNumber = room.RoomNumber,
+            Date = date,
+            StartTime = startTime,
+            DurationMinutes = DurationMinutes
+        };
+        return View(model);
     }
 
-    // POST: /Booking/Create
-    // Validates the input, checks for overlapping bookings and saves the booking
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> Create(Booking booking)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Creation (BookingCreationViewModel model)
     {
-        booking.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         // Business rule: a room cannot be double-booked
         if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
         {
@@ -91,6 +101,7 @@ public class BookingController : Controller
         await PopulateRooms();
         return View(booking);
     }
+    
 
     // POST: /Booking/Update
     // Validates the changes, checks for overlap and saves
