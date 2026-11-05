@@ -90,6 +90,10 @@ public class HomeController : Controller
                 .Where(room =>
                     room.Status == Room.Availability.Available &&
                     room.Capacity >= model.GroupSize &&
+                    // Room type filter: if no type is selected ("All room types"), all rooms pass.
+                    // Otherwise, only rooms with the selected type are included.
+                    (string.IsNullOrEmpty(model.RoomType) || room.RoomType == model.RoomType) &&
+                    // Exclude rooms that have bookings overlapping with the requested time slot
                     !_roomDbContext.Bookings.Any(booking =>
                         booking.RoomId == room.RoomId &&
                         booking.StartTime < endTime &&
@@ -102,10 +106,11 @@ public class HomeController : Controller
         {
             _logger.LogError(
                 e,
-                "[HomeController] Book failed to fetch available rooms for date {Date}, start time {StartTime}, group size {GroupSize}.",
+                "[HomeController] Book failed to fetch available rooms for date {Date}, start time {StartTime}, group size {GroupSize}, room type {RoomType}.",
                 model.Date,
                 model.StartTime,
-                model.GroupSize);
+                model.GroupSize,
+                model.RoomType);
 
             return StatusCode(500, "Available rooms could not be retrieved. Please try again later.");
         }

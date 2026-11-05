@@ -18,6 +18,7 @@ namespace study_room_booking.Models
         public String RoomNumber {get; set;} = string.Empty;
 
         //Dont need regex due to drop-down menu
+        [Required(ErrorMessage = "Room type is required")]
         public String RoomType {get; set;} = string.Empty;
 
         // Capacity must be between 1 and 50 people
