@@ -17,6 +17,8 @@ public class BookViewModel
 
     [Range(1, 25, ErrorMessage = "Group size must be between 1 and 25.")]
     public int GroupSize { get; set; } = 4;
+    
+    public string? RoomType { get; set; }
 
     public IReadOnlyList<Room> AvailableRooms { get; set; } =
         Array.Empty<Room>();

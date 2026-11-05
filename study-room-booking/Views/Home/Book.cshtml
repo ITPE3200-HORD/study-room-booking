@@ -81,6 +81,17 @@
                         <span asp-validation-for="GroupSize" class="text-danger"></span>
                     </div>
 
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <label asp-for="RoomType" class="form-label">Room type</label>
+                        <select asp-for="RoomType" class="form-select">
+                            <option value="">All room types</option>
+                            <option value="Group Study Room">Group Study Room</option>
+                            <option value="Class Room">Class Room</option>
+                            <option value="Auditorium">Auditorium</option>
+                        </select>
+                        <span asp-validation-for="RoomType" class="text-danger"></span>
+                    </div>
+
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary">
                             Search available rooms
@@ -108,7 +119,7 @@
                         <div class="alert alert-info" role="status">
                             <h3 class="h5">No rooms found</h3>
                             <p class="mb-0">
-                                Try another date, time or group size
+                                Try another date, time or group size or room type to find available rooms. You can also check the room directory to see all rooms and their details.
                             </p>
                         </div>
                     }
