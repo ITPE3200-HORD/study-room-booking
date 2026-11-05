@@ -13,4 +13,5 @@ public interface IBookingRepository
     Task<bool> Update(Booking booking);
     Task<bool> Delete(int id);
     Task<bool> IsOverlapping(Booking booking);
+    Task<bool> UserHasOverlappingBooking(Booking booking);
 }
