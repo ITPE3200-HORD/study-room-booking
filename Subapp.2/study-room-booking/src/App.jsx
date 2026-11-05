@@ -1,12 +1,18 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import Container from 'react-bootstrap/Container'
 import HomePage from './home/HomePage'
 import RoomListPage from './rooms/RoomListPage'
+import NavMenu from './shared/NavMenu'
 import './App.css'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
 
 
 function App() {
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
+
       <Container>
         <NavMenu />
           <Router>
@@ -17,7 +23,7 @@ function App() {
             </Routes>
           </Router>
         </Container>
-      </>
+      </QueryClientProvider>
     )
 }
 

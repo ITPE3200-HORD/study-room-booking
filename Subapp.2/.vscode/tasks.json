@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0", //Specifies the version of the tasks configuration schema.
+    "tasks": [
+        {
+            "label": "build", //a descriptive label for the task, used to reference it in other vonfigurations. 
+            "command": "dotnet", // the command to run this task, in this case, the .NET CLI tool.
+            "type": "shell", // specifies that this task will run in a shell environment (i.e., terminal or command prompt).
+            "args": [ //arguments passed to the command.
+                "build", // the build command for .NET Core, which compiles the project.
+                "${workspaceFolder}/api/study-room-booking.csproj" // the path to the project file to build, using a workspace folder variable. 
+            ],
+            "problemMatcher": "$msCompile" // indicates a predefined problem matcher that helps VS Code identify and highlight errors and warnings in the output of the build command.
+        }
+    ]
+}
