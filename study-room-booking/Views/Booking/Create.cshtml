@@ -1,70 +1,72 @@
-@model Booking
+@*Laget av claude - her må det mer til!*@
 
-@{
-    ViewData["Title"] = "Create booking";
-}
+@using study_room_booking.ViewModels
+@model BookingCreateViewModel
 
-<section class="container py-4" aria-labelledby="create-booking-title">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-7 col-xl-6">
-            <header class="mb-4">
-                <h1 id="create-booking-title" class="h2">Create a booking</h1>
-                <p class="text-body-secondary mb-0">
-                    Choose a room and enter the booking details.
-                </p>
-            </header>
+<h1>Confirm your booking</h1>
 
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <form asp-action="Create" method="post" class="d-grid gap-3">
-                        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+<dl>
+    <dt>Room</dt><dd>@Model.RoomNumber</dd>
+    <dt>Date</dt><dd>@Model.Date.ToString("yyyy-MM-dd")</dd>
+    <dt>Start</dt><dd>@Model.StartTime.ToString(@"hh\:mm")</dd>
+    <dt>Duration</dt><dd>@Model.DurationMinutes minutes</dd>
+</dl>
 
-                        <div>
-                            <label asp-for="RoomId" class="form-label">Room</label>
-                            <select asp-for="RoomId" asp-items="ViewBag.Rooms" class="form-select">
-                                <option value="0">Select a room</option>
-                            </select>
-                            <span asp-validation-for="RoomId" class="text-danger"></span>
-                        </div>
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
-                        <div>
-                            <label asp-for="UserName" class="form-label">Name</label>
-                            <input asp-for="UserName" class="form-control" />
-                            <span asp-validation-for="UserName" class="text-danger"></span>
-                        </div>
+    <input type="hidden" asp-for="RoomId" />
+    <input type="hidden" asp-for="RoomNumber" />
+    <input type="hidden" asp-for="Date" />
+    <input type="hidden" asp-for="StartTime" />
+    <input type="hidden" asp-for="DurationMinutes" />
 
-                        <div>
-                            <label asp-for="Description" class="form-label">Description</label>
-                            <textarea asp-for="Description"
-                                      class="form-control"
-                                      rows="3"
-                                      maxlength="200"></textarea>
-                            <span asp-validation-for="Description" class="text-danger"></span>
-                        </div>
 
-                        <div>
-                            <label asp-for="StartTime" class="form-label">Start time</label>
-                            <input asp-for="StartTime" class="form-control" />
-                            <span asp-validation-for="StartTime" class="text-danger"></span>
-                        </div>
+    <div class="mb-3">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
 
-                        <div>
-                            <label asp-for="EndTime" class="form-label">End time</label>
-                            <input asp-for="EndTime" class="form-control" />
-                            <span asp-validation-for="EndTime" class="text-danger"></span>
-                        </div>
+    @* Checkbox for creating a study session *@
+    <div class="form-check mb-3">
+        <input asp-for="CreateStudySession" class="form-check-input" />
+        <label asp-for="CreateStudySession" class="form-check-label">Open this booking as a study session</label>
+    </div>
 
-                        <div class="d-flex flex-wrap gap-2 pt-2">
-                            <button type="submit" class="btn btn-primary crud-btn">Create booking</button>
-                            <a asp-action="Table" class="btn btn-outline-secondary crud-btn">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    <div id="study-session-fields" class="border rounded p-3 mb-3" hidden>
+        <div class="mb-3">
+            <label asp-for="SessionTitle" class="form-label">Session title</label>
+            <input asp-for="SessionTitle" class="form-control" />
+            <span asp-validation-for="SessionTitle" class="text-danger"></span>
+        </div>
+        
+
+        <div class="mb-3">
+            <label asp-for="SessionSubject" class="form-label">Subject</label>
+            <input asp-for="SessionSubject" class="form-control" />
+            <span asp-validation-for="SessionSubject" class="text-danger"></span>
+        </div>
+
+        <div>
+            <label asp-for="SessionMaxParticipants" class="form-label">Maximum participants</label>
+            <input asp-for="SessionMaxParticipants" type="number" min="1" max="50" class="form-control" />
+            <span asp-validation-for="SessionMaxParticipants" class="text-danger"></span>
         </div>
     </div>
-</section>
+    <button type="submit" class="btn btn-primary">Confirm booking</button>
+    <a asp-controller="Home" asp-action="Book" class="btn btn-secondary">Back</a>
+</form>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+<script>
+    (() => {
+        const checkbox = document.getElementById('@Html.IdFor(model => model.CreateStudySession)');
+        const fields = document.getElementById('study-session-fields');
+
+        const updateVisibility = () => {
+            fields.hidden = !checkbox.checked;
+        };
+
+        checkbox.addEventListener('change', updateVisibility);
+        updateVisibility();
+    })();
+</script>
