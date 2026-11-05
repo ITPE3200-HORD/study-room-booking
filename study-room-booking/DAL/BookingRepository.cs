@@ -56,7 +56,7 @@ public class BookingRepository : IBookingRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("[BookingRepository] Create() failed for booking {@booking}, error message: {e}", booking, e.Message);
+            _logger.LogError(e,"[BookingRepository] Create() failed for booking {@booking}", booking);
             return false;
         }
     }

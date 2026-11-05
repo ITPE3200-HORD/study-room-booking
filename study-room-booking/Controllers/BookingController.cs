@@ -1,5 +1,6 @@
 // Controller for bookings. Handles requests from the user and uses the repositories
 // to access the database. Failed operations are logged instead of crashing the app.
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -57,89 +58,36 @@ public class BookingController : Controller
 
     [HttpPost]
     [Authorize]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Creation (BookingCreationViewModel model)
     {
-        var start = model.Date.Date + model.StartTime;
+        if (!ModelState.IsValid) return View(model);
 
+        var start = model.Date.Date + model.StartTime;
         var booking = new Booking
         {
             RoomId = model.RoomId,
+            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+            UserName = User.Identity?.Name ?? "",
             Description = model.Description,
             StartTime = start,
             EndTime = start.AddMinutes(model.DurationMinutes)
         };
 
-        if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
-            ModelState.AddModelError ("","The room is already booked");
-
-        if (ModelState.IsValid)
+        if (await _bookingRepository.IsOverlapping(booking))
         {
-            if(await _bookingRepository.Create(booking))
+            ModelState.AddModelError("", "The room is already booked.");
+            return View(model);
+        }
+            if(!await _bookingRepository.Create(booking))
             {
-                _logger.LogInformation("[BookingController] Booking create for room number {roomId}", booking.RoomId);
-                return RedirectToAction(nameof(Table)); //Bytte ut med egen bekreftelsesside???
+                ModelState.AddModelError("", "Something went wrong while saving the booking. Please try again.");
+                return View(model);
             }
-            ModelState.AddModelError("", "Something went wrong while saving the booking. Please try again.");
-        }   
-        return View(model);
-    }
-
-/*TRENGER VI DETTE???
-    // GET: /Booking/Create
-    // Shows the empty form for creating a new booking
-    [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> Create(int? roomId, DateTime? date, TimeSpan? startTime, int? durationMinutes)
-    {
-        await PopulateRooms();
-
-        var booking = new Booking();
-
-        if(roomId.HasValue)
-            booking.RoomId = roomId.Value;
-
-        if(date.HasValue && startTime.HasValue)
-        {
-            var start = date.Value.Date + startTime.Value;
-            booking.StartTime = start;
-            booking.EndTime = start.AddMinutes(durationMinutes ?? 60);
+            _logger.LogInformation("[BookingController] Bokking created for Room {roomId}", booking.RoomId);
+            return RedirectToAction(nameof(Table));
         }
-        return View(booking);
-    }
-
-    // POST: /Booking/Create
-    // Validates the input, checks for overlapping bookings and saves the booking
-    [HttpPost]
-    [Authorize]
-    public async Task<IActionResult> Create(Booking booking)
-    {
-        // Business rule: a room cannot be double-booked
-        if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
-        {
-            ModelState.AddModelError("", "The room is already booked in this time period");
-        }
-
-        if (ModelState.IsValid)
-        {
-            bool created = await _bookingRepository.Create(booking);
-            if (created)
-            {
-                _logger.LogInformation("[BookingController] Booking created: {id} for RoomId {roomId}", booking.BookingId, booking.RoomId);
-                return RedirectToAction(nameof(Table));
-            }
-
-            // The repository failed (database error) – tell the user instead of failing silently
-            ModelState.AddModelError("", "Something went wrong while saving the booking. Please try again.");
-        }
-
-        _logger.LogWarning("[BookingController] Booking creation failed {@booking}", booking);
-        await PopulateRooms();
-        return View(booking);
-    }
-    */
-
-        // GET: /Booking/Update/5
-    // Shows the form filled with the existing booking
+    
     [HttpGet]
     [Authorize]
     public async Task<IActionResult> Update(int id)
@@ -153,6 +101,7 @@ public class BookingController : Controller
         await PopulateRooms();
         return View(booking);
     }
+    
 
     // POST: /Booking/Update
     // Validates the changes, checks for overlap and saves
