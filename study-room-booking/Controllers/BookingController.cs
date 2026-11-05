@@ -40,7 +40,7 @@ public class BookingController : Controller
     //Confirmation page shown after the user picks a room from the search results
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> Creation (int roomId, DateTime date, TimeSpan startTime, int DurationMinutes)
+    public async Task<IActionResult> Creation(int roomId, DateTime date, TimeSpan startTime, int DurationMinutes)
     {
         var room = await _roomRepository.GetRoomById(roomId);
         if (room == null) return NotFound();
@@ -59,7 +59,7 @@ public class BookingController : Controller
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Creation (BookingCreationViewModel model)
+    public async Task<IActionResult> Creation(BookingCreationViewModel model)
     {
         if (!ModelState.IsValid) return View(model);
 
@@ -79,15 +79,24 @@ public class BookingController : Controller
             ModelState.AddModelError("", "The room is already booked.");
             return View(model);
         }
-            if(!await _bookingRepository.Create(booking))
-            {
-                ModelState.AddModelError("", "Something went wrong while saving the booking. Please try again.");
-                return View(model);
-            }
-            _logger.LogInformation("[BookingController] Bokking created for Room {roomId}", booking.RoomId);
-            return RedirectToAction(nameof(Table));
+        // Prevent the user from booking two rooms at the same time
+        if (await _bookingRepository.UserHasOverlappingBooking(booking))
+        {
+            ModelState.AddModelError("",
+            "You already have another booking in this time period. " +
+            "You can't be in two rooms at the same time, so please choose a different time.");
+            _logger.LogWarning("[BookingController] User {UserId} tried to double book at {StartTime}", booking.UserId, booking.StartTime);
+            return View(model);
         }
-    
+        if (!await _bookingRepository.Create(booking))
+        {
+            ModelState.AddModelError("", "Something went wrong while saving the booking. Please try again.");
+            return View(model);
+        }
+        _logger.LogInformation("[BookingController] Booking created for Room {roomId}", booking.RoomId);
+        return RedirectToAction(nameof(Table));
+    }
+
     [HttpGet]
     [Authorize]
     public async Task<IActionResult> Update(int id)
@@ -101,17 +110,27 @@ public class BookingController : Controller
         await PopulateRooms();
         return View(booking);
     }
-    
+
 
     // POST: /Booking/Update
     // Validates the changes, checks for overlap and saves
     [HttpPost]
     [Authorize]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Update(Booking booking)
     {
         if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
         {
             ModelState.AddModelError("", "The room is already booked in this time period");
+        }
+
+        // Prevent the user from having two bookings at the same time
+        if (ModelState.IsValid && await _bookingRepository.UserHasOverlappingBooking(booking))
+        {
+            ModelState.AddModelError("",
+            "You already have another booking in this time period. " +
+            "You can't be in two rooms at the same time, so please choose a different time.");
+            _logger.LogWarning("[BookingController] User {UserId} tried to double book at {StartTime}", booking.UserId, booking.StartTime);
         }
 
         if (ModelState.IsValid)
@@ -150,6 +169,7 @@ public class BookingController : Controller
     // Deletes the booking after the user has confirmed
     [HttpPost]
     [Authorize]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         bool deleted = await _bookingRepository.Delete(id);

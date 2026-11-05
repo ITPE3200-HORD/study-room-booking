@@ -116,4 +116,24 @@ public class BookingRepository : IBookingRepository
             return true;
         }
     }
+
+    // Checks if the user already has a booking in the given time period.
+    // A user cannot be in two rooms at the same time.
+    public async Task<bool> UserHasOverlappingBooking(Booking booking)
+    {
+        try
+        {
+            return await _db.Bookings.AnyAsync(b =>
+                b.UserId == booking.UserId &&
+                b.BookingId != booking.BookingId &&
+                b.StartTime < booking.EndTime &&
+                booking.StartTime < b.EndTime);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[BookingRepository] UserHasOverlappingBooking() failed for user {UserId}", booking.UserId);
+            // Treat errors as overlap, so we never accidentally allow a double booking
+            return true;
+        }
+    }
 }
