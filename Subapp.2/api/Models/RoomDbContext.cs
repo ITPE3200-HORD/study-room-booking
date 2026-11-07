@@ -1,11 +1,10 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using study_room_booking.Models;
 
 namespace study_room_booking.Models;
 
-public class RoomDbContext : DbContext
+public class RoomDbContext : IdentityDbContext<IdentityUser>
 {
     public RoomDbContext(DbContextOptions<RoomDbContext> options) : base (options)
     {
