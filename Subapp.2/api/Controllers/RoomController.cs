@@ -19,7 +19,7 @@ public class RoomAPIController : ControllerBase
         _logger = logger;
     }
 
-    // GET: /api/RoomAPI
+    // GET: /api/roomAPI/Table
     [HttpGet]
     [HttpGet("Table")]
     public async Task<IActionResult> GetAll()
@@ -34,7 +34,7 @@ public class RoomAPIController : ControllerBase
         return Ok(rooms.Select(ToDto));
     }
 
-    // GET: /api/RoomAPI/{id}
+    // GET: /api/roomAPI/{id}
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -48,7 +48,7 @@ public class RoomAPIController : ControllerBase
         return Ok(ToDto(room));
     }
 
-    // POST: /api/RoomAPI
+    // POST: /api/roomAPI
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Create([FromBody] RoomDto roomDto)
@@ -65,7 +65,7 @@ public class RoomAPIController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = room.RoomId }, ToDto(room));
     }
 
-    // PUT: /api/RoomAPI/{id}
+    // PUT: /api/roomAPI/{id}
     [HttpPut("{id:int}")]
     [Authorize]
     public async Task<IActionResult> Update(int id, [FromBody] RoomDto roomDto)
@@ -94,7 +94,7 @@ public class RoomAPIController : ControllerBase
         return NoContent();
     }
 
-    // DELETE: /api/RoomAPI/{id}
+    // DELETE: /api/roomAPI/{id}
     [HttpDelete("{id:int}")]
     [Authorize]
     public async Task<IActionResult> Delete(int id)
