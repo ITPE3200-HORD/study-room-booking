@@ -4,6 +4,7 @@ using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 using study_room_booking.Models;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +30,17 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 });
 
+builder.Services
+    .AddDefaultIdentity<IdentityUser>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+    })
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<RoomDbContext>();
+
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 
 var loggerConfiguration = new LoggerConfiguration()
     .MinimumLevel.Warning()
@@ -43,12 +54,14 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    DbSeeder.SeedRoomsAsync; // Seed the database with initial data
+    //DbSeeder.SeedRoomsAsync; // Seed the database with initial data
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
 
-app.UseCors();
+app.UseCors("CorsPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapStaticAssets();
 app.MapControllers();
 

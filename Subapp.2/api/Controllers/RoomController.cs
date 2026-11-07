@@ -1,12 +1,8 @@
-// Here we define the controller for rooms, which handles requests from the browser
-// and decides which view to show. All database access goes through the Room repository.
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using study_room_booking.DAL;
-using study_room_booking.Models;
-using study_room_booking.ViewModels;
 using study_room_booking.DTOs;
-using Microsoft.AspNetCore.Http.HttpResults;
+using study_room_booking.Models;
 
 namespace study_room_booking.Controllers;
 
@@ -23,140 +19,114 @@ public class RoomAPIController : ControllerBase
         _logger = logger;
     }
 
-    // GET: /Room/Table
-    // Shows all rooms in a table
+    // GET: /api/RoomAPI
+    [HttpGet]
     [HttpGet("Table")]
-    public async Task<IActionResult> Table()
+    public async Task<IActionResult> GetAll()
     {
         var rooms = await _roomRepository.GetAll();
         if (rooms == null)
         {
-            // Log an error if the repository failed to retrieve rooms
             _logger.LogError("[RoomAPIController] Failed to retrieve rooms from repository");
-            return StatusCode(500, "Internal server error");
-        }
-        var roomDtos = rooms.Select(room => new RoomDto
-        {
-            RoomId = room.RoomId,
-            Location = room.Location,
-            RoomNumber = room.RoomNumber,
-            RoomType = room.RoomType,
-            Capacity = room.Capacity,
-            Status = (RoomDto.Availability)room.Status
-        });
-        return Ok(roomDtos);
-    }
-
-    // GET: /Room/Create
-    // Shows the empty form for creating a new room
-    [HttpGet]
-    [Authorize]
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    // POST: /Room/Create
-    // Saves the new room to the database if the form is valid
-    [HttpPost]
-    [Authorize]
-    public async Task<IActionResult> Create(Room room)
-    {
-        if (ModelState.IsValid)
-        {
-            bool returnOk = await _roomRepository.Create(room);
-            if (!returnOk)
-            {
-                // Log an error and show a message to the user if the repository failed to save the room
-                _logger.LogError("[RoomController] Failed to create room in repository: {RoomNumber}", room.RoomNumber); // Terminal log for debugging
-                ModelState.AddModelError(string.Empty, "Could not save the room. Please try again."); // Message to user
-                return View(room);
-            }
-
-            // Log that the room was successfully created
-            _logger.LogInformation("[RoomController] Room created: {RoomId} {RoomNumber}", room.RoomId, room.RoomNumber);
-            return RedirectToAction(nameof(Table));
+            return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
         }
 
-        // Log a warning if the form input was invalid, so the error can be traced
-        _logger.LogWarning("[RoomController] Room creation failed, ModelState invalid {RoomNumber}", room.RoomNumber);
-        return View(room);
+        return Ok(rooms.Select(ToDto));
     }
 
-    // GET: /Room/Update/{id}
-    // Shows the form for updating an existing room
-    [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> Update(int id)
+    // GET: /api/RoomAPI/{id}
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
     {
         var room = await _roomRepository.GetRoomById(id);
         if (room == null)
         {
-            // Log a warning if no room with the given id exists
-            _logger.LogWarning("[RoomController] Room not found for update, RoomId: {RoomId}", id);
+            _logger.LogWarning("[RoomAPIController] Room not found, RoomId: {RoomId}", id);
             return NotFound();
         }
-        return View(room);
+
+        return Ok(ToDto(room));
     }
 
-    // POST: /Room/Update
-    // Updates an existing room in the database if the form is valid
+    // POST: /api/RoomAPI
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> Update(Room room)
+    public async Task<IActionResult> Create([FromBody] RoomDto roomDto)
     {
-        if (ModelState.IsValid)
+        var room = FromDto(roomDto);
+        var created = await _roomRepository.Create(room);
+        if (!created)
         {
-            bool returnOk = await _roomRepository.Update(room);
-            if (!returnOk)
-            {
-                // Log an error and show a message to the user if the repository failed to update the room
-                _logger.LogError("[RoomController] Failed to update room in repository: {RoomId} {RoomNumber}", room.RoomId, room.RoomNumber); // Terminal log for debugging
-                ModelState.AddModelError(string.Empty, "Could not update the room. Please try again."); // Message to user
-                return View(room);
-            }
-            // Log that the room was successfully updated
-            _logger.LogInformation("[RoomController] Room updated: {RoomId} {RoomNumber}", room.RoomId, room.RoomNumber);
-            return RedirectToAction(nameof(Table));
+            _logger.LogError("[RoomAPIController] Failed to create room: {RoomNumber}", room.RoomNumber);
+            return Problem("Could not save the room. Please try again.", statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        // Log a warning if the form input was invalid, so the error can be traced
-        _logger.LogWarning("[RoomController] Room update failed, ModelState invalid {RoomNumber} {RoomId}", room.RoomNumber, room.RoomId);
-        return View(room);
+        _logger.LogInformation("[RoomAPIController] Room created: {RoomId} {RoomNumber}", room.RoomId, room.RoomNumber);
+        return CreatedAtAction(nameof(GetById), new { id = room.RoomId }, ToDto(room));
     }
 
-    // GET: /Room/Delete/{id}
-    // Shows the confirmation page for deleting a room
-    [HttpGet]
+    // PUT: /api/RoomAPI/{id}
+    [HttpPut("{id:int}")]
+    [Authorize]
+    public async Task<IActionResult> Update(int id, [FromBody] RoomDto roomDto)
+    {
+        if (id != roomDto.RoomId)
+        {
+            return BadRequest("The route ID must match the room ID in the request body.");
+        }
+
+        var existingRoom = await _roomRepository.GetRoomById(id);
+        if (existingRoom == null)
+        {
+            _logger.LogWarning("[RoomAPIController] Room not found for update, RoomId: {RoomId}", id);
+            return NotFound();
+        }
+
+        var room = FromDto(roomDto);
+        var updated = await _roomRepository.Update(room);
+        if (!updated)
+        {
+            _logger.LogError("[RoomAPIController] Failed to update room: {RoomId} {RoomNumber}", id, room.RoomNumber);
+            return Problem("Could not update the room. Please try again.", statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        _logger.LogInformation("[RoomAPIController] Room updated: {RoomId} {RoomNumber}", room.RoomId, room.RoomNumber);
+        return NoContent();
+    }
+
+    // DELETE: /api/RoomAPI/{id}
+    [HttpDelete("{id:int}")]
     [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
-        var room = await _roomRepository.GetRoomById(id);
-        if (room == null)
+        var deleted = await _roomRepository.Delete(id);
+        if (!deleted)
         {
-            // Log a warning if no room with the given id exists
-            _logger.LogWarning("[RoomController] Room not found for deletion, RoomId: {RoomId}", id);
+            _logger.LogWarning("[RoomAPIController] Failed to delete room, RoomId: {RoomId}", id);
             return NotFound();
         }
-        return View(room);
+
+        _logger.LogInformation("[RoomAPIController] Room deleted, RoomId: {RoomId}", id);
+        return NoContent();
     }
 
-    // POST: /Room/DeleteConfirmed/{id}
-    // Deletes a room from the database
-    [HttpPost]
-    [Authorize]
-    public async Task<IActionResult> DeleteConfirmed(int id)
+    private static RoomDto ToDto(Room room) => new()
     {
-        bool returnOk = await _roomRepository.Delete(id);
-        if (!returnOk)
-        {
-            // Log an error if the repository failed to delete the room (not found or database error)
-            _logger.LogError("[RoomController] Failed to delete room in repository, RoomId: {RoomId}", id);
-            return BadRequest("Room deletion failed");
-        }
+        RoomId = room.RoomId,
+        Location = room.Location,
+        RoomNumber = room.RoomNumber,
+        RoomType = room.RoomType,
+        Capacity = room.Capacity,
+        Status = (RoomDto.Availability)room.Status
+    };
 
-        // Log that the room was successfully deleted
-        _logger.LogInformation("[RoomController] Room deleted, RoomId: {RoomId}", id);
-        return RedirectToAction(nameof(Table));
-    }
+    private static Room FromDto(RoomDto roomDto) => new()
+    {
+        RoomId = roomDto.RoomId,
+        Location = roomDto.Location,
+        RoomNumber = roomDto.RoomNumber,
+        RoomType = roomDto.RoomType,
+        Capacity = roomDto.Capacity,
+        Status = (Room.Availability)roomDto.Status
+    };
 }
