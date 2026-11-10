@@ -1,0 +1,20 @@
+# .NET buildfiler
+**/bin/
+**/obj/
+
+# React / Node
+**/node_modules/
+**/dist/
+**/coverage/
+
+# Lokale databaser og logger
+**/*.db
+**/*.db-*
+**/Logs/
+**/logs/
+**/*.log
+
+# IDE-filer
+.vs/
+.idea/
+.DS_Store
