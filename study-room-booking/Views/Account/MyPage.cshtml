@@ -35,14 +35,18 @@
                                 <td>@booking.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>
                                     <div class="d-flex flex-wrap gap-2">
-                                    <a asp-action="Update"
+                                    <a asp-controller="Booking"
+                                       asp-action="Update"
                                        asp-route-id="@booking.BookingId"
                                        class="btn btn-primary btn-sm crud-btn">
                                         Edit
                                     </a>
-                                    <a asp-action="Delete"
+                                    <a asp-controller ="Booking"
+                                       asp-action="Delete"
                                        asp-route-id="@booking.BookingId"
-                                       class="btn btn-outline-danger btn-sm crud-btn">
+                                       method="post"
+                                       onsubmit="return confirm("Delte this booking"?);">
+                                       <button type="submit" class="btn btn-outline-danger btn-sm crud-btn">
                                         Delete
                                     </a>
                                 </td>
