@@ -37,6 +37,11 @@
 
                         <div class="d-flex flex-wrap gap-2">
                             <button type="submit" class="btn btn-danger crud-btn">Delete booking</button>
+                        </div>
+                    </form>
+                    <form asp-action="Cancel" method="post">
+                        <input type="hidden" name="id" value="@Model.BookingId"/>
+                        <div class="d-flex flex-wrap gap-2">
                             <a asp-action="Table" class="btn btn-outline-secondary crud-btn">Cancel</a>
                         </div>
                     </form>
