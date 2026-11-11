@@ -114,6 +114,7 @@ public class BookingController : Controller
     public async Task<IActionResult> Update(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
+    
         if (booking == null)
         {
             _logger.LogError("[BookingController] Booking not found when updating BookingId {id}", id);

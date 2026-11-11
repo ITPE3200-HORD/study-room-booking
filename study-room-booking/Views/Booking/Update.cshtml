@@ -23,9 +23,11 @@
                         <input type="hidden" asp-for="UserId" />
 
                         <div>
-                            <label asp-for="RoomId" class="form-label" >Room</label>
-                                <option value="0">Select a room</option>
-                            </select>
+                            <label class="form-label">Room</label>
+                            <input type="text" class="form-control"
+                                   style="background-color: #e9ecef; cursor: not-allowed;" value="@Model.Room?.RoomNumber"
+                                   readonly />
+                            <input type="hidden" asp-for="RoomId" />
                             <span asp-validation-for="RoomId" class="text-danger"></span>
                         </div>
 
@@ -37,10 +39,7 @@
 
                         <div>
                             <label asp-for="Description" class="form-label">Description</label>
-                            <textarea asp-for="Description"
-                                      class="form-control"
-                                      rows="3"
-                                      maxlength="200"></textarea>
+                            <textarea asp-for="Description" class="form-control" rows="3" maxlength="200"></textarea>
                             <span asp-validation-for="Description" class="text-danger"></span>
                         </div>
 
