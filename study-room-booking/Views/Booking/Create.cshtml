@@ -25,6 +25,7 @@
     <div class="mb-3">
         <label asp-for="Description"></label>
         <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
     </div>
 
     @* Checkbox for creating a study session *@
@@ -70,3 +71,9 @@
         updateVisibility();
     })();
 </script>
+@* LoadsjQuery Validation so the DataAnnotations rules (e.g. max lenght)
+    are also checked in the browser before the form is sent.
+    The server still validates everything when the booking is saved. *@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
