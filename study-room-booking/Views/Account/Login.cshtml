@@ -21,7 +21,8 @@
             
             <div>
                 <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" class="form-control" autocomplete="username" autocapitalize="none" spellcheck="false" />
+                <input asp-for="Username" class="form-control" autocomplete="username" autocapitalize="none"
+                       spellcheck="false" />
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
             
@@ -29,6 +30,11 @@
                 <label asp-for="Password" class="control-label"></label>
                 <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" />
                 <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div>
+                <input asp-for="RememberMe" />
+                <label asp-for="RememberMe"></label>
             </div>
             
             <button class="btn btn-primary" type="submit">Log in</button>
