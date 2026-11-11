@@ -108,7 +108,8 @@ public class BookingController : Controller
         _logger.LogInformation("[BookingController] Booking created for Room {roomId}", booking.RoomId);
         return RedirectToAction("MyPage", "MyPage");
     }
-
+    
+    // GET: /Booking/Update/5
     [HttpGet]
     [Authorize]
     public async Task<IActionResult> Update(int id)
@@ -117,7 +118,7 @@ public class BookingController : Controller
         if (booking == null)
         {
             _logger.LogError("[BookingController] Booking not found when updating BookingId {id}", id);
-            return BadRequest("Booking not found for the BookingId");
+            return NotFound("Booking not found for the BookingId");
         }
         await PopulateRooms();
         return View(booking);
@@ -172,7 +173,7 @@ public class BookingController : Controller
         if (booking == null)
         {
             _logger.LogError("[BookingController] Booking not found for BookingId {id}", id);
-            return BadRequest("Booking not found for the BookingId");
+            return NotFound("Booking not found for the BookingId");
         }
         return View(booking);
     }

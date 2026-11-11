@@ -16,7 +16,7 @@ public class BookingCreateViewModel : IValidatableObject
     public int DurationMinutes { get; set; }
 
     // If filled in by the user
-    [StringLength(500, ErrorMessage = "Description cannot be longer than 500 characters.")]
+    [StringLength(200, ErrorMessage = "Description cannot be longer than 200 characters.")]
     public string? Description { get; set; }
     public bool CreateStudySession { get; set; }
 
