@@ -64,7 +64,7 @@ public class MyPageController : ControllerBase
                 .OrderBy(session => session.Booking.StartTime)
                 .Select(session => new
                 {
-                    studySessionsId = session.StudySessionId,
+                    studySessionId = session.StudySessionId,
                     title = session.Title,
                     subject = session.Subject,
                     isOpen = session.IsOpen,

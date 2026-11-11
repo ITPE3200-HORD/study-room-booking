@@ -2,19 +2,45 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Alert, Button, Card, Col, Row, Spinner } from 'react-bootstrap'
 
-const API_URL = "http://localhost:5234"
+const API_URL = import.meta.env.VITE_API_URL;
 
-async function fetchHomeData() {
+type Room = {
+    roomId: number
+    location: string | null
+    roomNumber: string
+    roomType: string
+    capacity: number
+    status: 0 | 1
+}
+
+type StudySession = {
+    studySessionId: number
+    title: string
+    subject: string | null
+    maxParticipants: number
+    participantCount: number
+    roomId: number
+    roomNumber: string 
+    startTime: string
+    endTime: string
+}
+
+type HomeData = {
+    rooms: Room[]
+    openStudySessions: StudySession[]
+}
+
+async function fetchHomeData(): Promise<HomeData> {
     const response = await fetch(`${API_URL}/api/Home`)
 
     if(!response.ok) {
         throw new Error(`Could not load home page (${response.status})`)
     }
 
-    return response.json()
+    return response.json() as Promise<HomeData>
 }
 
-function HomePage() {
+export default function HomePage() {
     const { data, isLoading, error } = useQuery({
         queryKey: ['home'],
         queryFn: fetchHomeData,
@@ -42,7 +68,7 @@ function HomePage() {
                 <h1>Find a study rooms for your group</h1>
                 <p className="lead">Browse campus rooms and find open study sessions.</p>
 
-                <Button as={Link} to="/rooms" variant="primary">Browse rooms</Button>
+                <Button className="btn btn-primary mb-3" href="/rooms">Browse rooms</Button>
 
                 {featuredRoom && (
                     <p className="mt-3 mb-0">Available now: Room {featuredRoom.roomNumber}</p>
@@ -53,12 +79,12 @@ function HomePage() {
                 <h2>Rooms on campus</h2>
                 <p>{rooms.length} rooms in the system.</p>
 
-                {rooms.length} === 0 ? (
+                {rooms.length === 0 ? (
                     <p>No rooms are available to show.</p>
                 ) : (
                     <Row className="g-3 mt-1">
                         {rooms.map(room => (
-                            <Col key={room.roomIs} xs={12} md={6} ld={4}>
+                            <Col key={room.roomId} xs={12} md={6} lg={4}>
                                 <Card className="h-100">
                                     <Card.Body>
                                         <Card.Title>
@@ -80,7 +106,7 @@ function HomePage() {
                             </Col>
                         ))}
                     </Row>
-                )
+                )}
             </section>
 
             <section id="sessions" className="mb-5">
@@ -119,5 +145,3 @@ function HomePage() {
         </main>
     )    
 }
-
-export default HomePage;
