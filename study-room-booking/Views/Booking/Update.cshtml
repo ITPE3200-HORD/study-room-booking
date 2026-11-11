@@ -23,8 +23,7 @@
                         <input type="hidden" asp-for="UserId" />
 
                         <div>
-                            <label asp-for="RoomId" class="form-label">Room</label>
-                            <select asp-for="RoomId" asp-items="ViewBag.Rooms" class="form-select">
+                            <label asp-for="RoomId" class="form-label" >Room</label>
                                 <option value="0">Select a room</option>
                             </select>
                             <span asp-validation-for="RoomId" class="text-danger"></span>
