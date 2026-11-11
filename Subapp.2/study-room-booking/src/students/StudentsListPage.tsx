@@ -1,9 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
-import { Table } from 'react-bootstrap';
+import { Button, Table } from 'react-bootstrap';
 
-const API_URL = "http://localhost:5003"
+const API_URL = import.meta.env.VITE_API_URL;
 
-const fetchStudents = async () => {
+type Student = {
+    studentId: number
+    userName: string
+    fullName: string
+    email: string
+}
+
+const fetchStudents = async (): Promise<Student[]> => {
     const response = await fetch(`${API_URL}/api/Student`, {
         credentials: 'include',
     })
@@ -12,7 +19,7 @@ const fetchStudents = async () => {
         console.error(`Fetch failed with status: ${response.status}`);
         throw new Error('Network response was not ok');
     }
-    return response.json()
+    return response.json() as Promise<Student[]>
 };
 
 const StudentListPage = () => {
