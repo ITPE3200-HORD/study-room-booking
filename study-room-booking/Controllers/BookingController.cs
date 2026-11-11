@@ -115,6 +115,7 @@ public class BookingController : Controller
     public async Task<IActionResult> Update(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
+    
         if (booking == null)
         {
             _logger.LogError("[BookingController] Booking not found when updating BookingId {id}", id);
@@ -152,7 +153,7 @@ public class BookingController : Controller
             if (updated)
             {
                 _logger.LogInformation("[BookingController] Booking updated: {id}", booking.BookingId);
-                return RedirectToAction(nameof(Table));
+                return RedirectToAction("MyPage", "MyPage");
             }
 
             ModelState.AddModelError("", "Something went wrong while updating the booking. Please try again.");
