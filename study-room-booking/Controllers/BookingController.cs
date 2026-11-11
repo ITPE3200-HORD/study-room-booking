@@ -152,7 +152,7 @@ public class BookingController : Controller
             if (updated)
             {
                 _logger.LogInformation("[BookingController] Booking updated: {id}", booking.BookingId);
-                return RedirectToAction(nameof(Table));
+                return RedirectToAction("MyPage", "MyPage");
             }
 
             ModelState.AddModelError("", "Something went wrong while updating the booking. Please try again.");
