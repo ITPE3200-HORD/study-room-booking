@@ -8,6 +8,7 @@ namespace study_room_booking.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class RoomAPIController : ControllerBase
 {
     private readonly IRoomRepository _roomRepository;
@@ -50,7 +51,7 @@ public class RoomAPIController : ControllerBase
 
     // POST: /api/roomAPI
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] RoomDto roomDto)
     {
         var room = FromDto(roomDto);
@@ -67,7 +68,7 @@ public class RoomAPIController : ControllerBase
 
     // PUT: /api/roomAPI/{id}
     [HttpPut("{id:int}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id, [FromBody] RoomDto roomDto)
     {
         if (id != roomDto.RoomId)
@@ -96,7 +97,7 @@ public class RoomAPIController : ControllerBase
 
     // DELETE: /api/roomAPI/{id}
     [HttpDelete("{id:int}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _roomRepository.Delete(id);
