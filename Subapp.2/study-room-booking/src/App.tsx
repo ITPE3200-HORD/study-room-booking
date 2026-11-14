@@ -27,6 +27,7 @@ export default function App() {
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/students" element={<AdminRoute><StudentListPage /></AdminRoute>} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/logout" element={<Navigate to="/" replace />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/my-page" element={<MyPagePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -79,7 +79,7 @@ function RegisterPage() {
                         <Form.Group className="mb-3" controlId="userName">
                             <Form.Label>Username</Form.Label>
                             <Form.Control
-                                autoComplete="userName"
+                                autoComplete="username"
                                 value={userName}
                                 onChange={event => setUserName(event.target.value)}
                                 required
@@ -111,9 +111,10 @@ function RegisterPage() {
                             <Form.Label>Password</Form.Label>
                             <Form.Control
                                 type="password"
-                                autoComplete="current-password"
+                                autoComplete="new-password"
                                 value={password}
                                 onChange={event => setPassword(event.target.value)}
+                                minLength={8}
                                 required
                             />
                         </Form.Group>
@@ -125,6 +126,7 @@ function RegisterPage() {
                                 autoComplete="new-password"
                                 value={confirmPassword}
                                 onChange={event => setConfirmPassword(event.target.value)}
+                                minLength={8}
                                 required
                             />
                         </Form.Group>

@@ -1,13 +1,42 @@
-import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
-import { useQuery } from '@tanstack/react-query';
+import { Alert, Nav, Navbar, NavDropdown } from 'react-bootstrap';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchCurrentUser } from './auth'
 
 export default function NavMenu() {
+    const navigate = useNavigate()
+    const queryClient = useQueryClient()
+    const [logoutError, setLogoutError] = useState('')
+    const [isLoggingOut, setIsLoggingOut] = useState(false)
     const { data: user } = useQuery({
         queryKey: ['current-user'],
         queryFn: fetchCurrentUser,
         retry: false,
     })
+
+    async function handleLogout() {
+        setLogoutError('')
+        setIsLoggingOut(true)
+
+        try {
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/Account/Logout`,
+                { method: 'POST', credentials: 'include' },
+            )
+
+            if (!response.ok) throw new Error('Could not log out.')
+
+            queryClient.setQueryData(['current-user'], null)
+            navigate('/', { replace: true })
+        } catch (error) {
+            setLogoutError(
+                error instanceof Error ? error.message : 'Could not log out.',
+            )
+        } finally {
+            setIsLoggingOut(false)
+        }
+    }
 
     const isAdmin = user?.isAdmin === true
     const isStudent = user !== null && user !== undefined && !isAdmin
@@ -45,7 +74,19 @@ export default function NavMenu() {
                             {isStudent && (
                                 <NavDropdown.Item href="/my-page">My page</NavDropdown.Item>
                             )}
-                            <NavDropdown.Item href="/logout">Log out</NavDropdown.Item>
+                            <NavDropdown.Item
+                                as="button"
+                                type="button"
+                                disabled={isLoggingOut}
+                                onClick={handleLogout}
+                            >
+                                {isLoggingOut ? 'Logging out…' : 'Log out'}
+                            </NavDropdown.Item>
+                            {logoutError && (
+                                <Alert variant="danger" role="alert" className="m-2">
+                                    {logoutError}
+                                </Alert>
+                            )}
                         </NavDropdown>
                     )}
                 </Nav>
