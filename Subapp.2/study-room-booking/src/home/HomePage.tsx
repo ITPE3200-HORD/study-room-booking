@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Card, Col, Row, Spinner } from 'react-bootstrap'
+import { fetchCurrentUser } from '../shared/auth'
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -41,11 +42,28 @@ async function fetchHomeData(): Promise<HomeData> {
 }
 
 export default function HomePage() {
-    const { data, isLoading, error } = useQuery({
+    const { data: user,
+        isLoading: isUserLoading
+    } = useQuery({
+        queryKey: ['current-user'],
+        queryFn: fetchCurrentUser,
+        retry: false,
+    })
+
+    const {
+        data,
+        isLoading,
+        error,
+    } = useQuery({
         queryKey: ['home'],
         queryFn: fetchHomeData,
     })
 
+    const roomLink = !user
+        ? { to: '/login', label: 'Log in' }
+        : user.isAdmin
+            ? { to: '/rooms', label: 'Manage rooms' }
+            : { to: '/booking', label: 'Browse rooms' }
     const rooms = data?.rooms ?? []
     const sessions = data?.openStudySessions ?? []
     const featuredRoom = rooms.find(rooms => rooms.status === 0)
@@ -80,9 +98,11 @@ export default function HomePage() {
                         Browse campus rooms and find open study sessions.
                     </p>
 
-                    <Link to="/rooms" className="button-primary">
-                        Browse rooms
-                    </Link>
+                    {!isUserLoading && (
+                        <Link to={roomLink.to} className="button-primary">
+                            {roomLink.label}
+                        </Link>
+                    )}
 
                 {featuredRoom && (
                     <p className="featured-room">
@@ -98,9 +118,11 @@ export default function HomePage() {
                     <p>
                         Choose a room that works for your group and your study plan.
                     </p>
-                    <Link to="/rooms" className="hero-card-link">
-                        Explore rooms <span aria-hidden="true">→</span>
-                    </Link>
+                    {!isUserLoading && (
+                        <Link to={roomLink.to} className="hero-card-link">
+                            Explore rooms <span aria-hidden="true">→</span>
+                        </Link>
+                    )}
                 </div>
             </section>
 
@@ -111,9 +133,11 @@ export default function HomePage() {
                         <h2>Rooms on campus</h2>
                         <p>{rooms.length} rooms in the system.</p>
                     </div>
-                    <Link to="/booking" className="text-link">
-                        Book a room
-                    </Link>
+                    {!isUserLoading && (
+                        <Link to={roomLink.to} className="text-link">
+                            Book a room
+                        </Link>
+                    )}
                 </header>
 
                 {rooms.length === 0 ? (
@@ -163,6 +187,11 @@ export default function HomePage() {
                         <h2>Open study sessions</h2>
                         <p>Join a session and study with other students.</p>
                     </div>
+                    {!isUserLoading && (
+                        <Link to={roomLink.to} className="text-link">
+                            Join a open session
+                        </Link>
+                    )}
                 </header>
 
                 {sessions.length === 0 ? (
