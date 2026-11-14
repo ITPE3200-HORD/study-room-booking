@@ -3,7 +3,7 @@ import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 
 export default function NavMenu() {
     return (
-        <Navbar expand="lg">
+        <Navbar expand="lg" className="site-navbar">
             <Navbar.Brand href="/">Study Room Booking</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">

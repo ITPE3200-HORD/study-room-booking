@@ -7,6 +7,7 @@ import NavMenu from './shared/NavMenu.js'
 import MyPagePage from './account/MyPagePage.js'
 import LoginPage from './account/LoginPage.js'
 import './App.css'
+import StudentListPage from './students/StudentsListPage.js'
 
 const queryClient = new QueryClient()
 
@@ -20,6 +21,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/rooms" element={<RoomListPage />} />
+            <Route path="/students" element={<StudentListPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/my-page" element={<MyPagePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

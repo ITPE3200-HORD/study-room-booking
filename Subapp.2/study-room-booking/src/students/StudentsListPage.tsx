@@ -29,33 +29,40 @@ const StudentListPage = () => {
     });
 
     return (
-        <div className="text-start">
-            <h1>Students</h1>
-            <Button onClick={() => refetch()} className="btn btn-primary mb-3" disabled={isLoading}>
-                {isLoading ? 'Loading...' : 'Refresh Students'}
+        <main className="page-content">
+            <header className="page-heading">
+                <h1>Students</h1>
+                <p>View and manage registered students.</p>
+            </header>
+
+            <Button className="btn-primary mb-3" onClick={() => refetch()}>
+                Refresh Students
             </Button>
             {error && <p style={{ color: 'red' }}>Failed to fetch students.</p>}
-            <Table striped bordered hover>
-                <thead>
-                    <tr>
-                        <th>StudentID</th>
-                        <th>Email</th>
-                        <th>Username</th>
-                        <th>Full name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {students.map(student => (
-                        <tr key={student.studentId}>
-                            <td>{student.studentId}</td>
-                            <td>{student.email}</td>
-                            <td>{student.userName}</td>
-                            <td>{student.fullName}</td>
+            
+            <div className="content-card table-scroll">
+                <Table hover>
+                    <thead>
+                        <tr>
+                            <th>StudentID</th>
+                            <th>Email</th>
+                            <th>Username</th>
+                            <th>Full name</th>
                         </tr>
-                    ))}
-                </tbody>
-            </Table>
-        </div>
+                    </thead>
+                    <tbody>
+                        {students.map(student => (
+                            <tr key={student.studentId}>
+                                <td>{student.studentId}</td>
+                                <td>{student.email}</td>
+                                <td>{student.userName}</td>
+                                <td>{student.fullName}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
+        </main>
     );
 };
 
