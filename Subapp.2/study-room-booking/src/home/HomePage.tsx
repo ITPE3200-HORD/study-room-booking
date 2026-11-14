@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Alert, Button, Card, Col, Row, Spinner } from 'react-bootstrap'
+import { Card, Col, Row, Spinner } from 'react-bootstrap'
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -48,7 +48,18 @@ export default function HomePage() {
 
     const rooms = data?.rooms ?? []
     const sessions = data?.openStudySessions ?? []
-    const featuredRoom = rooms.find(rooms => rooms.status == 0)
+    const featuredRoom = rooms.find(rooms => rooms.status === 0)
+
+    if (error) {
+        return (
+            <main className="home-page">
+                <div className="empty-state" role="alert">
+                    <h2>Could not load the home page</h2>
+                    <p>Please try again later.</p>
+                </div>
+            </main>
+        )
+    }
 
     if (isLoading) {
         return (
@@ -64,7 +75,7 @@ export default function HomePage() {
             <section className="home-hero">
                 <div className="home-hero-copy">
                     <p className="eyebrow">Study together</p>
-                    <h1>Find a study rooms for your group</h1>
+                    <h1>Find a study room for your group</h1>
                     <p className="home-hero-description">
                         Browse campus rooms and find open study sessions.
                     </p>
@@ -75,7 +86,8 @@ export default function HomePage() {
 
                 {featuredRoom && (
                     <p className="featured-room">
-                    Available now: Room {featuredRoom.roomNumber}
+                        <span className="availability-dot" aria-hidden="true" />
+                        Available now: Room {featuredRoom.roomNumber}
                     </p>
                 )}
                 </div>
@@ -149,7 +161,7 @@ export default function HomePage() {
                     <div>
                         <p className="eyebrow">Learn together</p>
                         <h2>Open study sessions</h2>
-                        <p>Join a sessions and study with other students.</p>
+                        <p>Join a session and study with other students.</p>
                     </div>
                 </header>
 

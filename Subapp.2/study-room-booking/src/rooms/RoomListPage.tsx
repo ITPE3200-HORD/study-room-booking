@@ -4,7 +4,7 @@ import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap'
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type searchFrom = {
+type SearchFrom = {
     date: string
     startTime: string
     durationMinutes: string
@@ -12,7 +12,7 @@ type searchFrom = {
     roomType: string
 }
 
-type SearchParams = searchFrom & {
+type SearchParams = SearchFrom & {
     requestId: number
 }
 
@@ -39,7 +39,7 @@ function toLocalDate(date: Date): string {
 const tomorrow = new Date()
 tomorrow.setDate(tomorrow.getDate() + 1)
 
-const initialForm: searchFrom = {
+const initialForm: SearchFrom = {
     date: toLocalDate(tomorrow),
     startTime: '14:00:00',
     durationMinutes: '120',
@@ -47,7 +47,7 @@ const initialForm: searchFrom = {
     roomType: '',
 }
 
-async function SearchAvailableRooms(search: SearchParams): Promise<SearchResult> {
+async function searchAvailableRooms(search: SearchParams): Promise<SearchResult> {
     const params = new URLSearchParams({
         date: search.date, 
         startTime: search.startTime,
@@ -67,8 +67,8 @@ async function SearchAvailableRooms(search: SearchParams): Promise<SearchResult>
     return response.json() as Promise<SearchResult>
 }
 
-function RoomListPage() {
-    const [form, setForm] = useState<searchFrom>(initialForm)
+export default function RoomListPage() {
+    const [form, setForm] = useState<SearchFrom>(initialForm)
     const [search, setSearch] = useState<SearchParams | null>(null)
 
     const { data, isFetching, error } = useQuery({
@@ -77,7 +77,7 @@ function RoomListPage() {
             if (search === null) {
                 throw new Error('Search criteria are missing.')
             }
-            return SearchAvailableRooms(search)
+            return searchAvailableRooms(search)
         },
         enabled: search !== null,
     })
@@ -98,12 +98,15 @@ function RoomListPage() {
 
     return (
         <main>
-            <header className="mb-4">
-                <h1>Find a room</h1>
-                <p>Choose when you need a room and how many people are in your group.</p>
+            <header className="booking-page">
+                <div>
+                    <p className="eyebrow">Find a space</p>
+                    <h1>Find a room</h1>
+                    <p>Choose when you need a room and how many people are in your group.</p>
+                </div>
             </header>
 
-            <Form onSubmit={handleSubmit} className="bg-light rounded p-3 p-md-4 mb-4">
+            <Form onSubmit={handleSubmit} className="room-search-panel">
                 <Row className="g-3">
                     <Col xs={12} sm={6} lg={3}>
                         <Form.Label htmlFor="date">Date</Form.Label>
@@ -205,27 +208,31 @@ function RoomListPage() {
             )}
 
             {data && !isFetching && (
-                <section aria-live="polite">
-                    <h2>Available rooms</h2>
-                    <p>{data.availableRoomCount} rooms match your search.</p>
+                <section className="room-results" aria-live="polite">
+                    <header className="room-results-heading">
+                        <div>
+                            <p className="eyebrow">Your search</p>
+                            <h2>Available rooms</h2>
+                            <p>{data.availableRoomCount} rooms match your search.</p>
+                        </div>
+                    </header>
 
                     {rooms.length === 0 ? (
-                        <p>Try another time, group size, or room type.</p>
+                        <div className="empty-state">
+                            <h3>No rooms found for these details</h3>
+                            <p>Try another time, group size, or room type.</p>
+                        </div>
                     ) : (
                         <Row className="g-3">
                             {rooms.map(room => (
                                 <Col key={room.roomId} xs={12} md={6} lg={4}>
-                                    <Card className="h-100">
+                                    <Card className="info-card h-100">
                                         <Card.Body>
-                                            <Card.Title>
-                                                Room {room.roomNumber}
-                                            </Card.Title>
+                                            <span className="card-label">{room.roomType}</span>
+                                            <Card.Title>Room {room.roomNumber}</Card.Title>
                                             <Card.Text>
-                                                Location: {room.location || '—'}
-                                                <br />
-                                                Type: {room.roomType}
-                                                <br />
-                                                Capacity: {room.capacity} people
+                                                <span>{room.location || 'Location not listed'}</span>
+                                                <span>Capacity: {room.capacity} people</span>
                                             </Card.Text>
                                         </Card.Body>
                                     </Card>
@@ -238,5 +245,3 @@ function RoomListPage() {
         </main>
     )
 }
-
-export default RoomListPage;
