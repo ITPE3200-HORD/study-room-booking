@@ -1,6 +1,6 @@
 import { useState, type SubmitEvent } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -37,7 +37,7 @@ function LoginPage() {
                 throw new Error(result?.message || 'Login failed.')
             }
 
-            await queryClient.invalidateQueries({ queryKey: ['current-user-is-admin'] })
+            await queryClient.invalidateQueries({ queryKey: ['current-user'] })
             navigate('/')
         } catch (err) {
             setError(
@@ -91,6 +91,7 @@ function LoginPage() {
                         <Button type="submit" disabled={isSubmitting}>
                             {isSubmitting ? 'Logging in…' : 'Log in'}
                         </Button>
+                        <Link to="/register">Create an account</Link>
                     </Form>
                 </Card.Body>
             </Card>

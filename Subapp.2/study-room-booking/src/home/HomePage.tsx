@@ -111,8 +111,8 @@ export default function HomePage() {
                         <h2>Rooms on campus</h2>
                         <p>{rooms.length} rooms in the system.</p>
                     </div>
-                    <Link to="/rooms" className="text-link">
-                        Browse all rooms
+                    <Link to="/booking" className="text-link">
+                        Book a room
                     </Link>
                 </header>
 

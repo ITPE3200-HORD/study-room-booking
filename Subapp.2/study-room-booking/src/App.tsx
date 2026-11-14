@@ -9,6 +9,9 @@ import MyPagePage from './account/MyPagePage.js'
 import LoginPage from './account/LoginPage.js'
 import './App.css'
 import StudentListPage from './students/StudentsListPage.js'
+import AdminRoute from './shared/AdminRoute.js'
+import RegisterPage from './account/RegisterPage.js'
+
 
 const queryClient = new QueryClient()
 
@@ -20,10 +23,11 @@ export default function App() {
         <Container>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/rooms" element={<RoomListPage />} />
+            <Route path="/rooms" element={<AdminRoute><RoomListPage /></AdminRoute>}/>
             <Route path="/booking" element={<BookingPage />} />
-            <Route path="/students" element={<StudentListPage />} />
+            <Route path="/students" element={<AdminRoute><StudentListPage /></AdminRoute>} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="/my-page" element={<MyPagePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

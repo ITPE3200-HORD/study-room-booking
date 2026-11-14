@@ -25,6 +25,10 @@
   letter-spacing: -1px;
 }
 
+.site-navbar .navbar-right {
+  align-items: center;
+}
+
 .site-navbar .nav-link {
   position: relative;
   padding: 12px 10px;
@@ -467,6 +471,15 @@
   color: var(--muted);
 }
 
+@media (max-width: 991.98px) {
+  .site-navbar .navbar-right {
+    align-items: stretch;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+}
+
 /* Small screens */
 @media (max-width: 767px) {
   .site-navbar {
@@ -534,3 +547,5 @@
     padding: 18px;
   }
 }
+
+
