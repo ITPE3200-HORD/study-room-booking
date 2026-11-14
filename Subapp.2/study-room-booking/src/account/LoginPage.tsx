@@ -1,6 +1,7 @@
 import { useState, type SubmitEvent } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -10,6 +11,7 @@ type LoginErrorResponse = {
 
 function LoginPage() {
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [rememberMe, setRememberMe] = useState(false)
@@ -35,6 +37,7 @@ function LoginPage() {
                 throw new Error(result?.message || 'Login failed.')
             }
 
+            await queryClient.invalidateQueries({ queryKey: ['current-user-is-admin'] })
             navigate('/')
         } catch (err) {
             setError(

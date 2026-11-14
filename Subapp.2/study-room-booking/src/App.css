@@ -131,6 +131,34 @@
   margin-bottom: 24px;
 }
 
+.page-heading-actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.booking-card-footer {
+  padding: 0 20px 20px;
+  border: 0;
+  background: transparent;
+}
+
+.booking-success {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid #c9dfcf;
+  border-radius: 10px;
+  background: #e8f1e9;
+  color: #28543d;
+}
+
 .page-heading h1 {
   margin: 0 0 6px;
   color: var(--text);
@@ -378,6 +406,7 @@
   display: block;
   margin-bottom: 28px;
   padding: 24px;
+  color: var(--paper);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);
@@ -403,6 +432,15 @@
 .room-search-panel .btn:hover {
   border-color: var(--green-dark);
   background: var(--green-dark);
+}
+
+.search-error {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid #f0c9b8;
+  border-radius: 10px;
+  background: #fce9df;
+  color: #773b20;
 }
 
 .room-results {
@@ -448,6 +486,11 @@
     padding-top: 26px;
   }
 
+  .page-heading-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .table-scroll {
     overflow-x: auto;
   }
@@ -480,7 +523,7 @@
   .home-section {
     padding: 32px 0;
   }
-  
+
   .booking-page {
     width: min(100% - 32px, 1160px);
     padding-top: 26px;

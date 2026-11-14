@@ -1,247 +1,224 @@
-import { useState, type ChangeEvent, type SubmitEvent } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap'
+import { useState, type SubmitEvent } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Alert, Button, Form, Modal, Table } from 'react-bootstrap'
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL
 
-type SearchFrom = {
-    date: string
-    startTime: string
-    durationMinutes: string
-    groupSize: string
-    roomType: string
-}
-
-type SearchParams = SearchFrom & {
-    requestId: number
-}
-
-type AvailableRoom = {
+type Room = {
     roomId: number
     location: string | null
     roomNumber: string
     roomType: string
     capacity: number
+    status: number
 }
 
-type SearchResult = {
-    availableRoomCount: number
-    availableRooms: AvailableRoom[]
+type RoomForm = Omit<Room, 'roomId'>
+
+const emptyRoom: RoomForm = {
+    location: '',
+    roomNumber: '',
+    roomType: 'Group Study Room',
+    capacity: 4,
+    status: 0,
 }
 
-function toLocalDate(date: Date): string {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2 ,'0')
-    return `${year}-${month}-${day}`
+async function fetchRooms(): Promise<Room[]> {
+    const response = await fetch(`${API_URL}/api/RoomAPI`, { credentials: 'include' })
+    if (!response.ok) throw new Error('Could not load rooms.')
+    return response.json() as Promise<Room[]>
 }
 
-const tomorrow = new Date()
-tomorrow.setDate(tomorrow.getDate() + 1)
-
-const initialForm: SearchFrom = {
-    date: toLocalDate(tomorrow),
-    startTime: '14:00:00',
-    durationMinutes: '120',
-    groupSize: '4',
-    roomType: '',
-}
-
-async function searchAvailableRooms(search: SearchParams): Promise<SearchResult> {
-    const params = new URLSearchParams({
-        date: search.date, 
-        startTime: search.startTime,
-        durationMinutes: search.durationMinutes,
-        groupSize: search.groupSize,
-        roomType: search.roomType,
-    })
-
+async function saveRoom(room: Room | RoomForm) {
+    const isUpdate = 'roomId' in room
     const response = await fetch(
-        `${API_URL}/api/Home/available-rooms?${params}`
+        `${API_URL}/api/RoomAPI${isUpdate ? `/${room.roomId}` : ''}`,
+        {
+            method: isUpdate ? 'PUT' : 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(room),
+        },
     )
+    if (!response.ok) throw new Error('Could not save room. Check your details and permissions.')
+}
 
-    if (!response.ok) {
-        throw new Error(`Room search failed (${response.status})`)
-    }
-
-    return response.json() as Promise<SearchResult>
+async function deleteRoom(roomId: number) {
+    const response = await fetch(`${API_URL}/api/RoomAPI/${roomId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+    })
+    if (!response.ok) throw new Error('Could not delete room. It may have existing bookings.')
 }
 
 export default function RoomListPage() {
-    const [form, setForm] = useState<SearchFrom>(initialForm)
-    const [search, setSearch] = useState<SearchParams | null>(null)
+    const queryClient = useQueryClient()
+    const { data: rooms = [], isLoading, error } = useQuery({
+        queryKey: ['rooms'],
+        queryFn: fetchRooms,
+    })
+    const [showEditor, setShowEditor] = useState(false)
+    const [editingRoom, setEditingRoom] = useState<Room | null>(null)
+    const [form, setForm] = useState<RoomForm>(emptyRoom)
+    const [actionError, setActionError] = useState('')
 
-    const { data, isFetching, error } = useQuery({
-        queryKey: ['availableRooms', search],
-        queryFn: () => {
-            if (search === null) {
-                throw new Error('Search criteria are missing.')
-            }
-            return searchAvailableRooms(search)
+    const saveMutation = useMutation({
+        mutationFn: saveRoom,
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['rooms'] })
+            setShowEditor(false)
+            setActionError('')
         },
-        enabled: search !== null,
+        onError: error => setActionError(error.message),
+    })
+    const deleteMutation = useMutation({
+        mutationFn: deleteRoom,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rooms'] }),
+        onError: error => setActionError(error.message),
     })
 
-    function handleChange(
-        event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-    ) {
-        const { name, value } = event.target
-        setForm(current => ({ ...current, [name]: value }))
+    function openCreate() {
+        setEditingRoom(null)
+        setForm(emptyRoom)
+        setActionError('')
+        setShowEditor(true)
+    }
+
+    function openEdit(room: Room) {
+        setEditingRoom(room)
+        setForm({
+            location: room.location ?? '',
+            roomNumber: room.roomNumber,
+            roomType: room.roomType,
+            capacity: room.capacity,
+            status: room.status,
+        })
+        setActionError('')
+        setShowEditor(true)
     }
 
     function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
         event.preventDefault()
-        setSearch({ ...form, requestId: Date.now() })
+        setActionError('')
+        saveMutation.mutate(editingRoom ? { ...form, roomId: editingRoom.roomId } : form)
     }
 
-    const rooms = data?.availableRooms ?? []
-
     return (
-        <main>
-            <header className="booking-page">
+        <main className="page-content">
+            <header className="page-heading page-heading-actions">
                 <div>
-                    <p className="eyebrow">Find a space</p>
-                    <h1>Find a room</h1>
-                    <p>Choose when you need a room and how many people are in your group.</p>
+                    <p className="eyebrow">Administration</p>
+                    <h1>Rooms</h1>
+                    <p>View and manage campus rooms.</p>
                 </div>
+                <Button className="btn-primary" onClick={openCreate}>Add room</Button>
             </header>
 
-            <Form onSubmit={handleSubmit} className="room-search-panel">
-                <Row className="g-3">
-                    <Col xs={12} sm={6} lg={3}>
-                        <Form.Label htmlFor="date">Date</Form.Label>
-                        <Form.Control
-                            id="date"
-                            name="date"
-                            type="date"
-                            min={toLocalDate(new Date())}
-                            value={form.date}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Col>
-
-                    <Col xs={12} sm={6} lg={3}>
-                        <Form.Label htmlFor="startTime">Start time</Form.Label>
-                        <Form.Select
-                            id="startTime"
-                            name="startTime"
-                            value={form.startTime}
-                            onChange={handleChange}
-                        >
-                            {Array.from({ length: 17 }, (_, index) => index + 6).map(hour => {
-                                const time = `${String(hour).padStart(2, '0')}:00:00`
-                                return (
-                                    <option key={time} value={time}>
-                                        {time.slice(0, 5)}
-                                    </option>
-                                )
-                            })}
-                        </Form.Select>
-                    </Col>
-
-                    <Col xs={12} sm={6} lg={2}>
-                        <Form.Label htmlFor="durationMinutes">Duration</Form.Label>
-                        <Form.Select
-                            id="durationMinutes"
-                            name="durationMinutes"
-                            value={form.durationMinutes}
-                            onChange={handleChange}
-                        >
-                            <option value="60">1 hour</option>
-                            <option value="90">1.5 hours</option>
-                            <option value="120">2 hours</option>
-                            <option value="180">3 hours</option>
-                        </Form.Select>
-                    </Col>
-
-                    <Col xs={12} sm={6} lg={2}>
-                        <Form.Label htmlFor="groupSize">Group size</Form.Label>
-                        <Form.Select
-                            id="groupSize"
-                            name="groupSize"
-                            value={form.groupSize}
-                            onChange={handleChange}
-                        >
-                            {[1, 2, 4, 6, 8, 10, 15, 20, 25].map(size => (
-                                <option key={size} value={size}>
-                                    {size} {size === 1 ? 'person' : 'people'}
-                                </option>
-                            ))}
-                        </Form.Select>
-                    </Col>
-
-                    <Col xs={12} sm={6} lg={2}>
-                        <Form.Label htmlFor="roomType">Room type</Form.Label>
-                        <Form.Select
-                            id="roomType"
-                            name="roomType"
-                            value={form.roomType}
-                            onChange={handleChange}
-                        >
-                            <option value="">All types</option>
-                            <option value="Group Study Room">Group Study Room</option>
-                            <option value="Class Room">Class Room</option>
-                            <option value="Auditorium">Auditorium</option>
-                        </Form.Select>
-                    </Col>
-
-                    <Col xs={12}>
-                        <Button type="submit" disabled={isFetching}>
-                            {isFetching ? 'Searching…' : 'Search available rooms'}
-                        </Button>
-                    </Col>
-                </Row>
-            </Form>
-
-            {error && (
-                <Alert variant="danger" role="alert">
-                    Could not search for rooms. Check that the API is running.
-                </Alert>
-            )}
-
-            {isFetching && (
-                <div className="py-3" role="status">
-                    <Spinner size="sm" animation="border" className="me-2" />
-                    Searching for available rooms…
+            {(error || actionError) && (
+                <div className="search-error" role="alert">
+                    {actionError || 'Could not load rooms. Check that the API is running and you are signed in as an admin.'}
                 </div>
             )}
 
-            {data && !isFetching && (
-                <section className="room-results" aria-live="polite">
-                    <header className="room-results-heading">
-                        <div>
-                            <p className="eyebrow">Your search</p>
-                            <h2>Available rooms</h2>
-                            <p>{data.availableRoomCount} rooms match your search.</p>
-                        </div>
-                    </header>
-
-                    {rooms.length === 0 ? (
-                        <div className="empty-state">
-                            <h3>No rooms found for these details</h3>
-                            <p>Try another time, group size, or room type.</p>
-                        </div>
-                    ) : (
-                        <Row className="g-3">
+            {isLoading ? (
+                <p role="status">Loading rooms…</p>
+            ) : error ? null : rooms.length === 0 ? (
+                <div className="empty-state">
+                    <h3>No rooms found</h3>
+                    <p>Add a room to get started.</p>
+                </div>
+            ) : (
+                <div className="content-card table-scroll">
+                    <Table hover>
+                        <thead>
+                            <tr>
+                                <th scope="col">Room</th>
+                                <th scope="col">Location</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Capacity</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                             {rooms.map(room => (
-                                <Col key={room.roomId} xs={12} md={6} lg={4}>
-                                    <Card className="info-card h-100">
-                                        <Card.Body>
-                                            <span className="card-label">{room.roomType}</span>
-                                            <Card.Title>Room {room.roomNumber}</Card.Title>
-                                            <Card.Text>
-                                                <span>{room.location || 'Location not listed'}</span>
-                                                <span>Capacity: {room.capacity} people</span>
-                                            </Card.Text>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
+                                <tr key={room.roomId}>
+                                    <td>{room.roomNumber}</td>
+                                    <td>{room.location || '—'}</td>
+                                    <td>{room.roomType}</td>
+                                    <td>{room.capacity}</td>
+                                    <td>{room.status === 0 ? 'Available' : 'Unavailable'}</td>
+                                    <td>
+                                        <div className="table-actions">
+                                            <Button size="sm" variant="outline-success" onClick={() => openEdit(room)}>Edit</Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline-danger"
+                                                disabled={deleteMutation.isPending}
+                                                onClick={() => {
+                                                    if (window.confirm(`Delete room ${room.roomNumber}?`)) {
+                                                        setActionError('')
+                                                        deleteMutation.mutate(room.roomId)
+                                                    }
+                                                }}
+                                            >Delete</Button>
+                                        </div>
+                                    </td>
+                                </tr>
                             ))}
-                        </Row>
-                    )}
-                </section>
+                        </tbody>
+                    </Table>
+                </div>
             )}
+
+            <Modal show={showEditor} onHide={() => setShowEditor(false)} centered>
+                <Form onSubmit={handleSubmit}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{editingRoom ? 'Edit room' : 'Add room'}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {actionError && <Alert variant="danger">{actionError}</Alert>}
+                        <Form.Group className="mb-3" controlId="roomNumber">
+                            <Form.Label>Room number</Form.Label>
+                            <Form.Control required maxLength={10} value={form.roomNumber}
+                                onChange={event => setForm({ ...form, roomNumber: event.target.value })} />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="location">
+                            <Form.Label>Location</Form.Label>
+                            <Form.Control required value={form.location ?? ''}
+                                onChange={event => setForm({ ...form, location: event.target.value })} />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="roomType">
+                            <Form.Label>Room type</Form.Label>
+                            <Form.Select value={form.roomType}
+                                onChange={event => setForm({ ...form, roomType: event.target.value })}>
+                                <option>Group Study Room</option>
+                                <option>Class Room</option>
+                                <option>Auditorium</option>
+                            </Form.Select>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="capacity">
+                            <Form.Label>Capacity</Form.Label>
+                            <Form.Control type="number" min={1} max={250} required value={form.capacity}
+                                onChange={event => setForm({ ...form, capacity: Number(event.target.value) })} />
+                        </Form.Group>
+                        <Form.Group controlId="status">
+                            <Form.Label>Status</Form.Label>
+                            <Form.Select value={form.status}
+                                onChange={event => setForm({ ...form, status: Number(event.target.value) })}>
+                                <option value={0}>Available</option>
+                                <option value={1}>Unavailable</option>
+                            </Form.Select>
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="outline-secondary" onClick={() => setShowEditor(false)}>Cancel</Button>
+                        <Button type="submit" disabled={saveMutation.isPending}>
+                            {saveMutation.isPending ? 'Saving…' : 'Save room'}
+                        </Button>
+                    </Modal.Footer>
+                </Form>
+            </Modal>
         </main>
     )
 }
