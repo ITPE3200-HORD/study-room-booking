@@ -131,8 +131,28 @@ public class BookingController : Controller
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update(Booking booking)
+    public async Task<IActionResult> Update(int bookingId, string? Description, string startTime, string EndTime)
     {
+        var booking = await _bookingRepository.GetBookingById(bookingId);
+        if (booking == null) return NotFound();
+
+        //Parse time from drop-down 
+        if (!TimeOnly.TryParse(startTime, out var start) || !TimeOnly.TryParse(EndTime, out var end))
+        {
+            ModelState.AddModelError("", "Invalid time selected.");
+        }
+        else if (end <= start)
+        {
+            ModelState.AddModelError("","End time must be after start time");
+        }
+        else
+        {
+            var date = booking.StartTime.Date;
+            booking.StartTime = date + start.ToTimeSpan();
+            booking.EndTime = date + end.ToTimeSpan();
+            booking.Description = Description;
+        }
+        
         if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
         {
             ModelState.AddModelError("", "The room is already booked in this time period");
