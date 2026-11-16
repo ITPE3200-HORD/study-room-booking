@@ -213,7 +213,7 @@ public class BookingController : Controller
             return BadRequest("Booking deletion failed");
         }
         _logger.LogInformation("[BookingController] Booking deleted: {id}", id);
-        return RedirectToAction(nameof(Table));
+        return RedirectToAction("MyPage", "MyPage");
     }
 
     // Fills the room dropdown in the Create and Update views
