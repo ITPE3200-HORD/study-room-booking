@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\study-room-booking\study-room-booking.csproj" />
+    <ProjectReference Include="..\Subapp1-MVC\study-room-booking.csproj" />
   </ItemGroup>
 
 </Project>
