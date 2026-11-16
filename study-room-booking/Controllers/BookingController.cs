@@ -115,6 +115,7 @@ public class BookingController : Controller
     public async Task<IActionResult> Update(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
+    
         if (booking == null)
         {
             _logger.LogError("[BookingController] Booking not found when updating BookingId {id}", id);
@@ -130,8 +131,28 @@ public class BookingController : Controller
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update(Booking booking)
+    public async Task<IActionResult> Update(int bookingId, string? Description, string startTime, string EndTime)
     {
+        var booking = await _bookingRepository.GetBookingById(bookingId);
+        if (booking == null) return NotFound();
+
+        //Parse time from drop-down 
+        if (!TimeOnly.TryParse(startTime, out var start) || !TimeOnly.TryParse(EndTime, out var end))
+        {
+            ModelState.AddModelError("", "Invalid time selected.");
+        }
+        else if (end <= start)
+        {
+            ModelState.AddModelError("","End time must be after start time");
+        }
+        else
+        {
+            var date = booking.StartTime.Date;
+            booking.StartTime = date + start.ToTimeSpan();
+            booking.EndTime = date + end.ToTimeSpan();
+            booking.Description = Description;
+        }
+        
         if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
         {
             ModelState.AddModelError("", "The room is already booked in this time period");
@@ -152,7 +173,7 @@ public class BookingController : Controller
             if (updated)
             {
                 _logger.LogInformation("[BookingController] Booking updated: {id}", booking.BookingId);
-                return RedirectToAction(nameof(Table));
+                return RedirectToAction("MyPage", "MyPage");
             }
 
             ModelState.AddModelError("", "Something went wrong while updating the booking. Please try again.");
@@ -192,7 +213,7 @@ public class BookingController : Controller
             return BadRequest("Booking deletion failed");
         }
         _logger.LogInformation("[BookingController] Booking deleted: {id}", id);
-        return RedirectToAction(nameof(Table));
+        return RedirectToAction("MyPage", "MyPage");
     }
 
     // Fills the room dropdown in the Create and Update views
