@@ -53,7 +53,14 @@ using (var scope = app.Services.CreateAsyncScope())
 
 if (app.Environment.IsDevelopment())
 {
+    // Shows detailed error information for developers
     app.UseDeveloperExceptionPage();    
+}
+else
+{
+    // In production, unexpected errors send the user to a general error page
+    // without exposing technical details
+    app.UseExceptionHandler("/Home/Error");
 }
 
 app.UseStaticFiles();
