@@ -4,10 +4,12 @@ using study_room_booking.ViewModels;
 using study_room_booking.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Cryptography.X509Certificates;
 
 namespace study_room_booking.Controllers;
 
 [Authorize(Roles = "Admin")]
+
 public class StudentController : Controller
 {
     private readonly IStudentRepository _studentRepository;
@@ -22,6 +24,71 @@ public class StudentController : Controller
         _studentRepository = studentRepository;
         _userManager = userManager;
         _logger = logger;
+    }
+
+
+    //Get: /Student/Create
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View(new StudentCreateViewModel());
+    }
+
+    //POST: /Student/Create
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create (StudentCreateViewModel model)
+    {
+        if (!ModelState.IsValid)
+        return View(model);
+
+        var user = new IdentityUser
+        {
+            UserName = model.Username.Trim(),
+            Email = model.Email.Trim()
+        };
+
+        var createUserResult = await _userManager.CreateAsync(user, model.Password);
+
+        if (!createUserResult.Succeeded)
+        {
+            foreach (var error in createUserResult.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+                return View(model);
+        }
+
+        //Student-role must exist before it can be assigned
+        var addRoleResult = await _userManager.AddToRoleAsync(user, "Student");
+
+        if (!addRoleResult.Succeeded)
+        {
+            await _userManager.DeleteAsync(user);
+
+            foreach (var error in addRoleResult.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+                return View(model);
+        }
+
+        var student = new Student
+        {
+            FullName= model.FullName.Trim(),
+            IdentityUserId = user.Id
+        };
+
+        if (!await _studentRepository.Create(student))
+        {
+            await _userManager.DeleteAsync(user);
+
+            ModelState.AddModelError(
+                string.Empty,
+                "Could not save student profile. Please try again.");
+
+                return View(model);
+        }
+
+        return RedirectToAction(nameof(Table));
     }
 
     // GET: /Student/Table
