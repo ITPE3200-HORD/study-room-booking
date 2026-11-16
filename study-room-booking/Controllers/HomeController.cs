@@ -116,4 +116,11 @@ public class HomeController : Controller
         }
         return View(model);
     }
+
+    // GET: /Home/Error
+    // Shown when an unexpected error occurs in production (see UseExceptionHandler in Program.cs)
+    public IActionResult Error()
+    {
+        return View();
+    }
 }
