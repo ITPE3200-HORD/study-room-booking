@@ -2,12 +2,7 @@ import { useState, type SubmitEvent } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-type LoginErrorResponse = {
-    message?: string
-}
+import * as AccountService from './AccountService'
 
 function LoginPage() {
     const navigate = useNavigate()
@@ -24,18 +19,7 @@ function LoginPage() {
         setIsSubmitting(true)
 
         try {
-            const response = await fetch(`${API_URL}/api/Account/Login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include', 
-                body: JSON.stringify({ username, password, rememberMe }),
-            })
-
-            const result = await response.json().catch(() => null)
-
-            if (!response.ok) {
-                throw new Error(result?.message || 'Login failed.')
-            }
+            await AccountService.login({ username, password, rememberMe })
 
             await queryClient.invalidateQueries({ queryKey: ['current-user'] })
             navigate('/')

@@ -2,15 +2,7 @@ import { useState, type SubmitEvent } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-type RegisterApiError = {
-    message?: string
-    detail?: string
-    title?: string
-    errors?: string [] | Record<string, string[]>
-}
+import * as AccountService from './AccountService'
 
 function RegisterPage() {
     const navigate = useNavigate()
@@ -29,30 +21,7 @@ function RegisterPage() {
         setIsSubmitting(true)
 
         try {
-            const response = await fetch(`${API_URL}/api/Account/Register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include', 
-                body: JSON.stringify({ userName, email, fullName, password, confirmPassword }),
-            })
-
-            const result = await response.json().catch(() => null) as RegisterApiError | null
-
-            if (!response.ok) {
-                const validationErrors = result?.errors
-                    ? Array.isArray(result.errors)
-                        ? result.errors
-                        : Object.values(result.errors).flat()
-                    : []
-
-                throw new Error(
-                    validationErrors.join(' ') ||
-                    result?.detail ||
-                    result?.message ||
-                    result?.title ||
-                    'Failed to register.'
-                )         
-            }
+            await AccountService.register({ userName, email, fullName, password, confirmPassword })
 
             await queryClient.invalidateQueries({ queryKey: ['current-user'] })
             navigate('/')
