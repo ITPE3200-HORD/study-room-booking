@@ -17,6 +17,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddOpenApi(); //Native .Net OpenAPI support
 
+// Unhandled errors are returned as standardized JSON (ProblemDetails) to the React app
+builder.Services.AddProblemDetails();
+
 builder.Services.AddDbContext<RoomDbContext>(options =>
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("RoomDbContextConnection"));
@@ -62,6 +65,10 @@ using (var scope = app.Services.CreateAsyncScope())
     await DbSeeder.SeedStudentAsync(scope.ServiceProvider, builder.Configuration);
     await DbSeeder.SeedRoomsAsync(db);
 }
+
+// Global error handling: catches any exception not handled in controllers or repositories,
+// logs it and returns a general 500 error without technical details
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
