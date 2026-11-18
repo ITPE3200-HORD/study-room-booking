@@ -18,6 +18,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddOpenApi(); //Native .Net OpenAPI support
 
+// Unhandled errors are returned as standardized JSON (ProblemDetails) to the React app
+builder.Services.AddProblemDetails();
+
 builder.Services.AddDbContext<RoomDbContext>(options =>
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("RoomDbContextConnection"));
@@ -50,6 +53,10 @@ var logger = loggerConfiguration.CreateLogger();
 builder.Logging.AddSerilog(logger);
 
 var app = builder.Build();
+
+// Global error handling: catches any exception not handled in controllers or repositories,
+// logs it and returns a general 500 error without technical details
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
