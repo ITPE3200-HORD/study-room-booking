@@ -9,7 +9,7 @@ export type MyBooking = {
 }
 
 export type MyStudySession = {
-    studySessionId: number 
+    studySessionId: number
     title: string
     subject: string | null
     isOpen: boolean

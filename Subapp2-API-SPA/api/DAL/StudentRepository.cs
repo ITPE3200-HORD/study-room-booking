@@ -47,19 +47,19 @@ public class StudentRepository : IStudentRepository
     }
 
     public async Task<Student?> GetByIdentityUserId(string userId)
-{
-    try
     {
-        return await _db.Students
-            .Include(student => student.IdentityUser)
-            .FirstOrDefaultAsync(student => student.IdentityUserId == userId);
+        try
+        {
+            return await _db.Students
+                .Include(student => student.IdentityUser)
+                .FirstOrDefaultAsync(student => student.IdentityUserId == userId);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("[StudentRepository] GetByIdentityUserId() failed for user {UserId}, error message: {e}", userId, e.Message);
+            return null;
+        }
     }
-    catch (Exception e)
-    {
-        _logger.LogError("[StudentRepository] GetByIdentityUserId() failed for user {UserId}, error message: {e}", userId, e.Message);
-        return null;
-    }
-}
 
     public async Task<bool> Create(Student student)
     {

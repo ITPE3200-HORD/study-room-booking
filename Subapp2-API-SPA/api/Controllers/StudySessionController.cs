@@ -37,8 +37,8 @@ public class StudySessionController : ControllerBase
         var sessions = await _studySessionRepository.GetOpen(subject, date);
         if (sessions == null)
         {
-            _logger.LogError("[StudySessionController] Failed to retrieve studysession");
-            return Problem("Studysession could not be retrieved.", statusCode: StatusCodes.Status500InternalServerError);
+            _logger.LogError("[StudySessionController] Failed to retrieve study session");
+            return Problem("Study session could not be retrieved.", statusCode: StatusCodes.Status500InternalServerError);
         }
 
         var currentStudentId = await GetCurrentStudentId();
@@ -59,7 +59,7 @@ public class StudySessionController : ControllerBase
         return Ok(ToDto(session, await GetCurrentStudentId()));
     }
 
-  // POST: /api/StudySession
+    // POST: /api/StudySession
     // Opens one of your own bookings as a study session
     [HttpPost]
     [Authorize]
@@ -225,7 +225,7 @@ public class StudySessionController : ControllerBase
         return NoContent();
     }
 
-        // ---------- Helpers ----------
+    // ---------- Helpers ----------
 
     private async Task<StudentEntity?> GetCurrentStudent()
     {

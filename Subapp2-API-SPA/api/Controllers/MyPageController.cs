@@ -89,7 +89,9 @@ public class MyPageController : ControllerBase
 
             return Ok(new
             {
-                hasStudentProfile
+                hasStudentProfile,
+                bookings,
+                studySessions
             });
         }
         catch (Exception ex)

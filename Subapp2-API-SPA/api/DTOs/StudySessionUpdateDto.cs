@@ -13,6 +13,6 @@ public class StudySessionUpdateDto
 
     [Range(2, 50)]    
     public int MaxParticipants { get; set; }
-    public Boolean IsOpen { get; set; }
+    public bool IsOpen { get; set; }
 
 }
