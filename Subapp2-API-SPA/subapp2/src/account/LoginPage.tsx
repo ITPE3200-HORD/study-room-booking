@@ -2,7 +2,7 @@ import { useState, type SubmitEvent } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-import * as AccountService from './AccountService'
+import { login } from './AccountService'
 
 function LoginPage() {
     const navigate = useNavigate()
@@ -19,16 +19,12 @@ function LoginPage() {
         setIsSubmitting(true)
 
         try {
-            await AccountService.login({ username, password, rememberMe })
-
+            // The API call and error handling are done in AccountService
+            await login({ username, password, rememberMe })
             await queryClient.invalidateQueries({ queryKey: ['current-user'] })
             navigate('/')
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : 'Could not connect to the API.'
-    )
+            setError(err instanceof Error ? err.message : 'Login failed.')
         } finally {
             setIsSubmitting(false)
         }

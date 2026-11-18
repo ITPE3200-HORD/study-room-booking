@@ -28,82 +28,106 @@ public class AccountController : ControllerBase
         _studentRepository = studentRepository;
         _logger = logger;
     }
-    
+
     // POST: /api/Account/Register
     [HttpPost("Register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequestDto model)
     {
-        var user = new IdentityUser
+        try
         {
-            UserName = model.Username,
-            Email = model.Email
-        };
-
-        var result = await _userManager.CreateAsync(user, model.Password);
-
-        if (!result.Succeeded)
-        {
-            return BadRequest(new
+            var user = new IdentityUser
             {
-                errors = result.Errors.Select(error => error.Description)
-            });
-        }
+                UserName = model.Username,
+                Email = model.Email
+            };
 
-        var student = new Student
-        {
-            FullName = model.FullName.Trim(),
-            IdentityUserId = user.Id
-        };
+            var result = await _userManager.CreateAsync(user, model.Password);
 
-        if (!await _studentRepository.Create(student))
-        {
-            var rollbackResult = await _userManager.DeleteAsync(user);
-
-            _logger.LogError(
-                "[AccountController] Failed to create student profile for user {UserId}",
-                user.Id);
-
-            if (!rollbackResult.Succeeded)
+            if (!result.Succeeded)
             {
-                _logger.LogError(
-                    "[AccountController] Failed to roll back user {UserId}",
-                    user.Id);
+                // Invalid input (e.g. username taken, weak password) is a user error, so Warning is used
+                _logger.LogWarning("[AccountController] Registration failed for user {Username}", model.Username);
+                return BadRequest(new
+                {
+                    errors = result.Errors.Select(error => error.Description)
+                });
             }
 
-            return Problem(
-                "Could not create the student profile.",
-                statusCode: StatusCodes.Status500InternalServerError);
+            var student = new Student
+            {
+                FullName = model.FullName.Trim(),
+                IdentityUserId = user.Id
+            };
+
+            if (!await _studentRepository.Create(student))
+            {
+                var rollbackResult = await _userManager.DeleteAsync(user);
+
+                _logger.LogError(
+                    "[AccountController] Failed to create student profile for user {UserId}",
+                    user.Id);
+
+                if (!rollbackResult.Succeeded)
+                {
+                    _logger.LogError(
+                        "[AccountController] Failed to roll back user {UserId}",
+                        user.Id);
+                }
+
+                return Problem(
+                    "Could not create the student profile.",
+                    statusCode: StatusCodes.Status500InternalServerError);
+            }
+
+            await _signInManager.SignInAsync(user, isPersistent: false);
+
+            return Ok(new
+            {
+                message = "Account created.",
+                username = user.UserName
+            });
         }
-
-        await _signInManager.SignInAsync(user, isPersistent: false);
-
-        return Ok(new
+        catch (Exception e)
         {
-            message = "Account created.",
-            username = user.UserName
-        });
+            // Unexpected errors (e.g. database unavailable) are logged with full details,
+            // while the user only receives a general message without technical information
+            _logger.LogError(e, "[AccountController] Registration failed unexpectedly for user {Username}", model.Username);
+            return Problem("Registration could not be completed.", statusCode: StatusCodes.Status500InternalServerError);
+        }
     }
 
     // POST: /api/Account/Login
     [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto model)
     {
-        var result = await _signInManager.PasswordSignInAsync(
-            model.Username,
-            model.Password,
-            model.RememberMe,
-            lockoutOnFailure: false);
+        try
+        {
+            var result = await _signInManager.PasswordSignInAsync(
+                model.Username,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: false);
 
-        
-        if (!result.Succeeded)
-        {
-            return Unauthorized(new { message = "Invalid username or password."});
+            if (!result.Succeeded)
+            {
+                // Wrong username or password is a user error, not a system error, so Warning is used
+                _logger.LogWarning("[AccountController] Failed login attempt for user {Username}", model.Username);
+                return Unauthorized(new { message = "Invalid username or password." });
+            }
+
+            return Ok(new
+            {
+                message = "Logged in.",
+                username = model.Username
+            });
         }
-        return Ok(new
+        catch (Exception e)
         {
-            message = "Logged in.",
-            username = model.Username
-        });
+            // Unexpected errors (e.g. database unavailable) are logged with full details,
+            // while the user only receives a general message without technical information
+            _logger.LogError(e, "[AccountController] Login failed for user {Username}", model.Username);
+            return Problem("Login could not be completed.", statusCode: StatusCodes.Status500InternalServerError);
+        }
     }
 
     // GET: /api/Account/Me

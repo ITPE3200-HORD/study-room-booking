@@ -2,7 +2,7 @@ import { Alert, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import * as AccountService from '../account/AccountService'
+import { fetchCurrentUser, logout } from '../account/AccountService';
 
 export default function NavMenu() {
     const navigate = useNavigate()
@@ -20,15 +20,15 @@ export default function NavMenu() {
         setIsLoggingOut(true)
 
         try {
-            await AccountService.logout()
-
+            // The API call and error handling are done in AccountService
+            await logout()
             queryClient.setQueryData(['current-user'], null)
-            navigate('/', { replace: true })
-        } catch (error) {
-            setLogoutError(
-                error instanceof Error ? error.message : 'Could not log out.',
-            )
-        } finally {
+            navigate('/ { replace: true }')
+        }
+        catch (error) {
+            setLogoutError(error instanceof Error ? error.message : 'Could not log out.')
+        }
+        finally {
             setIsLoggingOut(false)
         }
     }

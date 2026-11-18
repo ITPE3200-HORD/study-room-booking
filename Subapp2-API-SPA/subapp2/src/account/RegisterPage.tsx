@@ -2,7 +2,7 @@ import { useState, type SubmitEvent } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-import * as AccountService from './AccountService'
+import { register } from './AccountService'
 
 function RegisterPage() {
     const navigate = useNavigate()
@@ -21,16 +21,13 @@ function RegisterPage() {
         setIsSubmitting(true)
 
         try {
-            await AccountService.register({ userName, email, fullName, password, confirmPassword })
-
+            // The API call and error handling are done in AccountService
+            await register({ userName, email, fullName, password, confirmPassword })
             await queryClient.invalidateQueries({ queryKey: ['current-user'] })
             navigate('/')
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : 'Could not connect to the API.'
-    )
+            // Shows the message from the API, or a network error from safeFetch
+            setError(err instanceof Error ? err.message : 'Failed to register.')
         } finally {
             setIsSubmitting(false)
         }
@@ -55,7 +52,7 @@ function RegisterPage() {
                             />
                         </Form.Group>
 
-                         <Form.Group className="mb-3" controlId="email">
+                        <Form.Group className="mb-3" controlId="email">
                             <Form.Label>Email</Form.Label>
                             <Form.Control
                                 type="email"
@@ -66,7 +63,7 @@ function RegisterPage() {
                             />
                         </Form.Group>
 
-                         <Form.Group className="mb-3" controlId="fullName">
+                        <Form.Group className="mb-3" controlId="fullName">
                             <Form.Label>Full name</Form.Label>
                             <Form.Control
                                 autoComplete="name"

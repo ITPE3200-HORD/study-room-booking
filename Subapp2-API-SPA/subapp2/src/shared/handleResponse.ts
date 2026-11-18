@@ -32,3 +32,14 @@ function readErrorMessage(data: unknown): string | undefined {
     }
     return body.detail || body.message || body.title
 }
+
+
+// fetch only throws when the server cannot be reached (e.g. the API is not running).
+// This replaces the technical "Failed to fetch" with a message the user understands.
+export async function safeFetch(url: string, options?: RequestInit): Promise<Response> {
+    try {
+        return await fetch(url, options)
+    } catch {
+        throw new ApiError('Could not connect to the server. Please try again later.', 0)
+    }
+}
