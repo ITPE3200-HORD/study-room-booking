@@ -1,8 +1,4 @@
-export type CurrentUser = {
-    username: string
-    userId: string
-    isAdmin: boolean
-}
+import type { CurrentUser } from "../types/auth"
 
 export async function fetchCurrentUser(): Promise<CurrentUser | null> {
     const response = await fetch(

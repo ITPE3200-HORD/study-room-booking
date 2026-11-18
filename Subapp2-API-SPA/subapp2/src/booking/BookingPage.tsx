@@ -1,33 +1,9 @@
 import { useState, type ChangeEvent, type SubmitEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap'
+import type { SearchForm, SearchParams, SearchResult } from '../types/booking'
 
 const API_URL = import.meta.env.VITE_API_URL;
-
-type SearchFrom = {
-    date: string
-    startTime: string
-    durationMinutes: string
-    groupSize: string
-    roomType: string
-}
-
-type SearchParams = SearchFrom & {
-    requestId: number
-}
-
-type AvailableRoom = {
-    roomId: number
-    location: string | null
-    roomNumber: string
-    roomType: string
-    capacity: number
-}
-
-type SearchResult = {
-    availableRoomCount: number
-    availableRooms: AvailableRoom[]
-}
 
 function toLocalDate(date: Date): string {
     const year = date.getFullYear()
@@ -39,7 +15,7 @@ function toLocalDate(date: Date): string {
 const tomorrow = new Date()
 tomorrow.setDate(tomorrow.getDate() + 1)
 
-const initialForm: SearchFrom = {
+const initialForm: SearchForm = {
     date: toLocalDate(tomorrow),
     startTime: '14:00:00',
     durationMinutes: '120',
@@ -69,7 +45,7 @@ async function searchAvailableRooms(search: SearchParams): Promise<SearchResult>
 
 export default function BookingPage() {
     const queryClient = useQueryClient()
-    const [form, setForm] = useState<SearchFrom>(initialForm)
+    const [form, setForm] = useState<SearchForm>(initialForm)
     const [search, setSearch] = useState<SearchParams | null>(null)
 
     const { data, isFetching, error } = useQuery({

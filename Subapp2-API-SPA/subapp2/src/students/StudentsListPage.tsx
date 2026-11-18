@@ -1,54 +1,21 @@
 import { useState, type SubmitEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Button, Form, Modal, Table } from 'react-bootstrap'
-
-const API_URL = import.meta.env.VITE_API_URL
-
-type Student = {
-    studentId: number
-    userName: string
-    fullName: string
-    email: string
-}
-
-type StudentForm = Omit<Student, 'studentId'>
-
-async function fetchStudents(): Promise<Student[]> {
-    const response = await fetch(`${API_URL}/api/Student`, { credentials: 'include' })
-    if (!response.ok) throw new Error('Could not load students.')
-    return response.json() as Promise<Student[]>
-}
-
-async function updateStudent(student: Student) {
-    const response = await fetch(`${API_URL}/api/Student/${student.studentId}`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(student),
-    })
-    if (!response.ok) throw new Error('Could not update student. Check the details and your permissions.')
-}
-
-async function deleteStudent(studentId: number) {
-    const response = await fetch(`${API_URL}/api/Student/${studentId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-    })
-    if (!response.ok) throw new Error('Could not delete student.')
-}
+import * as StudentService from './StudentService'
+import { Student, StudentForm } from '../types/student'
 
 export default function StudentsListPage() {
     const queryClient = useQueryClient()
     const { data: students = [], isLoading, error } = useQuery({
         queryKey: ['students'],
-        queryFn: fetchStudents,
+        queryFn: StudentService.fetchStudents,
     })
     const [editingStudent, setEditingStudent] = useState<Student | null>(null)
     const [form, setForm] = useState<StudentForm>({ userName: '', fullName: '', email: '' })
     const [actionError, setActionError] = useState('')
 
     const updateMutation = useMutation({
-        mutationFn: updateStudent,
+        mutationFn: StudentService.updateStudent,
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['students'] })
             setEditingStudent(null)
@@ -57,7 +24,7 @@ export default function StudentsListPage() {
         onError: error => setActionError(error.message),
     })
     const deleteMutation = useMutation({
-        mutationFn: deleteStudent,
+        mutationFn: StudentService.deleteStudent,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['students'] }),
         onError: error => setActionError(error.message),
     })

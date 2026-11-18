@@ -1,61 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { Alert, Spinner, Table } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-type MyBooking = {
-    bookingId: number
-    roomId: number
-    roomNumber: string | null
-    startTime: string
-    endTime: string
-    description: string | null
-}
-
-type MyStudySession = {
-    studySessionId: number
-    title: string
-    subject: string | null
-    isOpen: boolean
-    maxParticipants: number
-    participantCount: number
-    bookingId: number
-    roomId: number
-    roomNumber: string | null
-    startTime: string
-    endTime: string
-}
-
-type MyPageData = {
-    hasStudentProfile: boolean
-    bookings: MyBooking[]
-    studySessions: MyStudySession[]
-}
-
-type ApiError = Error & {
-    status?: number
-}
-
-async function fetchMyPage(): Promise<MyPageData> {
-    const response = await fetch(`${API_URL}/api/MyPage`, {
-        credentials: 'include',
-    })
-
-    if (!response.ok) {
-        const error = Object.assign(
-            new Error(
-            response.status === 401
-                ? 'Log in to see you booking and study sessions.'
-                : `Could not load My Page (${response.status}).`
-            ),
-            { status: response.status }
-        )
-        throw error
-    }
-
-    return response.json()
-}
+import type { MyPageData } from '../types/myPage';
+import * as AccountService from './AccountService'
+import { ApiError } from '../shared/handleResponse';
 
 function formatDate(value: string): string {
     return new Date(value).toLocaleString('nb-NO')
@@ -64,7 +12,7 @@ function formatDate(value: string): string {
 function MyPagePage() {
     const { data, isLoading, error } = useQuery<MyPageData, ApiError>({
     queryKey: ['myPage'],
-    queryFn: fetchMyPage,
+    queryFn: AccountService.fetchMyPage,
     })
 
     if (isLoading) {
@@ -76,7 +24,7 @@ function MyPagePage() {
         )
     }
 
-    if (error?.status === 401) {
+    if (error instanceof ApiError && error.status === 401) {
         return (
             <Alert variant="warning">
                 {error.message} <Link to="/login">Log in</Link>
