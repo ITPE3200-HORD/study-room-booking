@@ -83,33 +83,40 @@ public class RoomAPIController : ControllerBase
             return NotFound();
         }
 
-        var room = FromDto(roomDto);
-        var updated = await _roomRepository.Update(room);
-        if (!updated)
+        // Update the existing room instead of creating a new object,
+        // because EF Core is already tracking a room with this id
+        existingRoom.Location = roomDto.Location;
+        existingRoom.RoomNumber = roomDto.RoomNumber;
+        existingRoom.RoomType = roomDto.RoomType;
+        existingRoom.Capacity = roomDto.Capacity;
+        existingRoom.Status = (Room.Availability)roomDto.Status;
+
+        var update = await _roomRepository.Update(existingRoom);
+        if (!update)
         {
-            _logger.LogError("[RoomAPIController] Failed to update room: {RoomId} {RoomNumber}", id, room.RoomNumber);
+            _logger.LogError("[RoomAPIController] Failed to update room: {RoomId} {RoomNumber}", id, existingRoom.RoomNumber);
             return Problem("Could not update the room. Please try again.", statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        _logger.LogInformation("[RoomAPIController] Room updated: {RoomId} {RoomNumber}", room.RoomId, room.RoomNumber);
+        _logger.LogInformation("[RoomAPIController] Room updated: {RoomId} {RoomNumber}", id, existingRoom.RoomNumber);
         return NoContent();
     }
 
-    // DELETE: /api/roomAPI/{id}
-    [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var deleted = await _roomRepository.Delete(id);
-        if (!deleted)
+        // DELETE: /api/roomAPI/{id}
+        [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
         {
-            _logger.LogWarning("[RoomAPIController] Failed to delete room, RoomId: {RoomId}", id);
-            return NotFound();
-        }
+            var deleted = await _roomRepository.Delete(id);
+            if (!deleted)
+            {
+                _logger.LogWarning("[RoomAPIController] Failed to delete room, RoomId: {RoomId}", id);
+                return NotFound();
+            }
 
-        _logger.LogInformation("[RoomAPIController] Room deleted, RoomId: {RoomId}", id);
-        return NoContent();
-    }
+            _logger.LogInformation("[RoomAPIController] Room deleted, RoomId: {RoomId}", id);
+            return NoContent();
+        }
 
     private static RoomDto ToDto(Room room) => new()
     {
