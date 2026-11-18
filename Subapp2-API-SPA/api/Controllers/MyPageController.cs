@@ -39,6 +39,11 @@ public class MyPageController : ControllerBase
                 .Where(student => student.IdentityUserId == userId)
                 .Select(student => (int?)student.StudentId)
                 .SingleOrDefaultAsync();
+            
+            // Admins (and others without a Student profile) have no study sessions
+            var hasStudentProfile = studentId.HasValue;
+            var currentStudentId = studentId ?? 0;
+
 
             var bookings = await _dbContext.Bookings
                 .AsNoTracking()
@@ -53,14 +58,17 @@ public class MyPageController : ControllerBase
                         : booking.Room.RoomNumber,
                     booking.StartTime,
                     booking.EndTime,
-                    booking.Description
+                    booking.Description,
+                    studySessionId = booking.StudySession == null
+                        ? (int?)null
+                        : booking.StudySession.StudySessionId
                 })
                 .ToListAsync();
             
             var studySessions = await _dbContext.StudySessions
                 .AsNoTracking()
                 .Where(session => session.Participants
-                    .Any(participant => participant.StudentId == studentId.Value))
+                    .Any(participant => participant.StudentId == currentStudentId))
                 .OrderBy(session => session.Booking.StartTime)
                 .Select(session => new
                 {
@@ -68,11 +76,12 @@ public class MyPageController : ControllerBase
                     title = session.Title,
                     subject = session.Subject,
                     isOpen = session.IsOpen,
+                    isOwner = session.Booking.UserId == userId,
                     maxParticipants = session.MaxParticipants,
                     participantCount = session.Participants.Count,
                     bookingId = session.BookingId,
                     roomId = session.Booking.RoomId,
-                    roomNumber = session.Booking.Room.RoomNumber,
+                    roomNumber = session.Booking.Room == null ? null : session.Booking.Room.RoomNumber,
                     startTime = session.Booking.StartTime,
                     endTime = session.Booking.EndTime
                 })
@@ -80,7 +89,7 @@ public class MyPageController : ControllerBase
 
             return Ok(new
             {
-                hasStudentProfile = true, bookings, studySessions
+                hasStudentProfile
             });
         }
         catch (Exception ex)

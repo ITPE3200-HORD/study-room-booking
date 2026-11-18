@@ -55,7 +55,7 @@ public class HomeController : ControllerBase
                     maxParticipants = session.MaxParticipants,
                     participantCount = session.Participants.Count,
                     roomId = session.Booking.RoomId,
-                    roomNumber = session.Booking.Room.RoomNumber,
+                    roomNumber = session.Booking.Room == null ? null : session.Booking.Room.RoomNumber,
                     startTime = session.Booking.StartTime,
                     endTime = session.Booking.EndTime
                 })

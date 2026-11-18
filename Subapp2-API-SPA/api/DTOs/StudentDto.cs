@@ -1,6 +1,6 @@
 namespace study_room_booking.DTOs;
 
-public class Student
+public class StudentDto
 {
     public int StudentId { get; set; }
     public string UserName { get; set; } = string.Empty;

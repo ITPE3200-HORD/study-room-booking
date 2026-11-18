@@ -8,6 +8,7 @@ public interface IStudySessionRepository
     Task<bool> Create(StudySession session);
     Task<bool> Update(StudySession session);
     Task<bool> Delete(int id);
+    Task<bool> ExistsForBooking(int bookingId);
     Task<bool> AddParticipant(SessionParticipant participant);     // join
     Task<bool> RemoveParticipant(int studySessionId, int studentId); // leave
 }
