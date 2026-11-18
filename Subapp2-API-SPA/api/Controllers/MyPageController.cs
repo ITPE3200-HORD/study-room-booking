@@ -31,7 +31,7 @@ public class MyPageController : ControllerBase
         {
             return Unauthorized();
         }
-        
+
         try
         {
             var studentId = await _dbContext.Students
@@ -56,7 +56,21 @@ public class MyPageController : ControllerBase
                     booking.Description
                 })
                 .ToListAsync();
-            
+
+            // Users without a student profile (e.g. admins) cannot join study sessions,
+            // so only their bookings are returned
+            if (studentId == null)
+            {
+                _logger.LogWarning("[MyPageController] No student profile found for user { UserId}", userId);
+                    return Ok(new
+                    {
+                        hasStudentProfile = false,
+                        bookings,
+                        studySessions = Array.Empty<object>()
+
+                    });
+            }
+
             var studySessions = await _dbContext.StudySessions
                 .AsNoTracking()
                 .Where(session => session.Participants
@@ -72,7 +86,10 @@ public class MyPageController : ControllerBase
                     participantCount = session.Participants.Count,
                     bookingId = session.BookingId,
                     roomId = session.Booking.RoomId,
-                    roomNumber = session.Booking.Room.RoomNumber,
+                    // Room can be null, so check it before reading RoomNumber
+                    roomNumber = session.Booking.Room == null
+                        ? null
+                        : session.Booking.Room.RoomNumber,
                     startTime = session.Booking.StartTime,
                     endTime = session.Booking.EndTime
                 })
@@ -80,7 +97,9 @@ public class MyPageController : ControllerBase
 
             return Ok(new
             {
-                hasStudentProfile = true, bookings, studySessions
+                hasStudentProfile = true,
+                bookings,
+                studySessions
             });
         }
         catch (Exception ex)
