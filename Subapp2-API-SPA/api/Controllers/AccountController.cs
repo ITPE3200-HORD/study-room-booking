@@ -28,7 +28,7 @@ public class AccountController : ControllerBase
         _studentRepository = studentRepository;
         _logger = logger;
     }
-    
+
     // POST: /api/Account/Register
     [HttpPost("Register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequestDto model)
@@ -88,22 +88,34 @@ public class AccountController : ControllerBase
     [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto model)
     {
-        var result = await _signInManager.PasswordSignInAsync(
-            model.Username,
-            model.Password,
-            model.RememberMe,
-            lockoutOnFailure: false);
+        try
+        {
+            var result = await _signInManager.PasswordSignInAsync(
+                model.Username,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: false);
 
-        
-        if (!result.Succeeded)
-        {
-            return Unauthorized(new { message = "Invalid username or password."});
+            if (!result.Succeeded)
+            {
+                // Wrong username or password is a user error, not a system error, so Warning is used
+                _logger.LogWarning("[AccountController] Failed login attempt for user {Username}", model.Username);
+                return Unauthorized(new { message = "Invalid username or password." });
+            }
+
+            return Ok(new
+            {
+                message = "Logged in.",
+                username = model.Username
+            });
         }
-        return Ok(new
+        catch (Exception e)
         {
-            message = "Logged in.",
-            username = model.Username
-        });
+            // Unexpected errors (e.g. database unavailable) are logged with full details,
+            // while the user only receives a general message without technical information
+            _logger.LogError(e, "[AccountController] Login failed for user {Username}", model.Username);
+            return Problem("Login could not be completed.", statusCode: StatusCodes.Status500InternalServerError);
+        }
     }
 
     // GET: /api/Account/Me
