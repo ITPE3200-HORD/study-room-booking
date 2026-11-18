@@ -1,1 +1,0 @@
-import type { CurrentUser } from "../types/auth"
