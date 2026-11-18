@@ -1,5 +1,5 @@
-import type { BookingCreateDto, SearchForm, SearchResult } from "../types/booking";
-import { handleResponse } from "../shared/handleResponse";
+import type { BookingCreateDto, SearchForm, SearchResult } from '../types/booking';
+import { handleResponse } from '../shared/handleResponse';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -15,7 +15,7 @@ export async function searchAvailableRooms(search: SearchForm): Promise<SearchRe
     const response = await fetch(
         `${API_URL}/api/Home/available-rooms?${params}`
     )
-    
+
     return handleResponse<SearchResult>(response, 'Room search failed.')
 }
 

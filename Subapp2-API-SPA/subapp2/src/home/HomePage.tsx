@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Card, Col, Row, Spinner } from 'react-bootstrap'
-import { fetchCurrentUser } from '../shared/auth'
+import { fetchCurrentUser } from '../account/AccountService'
 import * as HomeService from './HomeService'
 
 export default function HomePage() {
