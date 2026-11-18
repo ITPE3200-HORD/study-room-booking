@@ -1,6 +1,7 @@
 export type MyBooking = {
     bookingId: number
     roomId: number
+    studySessionId: number | null
     roomNumber: string | null
     startTime: string
     endTime: string
@@ -12,6 +13,7 @@ export type MyStudySession = {
     title: string
     subject: string | null
     isOpen: boolean
+    isOwner: boolean
     maxParticipants: number
     participantCount: number
     bookingId: number

@@ -11,7 +11,7 @@ export default function NavMenu() {
     const [isLoggingOut, setIsLoggingOut] = useState(false)
     const { data: user } = useQuery({
         queryKey: ['current-user'],
-        queryFn: fetchCurrentUser,
+        queryFn: AccountService.fetchCurrentUser,
         retry: false,
     })
 

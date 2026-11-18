@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using study_room_booking.DAL;
 using StudentEntity = study_room_booking.Models.Student;
-using StudentResponseDto = study_room_booking.DTOs.Student;
+using StudentResponseDto = study_room_booking.DTOs.StudentDto;
 using StudentUpdateDto = study_room_booking.DTOs.StudentUpdateDto;
 
 namespace study_room_booking.Controllers;
