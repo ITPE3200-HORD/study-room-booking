@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { Alert, Spinner, Table } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-import type { MyPageData } from '../types/myPage';
+import type { MyPageData } from '../types/myPage'
 import * as AccountService from './AccountService'
-import { ApiError } from '../shared/handleResponse';
+import { ApiError } from '../shared/handleResponse'
 
 function formatDate(value: string): string {
     return new Date(value).toLocaleString('nb-NO')

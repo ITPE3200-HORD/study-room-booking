@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { Card, Col, Row, Spinner } from 'react-bootstrap'
 import { fetchCurrentUser } from '../shared/auth'
 import * as HomeService from './HomeService'
-import type { HomeData } from '../types/home'
 
 export default function HomePage() {
     const { data: user,

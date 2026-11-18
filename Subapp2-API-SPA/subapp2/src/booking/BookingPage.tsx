@@ -1,9 +1,8 @@
 import { useState, type ChangeEvent, type SubmitEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap'
-import type { SearchForm, SearchParams, SearchResult } from '../types/booking'
-
-const API_URL = import.meta.env.VITE_API_URL;
+import type { SearchForm, SearchParams } from '../types/booking'
+import * as BookingService from './BookingService'
 
 function toLocalDate(date: Date): string {
     const year = date.getFullYear()
@@ -23,26 +22,6 @@ const initialForm: SearchForm = {
     roomType: '',
 }
 
-async function searchAvailableRooms(search: SearchParams): Promise<SearchResult> {
-    const params = new URLSearchParams({
-        date: search.date, 
-        startTime: search.startTime,
-        durationMinutes: search.durationMinutes,
-        groupSize: search.groupSize,
-        roomType: search.roomType,
-    })
-
-    const response = await fetch(
-        `${API_URL}/api/Home/available-rooms?${params}`
-    )
-
-    if (!response.ok) {
-        throw new Error(`Room search failed (${response.status})`)
-    }
-
-    return response.json() as Promise<SearchResult>
-}
-
 export default function BookingPage() {
     const queryClient = useQueryClient()
     const [form, setForm] = useState<SearchForm>(initialForm)
@@ -54,32 +33,23 @@ export default function BookingPage() {
             if (search === null) {
                 throw new Error('Search criteria are missing.')
             }
-            return searchAvailableRooms(search)
+            return BookingService.searchAvailableRooms(search)
         },
         enabled: search !== null,
     })
 
     const bookingMutation = useMutation({
-        mutationFn: async ({ roomId, searchParams }: { roomId: number; searchParams: SearchParams }) => {
+        mutationFn: ({ roomId, searchParams }: { roomId: number; searchParams: SearchParams }) => {
             const start = new Date(`${searchParams.date}T${searchParams.startTime}`)
             const end = new Date(start.getTime() + Number(searchParams.durationMinutes) * 60_000)
             const toLocalDateTime = (value: Date) =>
                 `${toLocalDate(value)}T${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}:00`
-            const response = await fetch(`${API_URL}/api/Booking`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    roomId,
-                    startTime: toLocalDateTime(start),
-                    endTime: toLocalDateTime(end),
-                    description: '',
-                }),
+            return BookingService.createBooking({
+                roomId,
+                startTime: toLocalDateTime(start),
+                endTime: toLocalDateTime(end),
+                description: '',
             })
-            if (!response.ok) {
-                const message = await response.text()
-                throw new Error(message || 'Could not create the booking.')
-            }
         },
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['myPage'] })
