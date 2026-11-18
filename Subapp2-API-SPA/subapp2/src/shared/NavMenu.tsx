@@ -11,7 +11,7 @@ export default function NavMenu() {
     const [isLoggingOut, setIsLoggingOut] = useState(false)
     const { data: user } = useQuery({
         queryKey: ['current-user'],
-        queryFn: AccountService.fetchCurrentUser,
+        queryFn: fetchCurrentUser,
         retry: false,
     })
 
@@ -23,7 +23,7 @@ export default function NavMenu() {
             // The API call and error handling are done in AccountService
             await logout()
             queryClient.setQueryData(['current-user'], null)
-            navigate('/ { replace: true }')
+            navigate('/', { replace: true })
         }
         catch (error) {
             setLogoutError(error instanceof Error ? error.message : 'Could not log out.')
