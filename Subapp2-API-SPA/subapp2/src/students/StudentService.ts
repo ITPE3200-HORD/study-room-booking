@@ -1,15 +1,15 @@
-import type { Student, StudentForm } from '../types/student'
-import { handleResponse } from '../shared/handleResponse'
+import type { Student } from '../types/student'
+import { handleResponse, safeFetch } from '../shared/handleResponse'
 
 const API_URL = import.meta.env.VITE_API_URL
 
 export async function fetchStudents(): Promise<Student[]> {
-    const response = await fetch(`${API_URL}/api/Student`, { credentials: 'include' })
+    const response = await safeFetch(`${API_URL}/api/Student`, { credentials: 'include' })
     return handleResponse<Student[]>(response, 'Could not load students.')
 }
 
 export async function updateStudent(student: Student): Promise<void> {
-    const response = await fetch(`${API_URL}/api/Student/${student.studentId}`, {
+    const response = await safeFetch(`${API_URL}/api/Student/${student.studentId}`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -19,7 +19,7 @@ export async function updateStudent(student: Student): Promise<void> {
 }
 
 export async function deleteStudent(studentId: number): Promise<void> {
-    const response = await fetch(`${API_URL}/api/Student/${studentId}`, {
+    const response = await safeFetch(`${API_URL}/api/Student/${studentId}`, {
         method: 'DELETE',
         credentials: 'include',
     })

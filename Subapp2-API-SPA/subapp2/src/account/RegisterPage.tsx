@@ -2,15 +2,7 @@ import { useState, type SubmitEvent } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-type RegisterApiError = {
-    message?: string
-    detail?: string
-    title?: string
-    errors?: string [] | Record<string, string[]>
-}
+import { register } from './AccountService'
 
 function RegisterPage() {
     const navigate = useNavigate()
@@ -29,39 +21,13 @@ function RegisterPage() {
         setIsSubmitting(true)
 
         try {
-            const response = await fetch(`${API_URL}/api/Account/Register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include', 
-                body: JSON.stringify({ userName, email, fullName, password, confirmPassword }),
-            })
-
-            const result = await response.json().catch(() => null) as RegisterApiError | null
-
-            if (!response.ok) {
-                const validationErrors = result?.errors
-                    ? Array.isArray(result.errors)
-                        ? result.errors
-                        : Object.values(result.errors).flat()
-                    : []
-
-                throw new Error(
-                    validationErrors.join(' ') ||
-                    result?.detail ||
-                    result?.message ||
-                    result?.title ||
-                    'Failed to register.'
-                )         
-            }
-
+            // The API call and error handling are done in AccountService
+            await register({ userName, email, fullName, password, confirmPassword })
             await queryClient.invalidateQueries({ queryKey: ['current-user'] })
             navigate('/')
         } catch (err) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : 'Could not connect to the API.'
-    )
+            // Shows the message from the API, or a network error from safeFetch
+            setError(err instanceof Error ? err.message : 'Failed to register.')
         } finally {
             setIsSubmitting(false)
         }
@@ -86,7 +52,7 @@ function RegisterPage() {
                             />
                         </Form.Group>
 
-                         <Form.Group className="mb-3" controlId="email">
+                        <Form.Group className="mb-3" controlId="email">
                             <Form.Label>Email</Form.Label>
                             <Form.Control
                                 type="email"
@@ -97,7 +63,7 @@ function RegisterPage() {
                             />
                         </Form.Group>
 
-                         <Form.Group className="mb-3" controlId="fullName">
+                        <Form.Group className="mb-3" controlId="fullName">
                             <Form.Label>Full name</Form.Label>
                             <Form.Control
                                 autoComplete="name"

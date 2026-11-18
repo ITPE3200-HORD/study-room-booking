@@ -2,7 +2,7 @@ import { Alert, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchCurrentUser } from '../account/AccountService'
+import { fetchCurrentUser, logout } from '../account/AccountService';
 
 export default function NavMenu() {
     const navigate = useNavigate()
@@ -20,20 +20,15 @@ export default function NavMenu() {
         setIsLoggingOut(true)
 
         try {
-            const response = await fetch(
-                `${import.meta.env.VITE_API_URL}/api/Account/Logout`,
-                { method: 'POST', credentials: 'include' },
-            )
-
-            if (!response.ok) throw new Error('Could not log out.')
-
+            // The API call and error handling are done in AccountService
+            await logout()
             queryClient.setQueryData(['current-user'], null)
-            navigate('/', { replace: true })
-        } catch (error) {
-            setLogoutError(
-                error instanceof Error ? error.message : 'Could not log out.',
-            )
-        } finally {
+            navigate('/ { replace: true }')
+        }
+        catch (error) {
+            setLogoutError(error instanceof Error ? error.message : 'Could not log out.')
+        }
+        finally {
             setIsLoggingOut(false)
         }
     }

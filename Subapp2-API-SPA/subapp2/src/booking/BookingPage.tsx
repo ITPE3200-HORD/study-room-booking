@@ -179,7 +179,7 @@ export default function BookingPage() {
 
             {error && (
                 <Alert className="search-error" variant="danger" role="alert">
-                    Could not search for rooms. Check that the API is running.
+                   {error.message}
                 </Alert>
             )}
 
