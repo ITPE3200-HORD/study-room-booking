@@ -20,8 +20,8 @@ public class BookingController : ControllerBase
     private readonly ILogger<BookingController> _logger;
 
     public BookingController(
-        IBookingRepository bookingRepository, 
-        IRoomRepository roomRepository, 
+        IBookingRepository bookingRepository,
+        IRoomRepository roomRepository,
         ILogger<BookingController> logger)
     {
         _bookingRepository = bookingRepository;
@@ -29,7 +29,7 @@ public class BookingController : ControllerBase
         _logger = logger;
     }
 
-    // GET: /api/Table
+    // GET: /api/Booking
     // Shows all bookings in a table
     [HttpGet]
     public async Task<IActionResult> GetAll()
@@ -64,7 +64,7 @@ public class BookingController : ControllerBase
             booking.EndTime,
             booking.Description
         });
-}
+    }
 
     //GET: /api/Booking/creation-options?roomId=1&date=2026-11-10&startTime=09:00:00&durationMinutes=60
     //Gets information about booking and validates starttime and availability
@@ -72,7 +72,7 @@ public class BookingController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetCreationOptions(
         [FromQuery] int roomId,
-        [FromQuery] DateTime date, 
+        [FromQuery] DateTime date,
         [FromQuery] TimeSpan startTime,
         [FromQuery] int durationMinutes)
     {
@@ -82,8 +82,8 @@ public class BookingController : ControllerBase
         }
 
         var start = date.Date.Add(startTime);
-        
-        if (start <= DateTime.Now) 
+
+        if (start <= DateTime.Now)
         {
             return BadRequest("The booking must start in the future.");
         }
@@ -99,12 +99,14 @@ public class BookingController : ControllerBase
 
         var proposedBooking = new BookingEntity
         {
-            RoomId = roomId, StartTime = start, EndTime = end
+            RoomId = roomId,
+            StartTime = start,
+            EndTime = end
         };
 
         var isAvailable = !await _bookingRepository.IsOverlapping(proposedBooking);
-        
-        return Ok(new 
+
+        return Ok(new
         {
             roomId = room.RoomId,
             roomNumber = room.RoomNumber,
@@ -118,7 +120,7 @@ public class BookingController : ControllerBase
     // POST: /api/Booking/Create
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> Create (
+    public async Task<IActionResult> Create(
         [FromBody] BookingCreateDto bookingDto)
     {
         var room = await _roomRepository.GetRoomById(bookingDto.RoomId);
@@ -146,8 +148,9 @@ public class BookingController : ControllerBase
             EndTime = bookingDto.EndTime
         };
 
-        if(await _bookingRepository.IsOverlapping(booking))
+        if (await _bookingRepository.IsOverlapping(booking))
         {
+            _logger.LogWarning("[BookingController] Booking conflict for RoomId {RoomId}", booking.RoomId);
             return Conflict("The room is already booked for that time.");
         }
 
@@ -157,13 +160,13 @@ public class BookingController : ControllerBase
 
             return Problem("Something went wrong while saving the booking.", statusCode: StatusCodes.Status500InternalServerError);
         }
-    
+
         _logger.LogInformation("[BookingController] Booking created: {BookingId}", booking.BookingId);
 
         return CreatedAtAction(
             nameof(GetById),
             new { id = booking.BookingId },
-            new 
+            new
             {
                 bookingId = booking.BookingId,
                 roomId = booking.RoomId,
@@ -172,8 +175,8 @@ public class BookingController : ControllerBase
                 booking.EndTime,
                 booking.Description
             });
-        }
-    
+    }
+
     // PUT: /api/Booking/{id}
     [HttpPut("{id:int}")]
     [Authorize]
@@ -210,6 +213,7 @@ public class BookingController : ControllerBase
 
         if (await _bookingRepository.IsOverlapping(booking))
         {
+            _logger.LogWarning("[BookingController] Booking conflict when updating booking {BookingId}", id);
             return Conflict("The room is already booked for that time.");
         }
 
@@ -222,13 +226,13 @@ public class BookingController : ControllerBase
                 "Something went wrong while updating the booking.", statusCode: StatusCodes.Status500InternalServerError);
         }
 
-         _logger.LogInformation(
-            "[BookingController] Booking updated: {BookingId}", id);
+        _logger.LogInformation(
+           "[BookingController] Booking updated: {BookingId}", id);
 
         return NoContent();
     }
-    
-     // DELETE: /api/Booking/{id}
+
+    // DELETE: /api/Booking/{id}
     [HttpDelete("{id:int}")]
     [Authorize]
     public async Task<IActionResult> Delete(int id)
@@ -251,12 +255,12 @@ public class BookingController : ControllerBase
 
         if (!await _bookingRepository.Delete(id))
         {
-            _logger.LogWarning(
+            _logger.LogError(
                 "[BookingController] Booking deletion failed, BookingId: {BookingId}",
                 id);
 
-           return Problem(
-                "Something went wrong while updating the booking.", statusCode: StatusCodes.Status500InternalServerError);
+            return Problem(
+                 "Something went wrong while deleting the booking.", statusCode: StatusCodes.Status500InternalServerError);
         }
 
         _logger.LogInformation(
