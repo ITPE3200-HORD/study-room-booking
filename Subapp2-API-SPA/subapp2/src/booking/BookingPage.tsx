@@ -1,33 +1,8 @@
 import { useState, type ChangeEvent, type SubmitEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap'
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-type SearchFrom = {
-    date: string
-    startTime: string
-    durationMinutes: string
-    groupSize: string
-    roomType: string
-}
-
-type SearchParams = SearchFrom & {
-    requestId: number
-}
-
-type AvailableRoom = {
-    roomId: number
-    location: string | null
-    roomNumber: string
-    roomType: string
-    capacity: number
-}
-
-type SearchResult = {
-    availableRoomCount: number
-    availableRooms: AvailableRoom[]
-}
+import type { SearchForm, SearchParams } from '../types/booking'
+import * as BookingService from './BookingService'
 
 function toLocalDate(date: Date): string {
     const year = date.getFullYear()
@@ -39,7 +14,7 @@ function toLocalDate(date: Date): string {
 const tomorrow = new Date()
 tomorrow.setDate(tomorrow.getDate() + 1)
 
-const initialForm: SearchFrom = {
+const initialForm: SearchForm = {
     date: toLocalDate(tomorrow),
     startTime: '14:00:00',
     durationMinutes: '120',
@@ -47,29 +22,9 @@ const initialForm: SearchFrom = {
     roomType: '',
 }
 
-async function searchAvailableRooms(search: SearchParams): Promise<SearchResult> {
-    const params = new URLSearchParams({
-        date: search.date, 
-        startTime: search.startTime,
-        durationMinutes: search.durationMinutes,
-        groupSize: search.groupSize,
-        roomType: search.roomType,
-    })
-
-    const response = await fetch(
-        `${API_URL}/api/Home/available-rooms?${params}`
-    )
-
-    if (!response.ok) {
-        throw new Error(`Room search failed (${response.status})`)
-    }
-
-    return response.json() as Promise<SearchResult>
-}
-
 export default function BookingPage() {
     const queryClient = useQueryClient()
-    const [form, setForm] = useState<SearchFrom>(initialForm)
+    const [form, setForm] = useState<SearchForm>(initialForm)
     const [search, setSearch] = useState<SearchParams | null>(null)
 
     const { data, isFetching, error } = useQuery({
@@ -78,32 +33,23 @@ export default function BookingPage() {
             if (search === null) {
                 throw new Error('Search criteria are missing.')
             }
-            return searchAvailableRooms(search)
+            return BookingService.searchAvailableRooms(search)
         },
         enabled: search !== null,
     })
 
     const bookingMutation = useMutation({
-        mutationFn: async ({ roomId, searchParams }: { roomId: number; searchParams: SearchParams }) => {
+        mutationFn: ({ roomId, searchParams }: { roomId: number; searchParams: SearchParams }) => {
             const start = new Date(`${searchParams.date}T${searchParams.startTime}`)
             const end = new Date(start.getTime() + Number(searchParams.durationMinutes) * 60_000)
             const toLocalDateTime = (value: Date) =>
                 `${toLocalDate(value)}T${String(value.getHours()).padStart(2, '0')}:${String(value.getMinutes()).padStart(2, '0')}:00`
-            const response = await fetch(`${API_URL}/api/Booking`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    roomId,
-                    startTime: toLocalDateTime(start),
-                    endTime: toLocalDateTime(end),
-                    description: '',
-                }),
+            return BookingService.createBooking({
+                roomId,
+                startTime: toLocalDateTime(start),
+                endTime: toLocalDateTime(end),
+                description: '',
             })
-            if (!response.ok) {
-                const message = await response.text()
-                throw new Error(message || 'Could not create the booking.')
-            }
         },
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['myPage'] })

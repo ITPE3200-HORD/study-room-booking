@@ -1,20 +1,12 @@
 import { useState, type SubmitEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Button, Form, Modal, Table } from 'react-bootstrap'
+import * as RoomService from './RoomService'
+import type { Room, RoomForm } from '../types/room'
 
-const API_URL = import.meta.env.VITE_API_URL
-
-type Room = {
-    roomId: number
-    location: string | null
-    roomNumber: string
-    roomType: string
-    capacity: number
-    status: number
+function saveRoom(room: Room | RoomForm) {
+    return 'roomId' in room ? RoomService.updateRoom(room) : RoomService.createRoom(room)
 }
-
-type RoomForm = Omit<Room, 'roomId'>
-
 const emptyRoom: RoomForm = {
     location: '',
     roomNumber: '',
@@ -23,39 +15,11 @@ const emptyRoom: RoomForm = {
     status: 0,
 }
 
-async function fetchRooms(): Promise<Room[]> {
-    const response = await fetch(`${API_URL}/api/RoomAPI`, { credentials: 'include' })
-    if (!response.ok) throw new Error('Could not load rooms.')
-    return response.json() as Promise<Room[]>
-}
-
-async function saveRoom(room: Room | RoomForm) {
-    const isUpdate = 'roomId' in room
-    const response = await fetch(
-        `${API_URL}/api/RoomAPI${isUpdate ? `/${room.roomId}` : ''}`,
-        {
-            method: isUpdate ? 'PUT' : 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(room),
-        },
-    )
-    if (!response.ok) throw new Error('Could not save room. Check your details and permissions.')
-}
-
-async function deleteRoom(roomId: number) {
-    const response = await fetch(`${API_URL}/api/RoomAPI/${roomId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-    })
-    if (!response.ok) throw new Error('Could not delete room. It may have existing bookings.')
-}
-
 export default function RoomListPage() {
     const queryClient = useQueryClient()
     const { data: rooms = [], isLoading, error } = useQuery({
         queryKey: ['rooms'],
-        queryFn: fetchRooms,
+        queryFn: RoomService.fetchRooms,
     })
     const [showEditor, setShowEditor] = useState(false)
     const [editingRoom, setEditingRoom] = useState<Room | null>(null)
@@ -72,7 +36,7 @@ export default function RoomListPage() {
         onError: error => setActionError(error.message),
     })
     const deleteMutation = useMutation({
-        mutationFn: deleteRoom,
+        mutationFn: RoomService.deleteRoom,
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rooms'] }),
         onError: error => setActionError(error.message),
     })

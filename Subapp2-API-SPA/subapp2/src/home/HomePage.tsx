@@ -1,45 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Card, Col, Row, Spinner } from 'react-bootstrap'
-import { fetchCurrentUser } from '../shared/auth'
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-type Room = {
-    roomId: number
-    location: string | null
-    roomNumber: string
-    roomType: string
-    capacity: number
-    status: 0 | 1
-}
-
-type StudySession = {
-    studySessionId: number
-    title: string
-    subject: string | null
-    maxParticipants: number
-    participantCount: number
-    roomId: number
-    roomNumber: string 
-    startTime: string
-    endTime: string
-}
-
-type HomeData = {
-    rooms: Room[]
-    openStudySessions: StudySession[]
-}
-
-async function fetchHomeData(): Promise<HomeData> {
-    const response = await fetch(`${API_URL}/api/Home`)
-
-    if(!response.ok) {
-        throw new Error(`Could not load home page (${response.status})`)
-    }
-
-    return response.json() as Promise<HomeData>
-}
+import { fetchCurrentUser } from '../account/AccountService'
+import * as HomeService from './HomeService'
 
 export default function HomePage() {
     const { data: user,
@@ -56,7 +19,7 @@ export default function HomePage() {
         error,
     } = useQuery({
         queryKey: ['home'],
-        queryFn: fetchHomeData,
+        queryFn: HomeService.fetchHomeData,
     })
 
     const roomLink = !user
