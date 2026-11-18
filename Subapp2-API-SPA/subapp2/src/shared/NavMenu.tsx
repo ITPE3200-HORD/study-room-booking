@@ -2,7 +2,7 @@ import { Alert, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchCurrentUser } from './auth'
+import { fetchCurrentUser } from '../account/AccountService'
 
 export default function NavMenu() {
     const navigate = useNavigate()

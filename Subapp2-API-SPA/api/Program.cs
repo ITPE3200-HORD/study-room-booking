@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using study_room_booking.DAL;
 using Scalar.AspNetCore;
 using Serilog;
-using Serilog.Events;
 using study_room_booking.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -54,6 +53,19 @@ builder.Logging.AddSerilog(logger);
 
 var app = builder.Build();
 
+// Create/update the database and add starting data when the app starts
+// MigrateAsync applies any migrations that haven't run yet, so a fresh
+// machine gets all tables without running "dotnet ef database update"
+using (var scope = app.Services.CreateAsyncScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<RoomDbContext>();
+    await db.Database.MigrateAsync();
+
+    await DbSeeder.SeedAdminAsync(scope.ServiceProvider, builder.Configuration);
+    await DbSeeder.SeedStudentAsync(scope.ServiceProvider, builder.Configuration);
+    await DbSeeder.SeedRoomsAsync(db);
+}
+
 // Global error handling: catches any exception not handled in controllers or repositories,
 // logs it and returns a general 500 error without technical details
 app.UseExceptionHandler();
@@ -61,7 +73,6 @@ app.UseExceptionHandler();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    //DbSeeder.SeedRoomsAsync; // Seed the database with initial data
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
