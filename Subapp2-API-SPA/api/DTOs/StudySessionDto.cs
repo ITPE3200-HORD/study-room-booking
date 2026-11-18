@@ -1,25 +1,19 @@
-using System.ComponentModel.DataAnnotations;
-namespace study_room_booking.DTOs {
-    public class StudySession
-    {
-    public int StudySessionId { get; set; } // PK
+namespace study_room_booking.DTOs;
 
-    public int BookingId { get; set; } // FK to Booking
-    public virtual Booking Booking { get; set; } = default!; // Navigation property to Booking
-
-    [Required, StringLength(100)]
-    public string Title {get; set; } = string.Empty;
-
-    [StringLength(100)]
-    public string? Subject { get; set; }
-
-    [Range(1, 50)]
+public class StudySessionDto
+{
+    public int StudySessionId { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string? Subject { get; set; } = string.Empty;
     public int MaxParticipants { get; set; }
+    public int ParticipantCount { get; set; } 
+    public bool IsOpen { get; set; }
+    public int BookingId { get; set; } 
+    public string RoomNumber { get; set; } = string.Empty;
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public string OwnerUserName { get; set; } = string.Empty;
+    public bool IsOwner { get; set; } 
+    public bool HasJoined { get; set; }
 
-    public bool IsOpen { get; set; } = true; // Indicates if the session is open for new participants
-
-    public virtual List<SessionParticipant> Participants { get; set; } = new();
-
-    }
- }
-
+}

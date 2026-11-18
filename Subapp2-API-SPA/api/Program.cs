@@ -40,6 +40,7 @@ builder.Services
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IStudySessionRepository, StudySessionRepository>();
 
 var loggerConfiguration = new LoggerConfiguration()
     .MinimumLevel.Warning()
