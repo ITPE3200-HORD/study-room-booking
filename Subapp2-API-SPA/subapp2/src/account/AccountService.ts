@@ -6,7 +6,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 // Gets the bookings and study sessions for the logged-in user
 export async function fetchMyPage(): Promise<MyPageData> {
-    const response = await safeFetch(`${API_URL}/api/MyPage`, { credentials: 'include'})
+    const response = await safeFetch(`${API_URL}/api/MyPage`, { credentials: 'include' })
     return handleResponse<MyPageData>(response, 'Could not load My Page')
 }
 
@@ -36,5 +36,16 @@ export async function register(account: RegisterDto): Promise<void> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(account),
     })
+
     return handleResponse<void>(response, 'Failed to register.')
 }
+
+// Logs the user out by removing the login cookie on the server
+export async function logout(): Promise<void> {
+    const response = await safeFetch(`${API_URL}/api/Account/Logout`, {
+        method: 'POST',
+        credentials: 'include',
+    })
+    return handleResponse<void>(response, 'Could not log out.')
+}
+
