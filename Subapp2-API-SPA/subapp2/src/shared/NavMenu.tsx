@@ -45,7 +45,7 @@ export default function NavMenu() {
                     {isStudent && (
                         <>
                             <Nav.Link href="/booking">Book a room</Nav.Link>
-                            <Nav.Link href="/session">Join a session</Nav.Link>
+                            <Nav.Link href="/sessions">Join a session</Nav.Link>
                         </>
                     )}
 
