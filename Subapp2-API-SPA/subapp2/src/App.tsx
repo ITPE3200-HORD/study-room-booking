@@ -7,6 +7,7 @@ import BookingPage from './booking/BookingPage.js'
 import NavMenu from './shared/NavMenu.js'
 import MyPagePage from './account/MyPagePage.js'
 import LoginPage from './account/LoginPage.js'
+import SessionsListPage from './sessions/SessionsListPage.js'
 import './App.css'
 import StudentListPage from './students/StudentsListPage.js'
 import AdminRoute from './shared/AdminRoute.js'
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/rooms" element={<AdminRoute><RoomListPage /></AdminRoute>}/>
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/students" element={<AdminRoute><StudentListPage /></AdminRoute>} />
+            <Route path="/sessions" element={<SessionsListPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/logout" element={<Navigate to="/" replace />} />
             <Route path="/register" element={<RegisterPage />} />

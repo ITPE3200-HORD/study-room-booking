@@ -151,8 +151,8 @@ export default function HomePage() {
                         <p>Join a session and study with other students.</p>
                     </div>
                     {!isUserLoading && (
-                        <Link to="/session" className="text-link">
-                            Join a open session
+                        <Link to="/sessions" className="text-link">
+                            Join an open session
                         </Link>
                     )}
                 </header>
