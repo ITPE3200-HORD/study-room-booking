@@ -6,9 +6,9 @@ namespace study_room_booking.Models;
 
 public class RoomDbContext : IdentityDbContext<IdentityUser>
 {
-    public RoomDbContext(DbContextOptions<RoomDbContext> options) : base (options)
+    public RoomDbContext(DbContextOptions<RoomDbContext> options) : base(options)
     {
-       
+
     }
 
     public DbSet<Room> Rooms { get; set; } = null!;

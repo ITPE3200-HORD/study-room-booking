@@ -226,7 +226,7 @@ public class BookingController : ControllerBase
             return NotFound("Booking not found.");
         }
 
-        var currentStudentId = await 
+        var currentStudentId = await
             GetCurrentStudentId();
         var isOwner = currentStudentId != null && booking.StudentId == currentStudentId;
 

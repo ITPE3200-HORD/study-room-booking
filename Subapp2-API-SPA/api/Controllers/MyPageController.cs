@@ -45,8 +45,7 @@ public class MyPageController : ControllerBase
         if (student == null)
         {
             _logger.LogWarning("[MyPageController] No student profile found for user {UserId}", userId);
-            return Ok(new MyPageDto {
-                HasStudentProfile = false});
+            return Ok(new MyPageDto {HasStudentProfile = false});
         }
 
         var bookings = await _bookingRepository.GetByStudentId(student.StudentId);

@@ -1,6 +1,7 @@
 using study_room_booking.Models;
 
 namespace study_room_booking.DAL;
+
 public interface IStudySessionRepository
 {
     Task<IEnumerable<StudySession>?> GetOpen(string? subject, DateTime? date);  // search + filter

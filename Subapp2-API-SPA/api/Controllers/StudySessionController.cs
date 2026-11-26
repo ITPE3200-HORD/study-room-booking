@@ -106,7 +106,7 @@ public class StudySessionController : ControllerBase
             _logger.LogWarning("[StudySessionController] MaxParticipants {Max} exceeds capacity {Capacity} for booking {BookingId}", dto.MaxParticipants, booking.Room.Capacity, dto.BookingId);
             return BadRequest($"Room {booking.Room.RoomNumber} only has room for {booking.Room.Capacity} people.");
         }
-        
+
         var session = new StudySession
         {
             BookingId = dto.BookingId,
@@ -323,6 +323,6 @@ public class StudySessionController : ControllerBase
     private static bool IsOwner(StudySession session, int? currentStudentId) =>
         currentStudentId != null && session.Booking.StudentId == currentStudentId;
 
-    private bool CanManage(StudySession session, int? currentStudentId) => 
+    private bool CanManage(StudySession session, int? currentStudentId) =>
         IsOwner(session, currentStudentId) || User.IsInRole("Admin");
 }

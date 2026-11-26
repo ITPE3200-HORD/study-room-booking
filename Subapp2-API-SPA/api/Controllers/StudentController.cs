@@ -157,8 +157,8 @@ public class StudentController : ControllerBase
             return Problem("Student could not be deleted.", statusCode: StatusCodes.Status500InternalServerError);
         }
     }
-    
-     private static StudentResponseDto ToDto(StudentEntity student)
+
+    private static StudentResponseDto ToDto(StudentEntity student)
     {
         return new StudentResponseDto
         {

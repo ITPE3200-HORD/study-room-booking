@@ -61,7 +61,7 @@ public class BookingRepository : IBookingRepository
         catch (Exception e)
         {
             _logger.LogError("[BookingRepository] GetByStudentId() failed for StudentId {studentId}, error message: {e}", studentId, e.Message);
-                return null;
+            return null;
         }
     }
 

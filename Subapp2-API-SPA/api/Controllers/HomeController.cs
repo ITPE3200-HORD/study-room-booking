@@ -30,7 +30,7 @@ public class HomeController : ControllerBase
         if (rooms == null || sessions == null)
         {
             _logger.LogError("[HomeController] Failed to load home page data.");
-            return Problem ("Home page data could not be retrieved.", statusCode: StatusCodes.Status500InternalServerError);
+            return Problem("Home page data could not be retrieved.", statusCode: StatusCodes.Status500InternalServerError);
         }
 
         var homeDto = new HomeDto
@@ -74,7 +74,7 @@ public class HomeController : ControllerBase
         var bookingEnd = bookingStart.AddMinutes(durationMinutes);
 
         var availableRooms = await _roomRepository.GetAvailable(bookingStart, bookingEnd, groupSize, roomType);
-        
+
         if (availableRooms == null)
         {
             _logger.LogError("[HomeController] Failed to search for available rooms.");
@@ -83,9 +83,10 @@ public class HomeController : ControllerBase
 
         var roomDtos = availableRooms.Select(room => room.ToDto()).ToList();
 
-        return Ok(new AvailableRoomsDto 
-            {
-                AvailableRoomCount = roomDtos.Count, AvailableRooms = roomDtos
-                });
+        return Ok(new AvailableRoomsDto
+        {
+            AvailableRoomCount = roomDtos.Count,
+            AvailableRooms = roomDtos
+        });
     }
 }

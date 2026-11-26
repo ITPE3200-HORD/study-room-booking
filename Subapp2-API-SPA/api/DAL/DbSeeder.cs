@@ -14,24 +14,24 @@ public static class DbSeeder
         var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var db = serviceProvider.GetRequiredService<RoomDbContext>();
-        
+
         const string studentRole = "Student";
 
         var studentEmail = configuration["StudentUser:Email"];
-        var studentPassword = configuration ["StudentUser:Password"];
+        var studentPassword = configuration["StudentUser:Password"];
 
-    //Checks if the student exists - if not, create it
-    if(string.IsNullOrWhiteSpace(studentEmail)|| string.IsNullOrWhiteSpace(studentPassword))
-    {
-        return;
-    }
+        //Checks if the student exists - if not, create it
+        if (string.IsNullOrWhiteSpace(studentEmail) || string.IsNullOrWhiteSpace(studentPassword))
+        {
+            return;
+        }
 
-    if (!await roleManager.RoleExistsAsync(studentRole))
-    await roleManager.CreateAsync(new IdentityRole(studentRole));
+        if (!await roleManager.RoleExistsAsync(studentRole))
+            await roleManager.CreateAsync(new IdentityRole(studentRole));
 
-    var user = await userManager.FindByEmailAsync(studentEmail);
+        var user = await userManager.FindByEmailAsync(studentEmail);
 
-    if (user == null)
+        if (user == null)
         {
             user = new IdentityUser
             {
@@ -60,11 +60,11 @@ public static class DbSeeder
         var db = serviceProvider.GetRequiredService<RoomDbContext>();
 
         const string adminRole = "Admin";
-        
+
         var adminEmail = configuration["AdminUser:Email"];
         var adminPassword = configuration["AdminUser:Password"];
 
-       
+
         // Check if the Admin role exists, if not, create it
         if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
         {
@@ -100,10 +100,10 @@ public static class DbSeeder
             var result = await userManager.AddToRoleAsync(admin, adminRole);
 
             if (!result.Succeeded)
-            throw new InvalidOperationException("Could not assign Admin role.");
+                throw new InvalidOperationException("Could not assign Admin role.");
         }
     }
-    
+
     public static async Task SeedRoomsAsync(RoomDbContext db)
     {
         if (await db.Rooms.AnyAsync())

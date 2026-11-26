@@ -102,21 +102,21 @@ public class RoomAPIController : ControllerBase
         return NoContent();
     }
 
-        // DELETE: /api/roomAPI/{id}
-        [HttpDelete("{id:int}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int id)
+    // DELETE: /api/roomAPI/{id}
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var deleted = await _roomRepository.Delete(id);
+        if (!deleted)
         {
-            var deleted = await _roomRepository.Delete(id);
-            if (!deleted)
-            {
-                _logger.LogWarning("[RoomAPIController] Failed to delete room, RoomId: {RoomId}", id);
-                return NotFound();
-            }
-
-            _logger.LogInformation("[RoomAPIController] Room deleted, RoomId: {RoomId}", id);
-            return NoContent();
+            _logger.LogWarning("[RoomAPIController] Failed to delete room, RoomId: {RoomId}", id);
+            return NotFound();
         }
+
+        _logger.LogInformation("[RoomAPIController] Room deleted, RoomId: {RoomId}", id);
+        return NoContent();
+    }
 
     private static RoomDto ToDto(Room room) => new()
     {
