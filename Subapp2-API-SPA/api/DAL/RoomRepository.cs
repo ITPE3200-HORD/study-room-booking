@@ -31,6 +31,33 @@ public class RoomRepository : IRoomRepository
         }
     }
 
+    public async Task<IEnumerable<Room>?> GetAvailable(DateTime start, DateTime end, int groupSize, string? roomType)
+    {
+        try
+        {
+            return await _db.Rooms
+                .AsNoTracking()
+                .Where(room =>
+                    room.Status == Room.Availability.Available &&
+                    room.Capacity >= groupSize &&
+                    // If no room type is selected, all types are included
+                    (string.IsNullOrEmpty(roomType) || room.RoomType == roomType) &&
+                    // Exclude rooms with a booking that overlaps the requested time
+                    !_db.Bookings.Any(booking =>
+                        booking.RoomId == room.RoomId &&
+                        booking.StartTime < end &&
+                        start < booking.EndTime))
+                .OrderBy(room => room.Capacity)
+                .ThenBy(room => room.RoomNumber)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("[RoomRepository] GetAvailable() failed, error message: {e}", e.Message);
+            return null;
+        }
+    }
+
     public async Task<Room?> GetRoomById(int id)
     {
         try

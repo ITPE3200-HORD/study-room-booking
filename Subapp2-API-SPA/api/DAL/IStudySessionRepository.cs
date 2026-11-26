@@ -4,6 +4,7 @@ namespace study_room_booking.DAL;
 public interface IStudySessionRepository
 {
     Task<IEnumerable<StudySession>?> GetOpen(string? subject, DateTime? date);  // search + filter
+    Task<IEnumerable<StudySession>?> GetForStudent(int studentId); // sessions the student has joined
     Task<StudySession?> GetById(int id);              // Include Booking.Room and Participants
     Task<bool> Create(StudySession session);
     Task<bool> Update(StudySession session);

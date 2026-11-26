@@ -46,6 +46,25 @@ public class BookingRepository : IBookingRepository
         }
     }
 
+    public async Task<IEnumerable<Booking>?> GetByStudentId(int studentId)
+    {
+        try
+        {
+            return await _db.Bookings
+                .AsNoTracking()
+                .Include(booking => booking.Room)
+                .Include(booking => booking.StudySession)
+                .Where(booking => booking.StudentId == studentId)
+                .OrderBy(booking => booking.StartTime)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("[BookingRepository] GetByStudentId() failed for StudentId {studentId}, error message: {e}", studentId, e.Message);
+                return null;
+        }
+    }
+
     public async Task<bool> Create(Booking booking)
     {
         try

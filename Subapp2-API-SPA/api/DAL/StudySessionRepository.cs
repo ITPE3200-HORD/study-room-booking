@@ -48,6 +48,26 @@ public class StudySessionRepository : IStudySessionRepository
         }
     }
 
+    public async Task<IEnumerable<StudySession>?> GetForStudent(int studentId)
+    {
+        try
+        {
+            return await _db.StudySessions
+                .AsNoTracking()
+                .Include(session => session.Booking).ThenInclude(booking => booking.Room)
+                .Include(session => session.Booking).ThenInclude(booking => booking.Student)
+                .Include(session => session.Participants)
+                .Where(session => session.Participants.Any(participant => participant.StudentId == studentId))
+                .OrderBy(session => session.Booking.StartTime)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("[StudySessionRepository] GetForStudent() failed for StudentId {studentId}, error message: {e}", studentId, e.Message);
+            return null;
+        }
+    }
+
     public async Task<StudySession?> GetById(int id)
     {
         try
