@@ -56,7 +56,7 @@ public class BookingRepository : IBookingRepository
         }
         catch (Exception e)
         {
-            _logger.LogError(e,"[BookingRepository] Create() failed for booking {@booking}", booking);
+            _logger.LogError(e, "[BookingRepository] Create() failed for booking {@booking}", booking);
             return false;
         }
     }
@@ -134,6 +134,22 @@ public class BookingRepository : IBookingRepository
             _logger.LogError(e, "[BookingRepository] UserHasOverlappingBooking() failed for user {UserId}", booking.UserId);
             // Treat errors as overlap, so we never accidentally allow a double booking
             return true;
+        }
+    }
+
+    public async Task<IEnumerable<Booking>?> GetByUserId(string userId)
+    {
+        try
+        {
+            return await _db.Bookings
+                .Include(b => b.Room)
+                .Where(b => b.UserId == userId)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to get bookings for user {UserId}.", userId);
+            return null;
         }
     }
 }

@@ -96,4 +96,10 @@ public class StudentRepository : IStudentRepository
             return false;
         }
     }
+
+    public async Task<Student?> GetByIdentityUserId(string identityUserId)
+    {
+        return await _db.Students
+            .FirstOrDefaultAsync(s => s.IdentityUserId == identityUserId);
+    }
 }
