@@ -71,11 +71,18 @@ public class StudySessionController : ControllerBase
         if (booking == null) return NotFound("Booking not found.");
 
         // Rule: you can only create a session for your own booking
-        if (booking.UserId != userId) return Forbid();
+        if (booking.UserId != userId)
+        {
+            _logger.LogWarning("[StudySessionController] User {UserId} tried to create a session for booking {BookingId} they do not own", userId, dto.BookingId);
+            return Forbid();
+        }
 
         // Rule: one booking can only have one session
         if (await _studySessionRepository.ExistsForBooking(dto.BookingId))
+        {
+            _logger.LogWarning("[StudySessionController] Booking {BookingId} already has a study session", dto.BookingId);
             return Conflict("This booking already has a study session.");
+        }
 
         // Rule: the booking must be in the future
         if (booking.StartTime <= DateTime.Now)
@@ -121,7 +128,11 @@ public class StudySessionController : ControllerBase
         if (session == null) return NotFound("Study session not found.");
 
         // Rule: only the owner or an admin can edit
-        if (!CanManage(session)) return Forbid();
+        if (!CanManage(session))
+        {
+            _logger.LogWarning("[StudySessionController] User tried to update study session {Id} without permission", id);
+            return Forbid();
+        }
 
         // Rule: you can't lower the limit below the number of people already joined
         if (dto.MaxParticipants < session.Participants.Count)
@@ -153,7 +164,11 @@ public class StudySessionController : ControllerBase
         var session = await _studySessionRepository.GetById(id);
         if (session == null) return NotFound("Study session not found.");
 
-        if (!CanManage(session)) return Forbid();
+        if (!CanManage(session))
+        {
+            _logger.LogWarning("[StudySessionController] User tried to delete study session {Id} without permission", id);
+            return Forbid();
+        }
 
         // Participants are deleted automatically (cascade delete in the database)
         if (!await _studySessionRepository.Delete(id))
@@ -180,13 +195,25 @@ public class StudySessionController : ControllerBase
 
         // Domain rules for joining
         if (!session.IsOpen)
+        {
+            _logger.LogWarning("[StudySessionController] Student {StudentId} tried to join closed session {Id}", student.StudentId, id);
             return Conflict("This study session is closed.");
+        }
         if (session.Booking.StartTime <= DateTime.Now)
+        {
+            _logger.LogWarning("[StudySessionController] Student {StudentId} tried to join session {Id} that has already started", student.StudentId, id);
             return Conflict("This study session has already started.");
+        }
         if (session.Participants.Any(participant => participant.StudentId == student.StudentId))
+        {
+            _logger.LogWarning("[StudySessionController] Student {StudentId} has already joined session {Id}", student.StudentId, id);
             return Conflict("You have already joined this study session.");
+        }
         if (session.Participants.Count >= session.MaxParticipants)
+        {
+            _logger.LogWarning("[StudySessionController] Student {StudentId} tried to join full session {Id}", student.StudentId, id);
             return Conflict("This study session is full.");
+        }
 
         var participant = new SessionParticipant { StudySessionId = id, StudentId = student.StudentId };
         if (!await _studySessionRepository.AddParticipant(participant))
