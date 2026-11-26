@@ -40,14 +40,24 @@ public class MyPageController : ControllerBase
                 .Select(student => (int?)student.StudentId)
                 .SingleOrDefaultAsync();
             
-            // Admins (and others without a Student profile) have no study sessions
+            //Only users with student profile can book rooms
             var hasStudentProfile = studentId.HasValue;
             var currentStudentId = studentId ?? 0;
 
+            if (studentId == null)
+            {
+                _logger.LogWarning("[MyPageController] No student profile found for user { UserId}", userId);
+                    return Ok(new
+                    {
+                        hasStudentProfile = false,
+                        bookings = Array.Empty<object>(),
+                        studySessions = Array.Empty<object>()
+                    });
+            }
 
             var bookings = await _dbContext.Bookings
                 .AsNoTracking()
-                .Where(booking => booking.UserId == userId)
+                .Where(booking => booking.StudentId == studentId)
                 .OrderBy(booking => booking.StartTime)
                 .Select(booking => new
                 {
@@ -65,20 +75,6 @@ public class MyPageController : ControllerBase
                 })
                 .ToListAsync();
 
-            // Users without a student profile (e.g. admins) cannot join study sessions,
-            // so only their bookings are returned
-            if (studentId == null)
-            {
-                _logger.LogWarning("[MyPageController] No student profile found for user { UserId}", userId);
-                    return Ok(new
-                    {
-                        hasStudentProfile = false,
-                        bookings,
-                        studySessions = Array.Empty<object>()
-
-                    });
-            }
-
             var studySessions = await _dbContext.StudySessions
                 .AsNoTracking()
                 .Where(session => session.Participants
@@ -90,7 +86,7 @@ public class MyPageController : ControllerBase
                     title = session.Title,
                     subject = session.Subject,
                     isOpen = session.IsOpen,
-                    isOwner = session.Booking.UserId == userId,
+                    isOwner = session.Booking.StudentId == currentStudentId,
                     maxParticipants = session.MaxParticipants,
                     participantCount = session.Participants.Count,
                     bookingId = session.BookingId,

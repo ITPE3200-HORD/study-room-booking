@@ -17,21 +17,25 @@ public class BookingController : ControllerBase
 {
     private readonly IBookingRepository _bookingRepository;
     private readonly IRoomRepository _roomRepository;
+    private readonly IStudentRepository _studentRepository;
     private readonly ILogger<BookingController> _logger;
 
     public BookingController(
         IBookingRepository bookingRepository,
         IRoomRepository roomRepository,
+        IStudentRepository studentRepository,
         ILogger<BookingController> logger)
     {
         _bookingRepository = bookingRepository;
         _roomRepository = roomRepository;
+        _studentRepository = studentRepository;
         _logger = logger;
     }
 
     // GET: /api/Booking
     // Shows all bookings in a table
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetAll()
     {
         var bookings = await _bookingRepository.GetAll();
@@ -46,6 +50,7 @@ public class BookingController : ControllerBase
 
     // GET: /api/Booking/{id}
     [HttpGet("{id:int}")]
+    [Authorize]
     public async Task<IActionResult> GetById(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
@@ -130,19 +135,17 @@ public class BookingController : ControllerBase
             return NotFound("Room not found.");
         }
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var userName = User.Identity?.Name;
+        var studentId = await GetCurrentStudentId();
 
-        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(userName))
+        if (studentId == null)
         {
-            return Unauthorized();
+            return Forbid(); //Only students can book
         }
 
         var booking = new BookingEntity
         {
             RoomId = bookingDto.RoomId,
-            UserId = userId,
-            UserName = userName,
+            StudentId = studentId.Value,
             Description = bookingDto.Description?.Trim(),
             StartTime = bookingDto.StartTime,
             EndTime = bookingDto.EndTime
@@ -189,11 +192,11 @@ public class BookingController : ControllerBase
             return NotFound("Booking not found.");
         }
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isOwner = booking.UserId == userId;
-        var isAdmin = User.IsInRole("Admin");
+        var currentStudentId = await
+            GetCurrentStudentId();
+        var isOwner = currentStudentId != null && booking.StudentId == currentStudentId;
 
-        if (!isOwner && !isAdmin)
+        if (!isOwner)
         {
             return Forbid();
         }
@@ -244,11 +247,11 @@ public class BookingController : ControllerBase
             return NotFound("Booking not found.");
         }
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isOwner = booking.UserId == userId;
-        var isAdmin = User.IsInRole("Admin");
+        var currentStudentId = await 
+            GetCurrentStudentId();
+        var isOwner = currentStudentId != null && booking.StudentId == currentStudentId;
 
-        if (!isOwner && !isAdmin)
+        if (!isOwner)
         {
             return Forbid();
         }
@@ -268,5 +271,15 @@ public class BookingController : ControllerBase
             id);
 
         return NoContent();
+    }
+
+    private async Task<int?> GetCurrentStudentId()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return null;
+
+        var student = await
+        _studentRepository.GetByIdentityUserId(userId);
+        return student?.StudentId;
     }
 }
