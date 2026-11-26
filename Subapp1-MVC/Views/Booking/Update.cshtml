@@ -30,10 +30,9 @@
                         </div>
 
                         <div>
-                            <label asp-for="UserName" class="form-label">Name</label>
-                            <input asp-for="UserName" class="form-control"
+                            <<label class="form-label">Name</label>
+                            <input class="form-control" value="@Model.Student?.FullName" />
                                    style="background-color: #e9ecef; cursor: not-allowed;" readonly />
-                            <span asp-validation-for="UserName" class="text-danger"></span>
                         </div>
 
                         <div>
