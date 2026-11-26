@@ -1,21 +1,23 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 using study_room_booking.ViewModels;
-using study_room_booking.Models;
+using study_room_booking.DAL;
+
 
 namespace study_room_booking.Controllers;
 
 [Authorize]
 public class MyPageController : Controller
 {
-    private readonly RoomDbContext _dbContext;
+    private readonly IStudentRepository _studentRepository;
+    private readonly IBookingRepository _bookingRepository;
     private readonly ILogger<MyPageController> _logger;
 
-    public MyPageController(RoomDbContext dbContext, ILogger<MyPageController> logger)
+    public MyPageController(IStudentRepository studentRepository, IBookingRepository bookingRepository, ILogger<MyPageController> logger) //Kan legge ttil IStudySession
     {
-        _dbContext = dbContext;
+        _studentRepository = studentRepository;
+        _bookingRepository = bookingRepository;
         _logger = logger;
     }
 
@@ -23,69 +25,37 @@ public class MyPageController : Controller
     [HttpGet]
     public async Task<IActionResult> MyPage()
     {
-        int? studentId;
-        List<Booking> bookings;
-
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         if (userId == null)
         {
             return Unauthorized();
         }
-        
+
         try
         {
-            studentId = await _dbContext.Students
-                .Where(student => student.IdentityUserId == userId)
-                .Select(student => (int?)student.StudentId)
-                .SingleOrDefaultAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[MyPageController] MyPage failed to fetch student profile for user ID {UserId}.", userId);
-            return StatusCode(500, "Internal server error");
-        }
-        
-        try
-        {
-            bookings = await _dbContext.Bookings
-                .AsNoTracking()
-                .Where(booking => booking.UserId == userId)
-                .Include(booking => booking.Room)
-                .OrderBy(booking => booking.StartTime)
-                .ToListAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[MyPageController] MyPage failed to fetch bookings for user ID {UserId}.", userId);
-            return StatusCode(500, "Internal server error");
-        }
+            var student = await _studentRepository.GetByIdentityUserId(userId);
+            var bookings = await _bookingRepository.GetByUserId(userId);
 
-        var viewModel = new MyPageViewModel
-        {
-            HasStudentProfile = studentId.HasValue,
-            Bookings = bookings
-        };
+            if (bookings == null)
+            {
+                _logger.LogError("Failed to fetch bookings for user {userId}.", userId);
 
-        if (studentId.HasValue)
-        {
-            try
-            {
-                viewModel.StudySessions = await _dbContext.StudySessions
-                    .AsNoTracking()
-                    .Where(session => session.Participants
-                        .Any(participant => participant.StudentId == studentId.Value))
-                    .Include(session => session.Booking)
-                        .ThenInclude(booking => booking.Room)
-                    .OrderBy(session => session.Booking.StartTime)
-                    .ToListAsync();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "[MyPageController] Failed to fetch study sessions for student ID {StudentId}.", studentId.Value);
                 return StatusCode(500, "Internal server error");
             }
-        }
 
-        return View("~/Views/Account/MyPage.cshtml", viewModel);
+            var viewModel = new MyPageViewModel
+            {
+                HasStudentProfile = student != null,
+                Bookings = bookings.ToList()
+            };
+
+            return View("~/Views/Account/MyPage.cshtml", viewModel);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to load MyPage for userr {userId}.", userId);
+            return StatusCode(500, "Internal serverr error");
+        }
     }
 }
