@@ -28,9 +28,8 @@
                         </div>
 
                         <div>
-                            <label asp-for="UserName" class="form-label">Name</label>
-                            <input asp-for="UserName" class="form-control" />
-                            <span asp-validation-for="UserName" class="text-danger"></span>
+                            <label class="form-label">Name</label>
+                            <input class="form-control" value="@Model.Student?.FullName" />
                         </div>
 
                         <div>

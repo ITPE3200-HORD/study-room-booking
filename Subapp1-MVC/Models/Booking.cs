@@ -9,13 +9,9 @@ namespace study_room_booking.Models
         [Range(1, int.MaxValue, ErrorMessage = "Please select a room")]
         public int RoomId { get; set; }
         public virtual Room? Room { get; set; }
+        public int StudentId { get; set; }
+        public virtual Student? Student { get; set; }
         public virtual StudySession? StudySession { get; set; }
-
-        public string? UserId { get; set; }
-
-        [Required(ErrorMessage = "Name is required")]
-        [StringLength(50, ErrorMessage = "Name cannot be longer than 50 characters")]
-        public string? UserName { get; set; }
 
         [StringLength(200, ErrorMessage = "Description cannot be longer than 200 characters")]
         public string? Description { get; set; }
