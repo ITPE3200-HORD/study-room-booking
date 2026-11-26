@@ -1,3 +1,8 @@
+// Here we implement the StudySession repository,
+// which handles all database access for study sessions and their participants.
+// Each method wraps the database call in try/catch, so errors are logged
+// instead of crashing the application.
+
 using Microsoft.EntityFrameworkCore;
 using study_room_booking.Models;
 
@@ -44,6 +49,26 @@ public class StudySessionRepository : IStudySessionRepository
         catch (Exception e)
         {
             _logger.LogError(e, "[StudySessionRepository] GetOpen() failed");
+            return null;
+        }
+    }
+
+    public async Task<IEnumerable<StudySession>?> GetForStudent(int studentId)
+    {
+        try
+        {
+            return await _db.StudySessions
+                .AsNoTracking()
+                .Include(session => session.Booking).ThenInclude(booking => booking.Room)
+                .Include(session => session.Booking).ThenInclude(booking => booking.Student)
+                .Include(session => session.Participants)
+                .Where(session => session.Participants.Any(participant => participant.StudentId == studentId))
+                .OrderBy(session => session.Booking.StartTime)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("[StudySessionRepository] GetForStudent() failed for StudentId {studentId}, error message: {e}", studentId, e.Message);
             return null;
         }
     }

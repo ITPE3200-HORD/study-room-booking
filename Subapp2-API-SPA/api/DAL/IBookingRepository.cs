@@ -1,5 +1,5 @@
-// Inte// Interface for the Booking repository.
-// Defines which database operations the BookingController can use.
+// Interface for the Booking repository.
+// Defines which database operations the controllers can use for bookings.
 
 using study_room_booking.Models;
 
@@ -8,6 +8,7 @@ namespace study_room_booking.DAL;
 public interface IBookingRepository
 {
     Task<IEnumerable<Booking>?> GetAll();
+    Task<IEnumerable<Booking>?> GetByStudentId(int studentId);
     Task<Booking?> GetBookingById(int id);
     Task<bool> Create(Booking booking);
     Task<bool> Update(Booking booking);

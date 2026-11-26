@@ -11,6 +11,7 @@ namespace study_room_booking.DAL;
 public interface IRoomRepository
 {
     Task<IEnumerable<Room>?> GetAll();
+    Task<IEnumerable<Room>?> GetAvailable(DateTime start, DateTime end, int groupSize, string? roomType);
     Task<Room?> GetRoomById(int id);
     Task<bool> Create(Room room);
     Task<bool> Update(Room room);

@@ -1,9 +1,8 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using study_room_booking.Models;
-using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.AspNetCore.Mvc;
+using study_room_booking.DAL;
+using study_room_booking.DTOs;
 
 namespace study_room_booking.Controllers;
 
@@ -12,12 +11,20 @@ namespace study_room_booking.Controllers;
 [Authorize]
 public class MyPageController : ControllerBase
 {
-    private readonly RoomDbContext _dbContext;
+    private readonly IStudentRepository _studentRepository;
+    private readonly IBookingRepository _bookingRepository;
+    private readonly IStudySessionRepository _studySessionRepository;
     private readonly ILogger<MyPageController> _logger;
 
-    public MyPageController(RoomDbContext dbContext, ILogger<MyPageController> logger)
+    public MyPageController(
+        IStudentRepository studentRepository,
+        IBookingRepository bookingRepository,
+        IStudySessionRepository studySessionRepository,
+        ILogger<MyPageController> logger)
     {
-        _dbContext = dbContext;
+        _studentRepository = studentRepository;
+        _bookingRepository = bookingRepository;
+        _studySessionRepository = studySessionRepository;
         _logger = logger;
     }
 
@@ -32,85 +39,29 @@ public class MyPageController : ControllerBase
             return Unauthorized();
         }
 
-        try
+        var student = await _studentRepository.GetByIdentityUserId(userId);
+
+        // Only users with a student profile can have bookings and sessions (admins have none)
+        if (student == null)
         {
-            var studentId = await _dbContext.Students
-                .AsNoTracking()
-                .Where(student => student.IdentityUserId == userId)
-                .Select(student => (int?)student.StudentId)
-                .SingleOrDefaultAsync();
-            
-            //Only users with student profile can book rooms
-            var hasStudentProfile = studentId.HasValue;
-            var currentStudentId = studentId ?? 0;
-
-            if (studentId == null)
-            {
-                _logger.LogWarning("[MyPageController] No student profile found for user { UserId}", userId);
-                    return Ok(new
-                    {
-                        hasStudentProfile = false,
-                        bookings = Array.Empty<object>(),
-                        studySessions = Array.Empty<object>()
-                    });
-            }
-
-            var bookings = await _dbContext.Bookings
-                .AsNoTracking()
-                .Where(booking => booking.StudentId == studentId)
-                .OrderBy(booking => booking.StartTime)
-                .Select(booking => new
-                {
-                    bookingId = booking.BookingId,
-                    roomId = booking.RoomId,
-                    roomNumber = booking.Room == null
-                        ? null
-                        : booking.Room.RoomNumber,
-                    booking.StartTime,
-                    booking.EndTime,
-                    booking.Description,
-                    studySessionId = booking.StudySession == null
-                        ? (int?)null
-                        : booking.StudySession.StudySessionId
-                })
-                .ToListAsync();
-
-            var studySessions = await _dbContext.StudySessions
-                .AsNoTracking()
-                .Where(session => session.Participants
-                    .Any(participant => participant.StudentId == currentStudentId))
-                .OrderBy(session => session.Booking.StartTime)
-                .Select(session => new
-                {
-                    studySessionId = session.StudySessionId,
-                    title = session.Title,
-                    subject = session.Subject,
-                    isOpen = session.IsOpen,
-                    isOwner = session.Booking.StudentId == currentStudentId,
-                    maxParticipants = session.MaxParticipants,
-                    participantCount = session.Participants.Count,
-                    bookingId = session.BookingId,
-                    roomId = session.Booking.RoomId,
-                    // Room can be null, so check it before reading RoomNumber
-                    roomNumber = session.Booking.Room == null
-                        ? null
-                        : session.Booking.Room.RoomNumber,
-                    startTime = session.Booking.StartTime,
-                    endTime = session.Booking.EndTime
-                })
-                .ToListAsync();
-
-            return Ok(new
-            {
-                hasStudentProfile = true,
-                bookings,
-                studySessions
-            });
+            _logger.LogWarning("[MyPageController] No student profile found for user {UserId}", userId);
+            return Ok(new MyPageDto {HasStudentProfile = false});
         }
-        catch (Exception ex)
+
+        var bookings = await _bookingRepository.GetByStudentId(student.StudentId);
+        var sessions = await _studySessionRepository.GetForStudent(student.StudentId);
+
+        if (bookings == null || sessions == null)
         {
-            _logger.LogError(ex, "[MyPageController] Failed to load data for user {UserId}.", userId);
+            _logger.LogError("[MyPageController] Failed to load data for student {StudentId}", student.StudentId);
             return Problem("My page data could not be retrieved.", statusCode: StatusCodes.Status500InternalServerError);
         }
+
+        return Ok(new MyPageDto
+        {
+            HasStudentProfile = true,
+            Bookings = bookings.Select(booking => booking.ToDto()).ToList(),
+            StudySessions = sessions.Select(session => session.ToDto(student.StudentId)).ToList()
+        });
     }
 }

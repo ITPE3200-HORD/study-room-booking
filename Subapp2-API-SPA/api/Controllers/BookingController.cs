@@ -1,13 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using study_room_booking.DAL;
 using System.Security.Claims;
 using BookingEntity = study_room_booking.Models.Booking;
-using BookingCreateDto = study_room_booking.DTOs.BookingCreateDto;
-using BookingUpdateDto = study_room_booking.DTOs.BookingUpdateDto;
 using study_room_booking.Models;
-
+using study_room_booking.DTOs;
 
 namespace study_room_booking.Controllers;
 
@@ -45,7 +42,7 @@ public class BookingController : ControllerBase
             _logger.LogError("[BookingController] Booking list not found while executing GetAll()");
             return NotFound("Booking list not found");
         }
-        return Ok(bookings);
+        return Ok(bookings.Select(booking => booking.ToDto()));
     }
 
     // GET: /api/Booking/{id}
@@ -60,15 +57,7 @@ public class BookingController : ControllerBase
             return NotFound("Booking not found.");
         }
 
-        return Ok(new
-        {
-            bookingId = booking.BookingId,
-            roomId = booking.RoomId,
-            roomNumber = booking.Room?.RoomNumber,
-            booking.StartTime,
-            booking.EndTime,
-            booking.Description
-        });
+        return Ok(booking.ToDto());
     }
 
     //GET: /api/Booking/creation-options?roomId=1&date=2026-11-10&startTime=09:00:00&durationMinutes=60
@@ -111,14 +100,14 @@ public class BookingController : ControllerBase
 
         var isAvailable = !await _bookingRepository.IsOverlapping(proposedBooking);
 
-        return Ok(new
+        return Ok(new BookingOptionsDto
         {
-            roomId = room.RoomId,
-            roomNumber = room.RoomNumber,
-            startTime = start,
-            endTime = end,
-            durationMinutes,
-            isAvailable
+            RoomId = room.RoomId,
+            RoomNumber = room.RoomNumber,
+            StartTime = start,
+            EndTime = end,
+            DurationMinutes = durationMinutes,
+            IsAvailable = isAvailable
         });
     }
 
@@ -166,18 +155,7 @@ public class BookingController : ControllerBase
 
         _logger.LogInformation("[BookingController] Booking created: {BookingId}", booking.BookingId);
 
-        return CreatedAtAction(
-            nameof(GetById),
-            new { id = booking.BookingId },
-            new
-            {
-                bookingId = booking.BookingId,
-                roomId = booking.RoomId,
-                roomNumber = room.RoomNumber,
-                booking.StartTime,
-                booking.EndTime,
-                booking.Description
-            });
+        return CreatedAtAction(nameof(GetById), new { id = booking.BookingId }, booking.ToDto());
     }
 
     // PUT: /api/Booking/{id}
@@ -247,7 +225,7 @@ public class BookingController : ControllerBase
             return NotFound("Booking not found.");
         }
 
-        var currentStudentId = await 
+        var currentStudentId = await
             GetCurrentStudentId();
         var isOwner = currentStudentId != null && booking.StudentId == currentStudentId;
 
