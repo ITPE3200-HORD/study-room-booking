@@ -24,7 +24,8 @@ public class BookingController : Controller
     }
 
     // GET: /Booking/Table
-    // Shows all bookings in a table
+    // Shows all bookings in a table. Only accessible to admins
+    [HttpGet]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Table()
     {
@@ -57,6 +58,7 @@ public class BookingController : Controller
         return View(model);
     }
 
+    // POST: /Booking/Create
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]

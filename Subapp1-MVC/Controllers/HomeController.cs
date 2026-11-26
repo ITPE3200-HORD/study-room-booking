@@ -16,7 +16,9 @@ public class HomeController : Controller
         _logger = logger;
     }
 
+    // GET: /Home/Index
     // First available room is displayed on the home page
+    [HttpGet]
     public async Task<IActionResult> Index()
     {
         List<Room> rooms;
@@ -36,7 +38,8 @@ public class HomeController : Controller
             return StatusCode(500, "Internal server error");
         }
 
-        try{
+        try
+        {
             openStudySessions = await _roomDbContext.StudySessions
                 .AsNoTracking()
                 .Where(session =>
@@ -55,7 +58,7 @@ public class HomeController : Controller
             return StatusCode(500, "Internal server error");
         }
 
-       
+
         var viewModel = new HomeIndexViewModel
         {
             Rooms = rooms,
@@ -65,6 +68,7 @@ public class HomeController : Controller
         return View(viewModel);
     }
 
+    // GET: /Home/Book
     [HttpGet]
     public async Task<IActionResult> Book([FromQuery] BookViewModel model)
     {
@@ -119,6 +123,7 @@ public class HomeController : Controller
 
     // GET: /Home/Error
     // Shown when an unexpected error occurs in production (see UseExceptionHandler in Program.cs)
+    [HttpGet]
     public IActionResult Error()
     {
         return View();
