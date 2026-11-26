@@ -42,7 +42,7 @@ public class StudySessionRepository : IStudySessionRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("[StudySessionRepository] GetOpen() failed, error message: {e}", e.Message);
+            _logger.LogError(e, "[StudySessionRepository] GetOpen() failed");
             return null;
         }
     }
@@ -58,7 +58,7 @@ public class StudySessionRepository : IStudySessionRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("[StudySessionRepository] GetById() failed for StudySessionId {id}, error message: {e}", id, e.Message);
+            _logger.LogError(e, "[StudySessionRepository] GetById() failed for StudySessionId {Id}", id);
             return null;
         }
     }
@@ -73,7 +73,7 @@ public class StudySessionRepository : IStudySessionRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("[StudySessionRepository] Create() failed for studysession {@studySession}, error message: {e}", studySession, e.Message);
+            _logger.LogError(e, "[StudySessionRepository] Create() failed for booking {BookingId}", studySession.BookingId);
             return false;
         }
     }
@@ -88,7 +88,7 @@ public class StudySessionRepository : IStudySessionRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("[StudySessionRepository] Update() failed for study session {@studySession}, error message: {e}", studySession, e.Message);
+            _logger.LogError(e, "[StudySessionRepository] Update() failed for StudySessionId {Id}", studySession.StudySessionId);
             return false;
         }
     }
@@ -100,7 +100,7 @@ public class StudySessionRepository : IStudySessionRepository
             var studySession = await _db.StudySessions.FindAsync(id);
             if (studySession == null)
             {
-                _logger.LogError("[StudySessionRepository] Studysession not found for StudySessionId {id}", id);
+                _logger.LogWarning("[StudySessionRepository] Study session not found for StudySessionId {Id}", id);
                 return false;
             }
             _db.StudySessions.Remove(studySession);
@@ -109,7 +109,7 @@ public class StudySessionRepository : IStudySessionRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("[StudySessionRepository] Delete() failed for StudySessionId {id}, error message: {e}", id, e.Message);
+            _logger.LogError(e, "[StudySessionRepository] Delete() failed for StudySessionId {Id}", id);
             return false;
         }
     }
@@ -123,11 +123,11 @@ public class StudySessionRepository : IStudySessionRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("[StudySessionRepository] ExistsForBooking() failed for BookingId {bookingId}, error message: {e}", bookingId, e.Message);
+            _logger.LogError(e, "[StudySessionRepository] ExistsForBooking() failed for BookingId {BookingId}", bookingId);
             return true; // treat errors as "exists" so we never create duplicates
         }
     }
-    
+
     public async Task<bool> AddParticipant(SessionParticipant participant)
     {
         try
@@ -138,10 +138,10 @@ public class StudySessionRepository : IStudySessionRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("[StudySessionRepository] AddParticipant() failed for session {SessionId}, student {StudentId}, error message: {e}",
-                participant.StudySessionId, participant.StudentId, e.Message);
+            _logger.LogError(e, "[StudySessionRepository] AddParticipant() failed for session {SessionId}, student {StudentId}",
+                participant.StudySessionId, participant.StudentId);
             return false;
-        }    
+        }
     }
 
     public async Task<bool> RemoveParticipant(int studySessionId, int studentId)
@@ -164,8 +164,8 @@ public class StudySessionRepository : IStudySessionRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("[StudySessionRepository] RemoveParticipant() failed for session {SessionId}, student {StudentId}, error message: {e}",
-                studySessionId, studentId, e.Message);
+            _logger.LogError(e, "[StudySessionRepository] RemoveParticipant() failed for session {SessionId}, student {StudentId}",
+              studySessionId, studentId);
             return false;
         }
     }

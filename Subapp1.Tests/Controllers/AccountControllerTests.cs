@@ -64,9 +64,10 @@ public class AccountControllerTests
 
         var studentRepository = Substitute.For<IStudentRepository>();
         var controller = new AccountController(
-            userManager,
-            signInManager,
-            studentRepository);
+        userManager,
+        signInManager,
+        studentRepository,
+        Substitute.For<ILogger<AccountController>>());
 
         var urlHelper = Substitute.For<IUrlHelper>();
         urlHelper.IsLocalUrl("/my-page").Returns(true);
@@ -155,7 +156,8 @@ public class AccountControllerTests
         var controller = new AccountController(
             userManager,
             signInManager,
-            studentRepository);
+            studentRepository,
+            Substitute.For<ILogger<AccountController>>());
 
         var model = new RegisterViewModel
         {
@@ -238,7 +240,8 @@ public class AccountControllerTests
         var controller = new AccountController(
             userManager,
             signInManager,
-            studentRepository);
+            studentRepository,
+            Substitute.For<ILogger<AccountController>>());
 
         var urlHelper = Substitute.For<IUrlHelper>();
         urlHelper.IsLocalUrl("/my-page").Returns(true);
@@ -326,7 +329,8 @@ public class AccountControllerTests
         var controller = new AccountController(
             userManager,
             signInManager,
-            studentRepository);
+            studentRepository,
+            Substitute.For<ILogger<AccountController>>());
 
         var model = new RegisterViewModel
         {
