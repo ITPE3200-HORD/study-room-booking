@@ -124,14 +124,14 @@ public class BookingRepository : IBookingRepository
         try
         {
             return await _db.Bookings.AnyAsync(b =>
-                b.UserId == booking.UserId &&
+                b.StudentId == booking.StudentId &&
                 b.BookingId != booking.BookingId &&
                 b.StartTime < booking.EndTime &&
                 booking.StartTime < b.EndTime);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "[BookingRepository] UserHasOverlappingBooking() failed for user {UserId}", booking.UserId);
+            _logger.LogError(e, "[BookingRepository] UserHasOverlappingBooking() failed for student {StudentId}", booking.StudentId);
             // Treat errors as overlap, so we never accidentally allow a double booking
             return true;
         }
@@ -143,7 +143,8 @@ public class BookingRepository : IBookingRepository
         {
             return await _db.Bookings
                 .Include(b => b.Room)
-                .Where(b => b.UserId == userId)
+                .Include(b => b.Student)
+                .Where(b => b.Student!.IdentityUserId == userId)
                 .ToListAsync();
         }
         catch (Exception e)

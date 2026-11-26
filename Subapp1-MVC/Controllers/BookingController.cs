@@ -14,12 +14,18 @@ public class BookingController : Controller
 {
     private readonly IBookingRepository _bookingRepository;
     private readonly IRoomRepository _roomRepository;
+    private readonly IStudentRepository _studentRepository;
     private readonly ILogger<BookingController> _logger;
 
-    public BookingController(IBookingRepository bookingRepository, IRoomRepository roomRepository, ILogger<BookingController> logger)
+    public BookingController(
+        IBookingRepository bookingRepository,
+        IRoomRepository roomRepository,
+        IStudentRepository studentRepository,
+        ILogger<BookingController> logger)
     {
         _bookingRepository = bookingRepository;
         _roomRepository = roomRepository;
+        _studentRepository = studentRepository;
         _logger = logger;
     }
 
@@ -66,12 +72,31 @@ public class BookingController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
+        // Find the Student linked to the logged-in IdentityUser (created on first booking)
+        var identityUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (identityUserId == null) return Challenge();
+
+        var student = await _studentRepository.GetByIdentityUserId(identityUserId);
+        if (student == null)
+        {
+            student = new Student
+            {
+                IdentityUserId = identityUserId,
+                FullName = User.Identity?.Name ?? ""
+            };
+            if (!await _studentRepository.Create(student))
+            {
+                _logger.LogError("[BookingController] Could not create Student for IdentityUser {IdentityUserId}", identityUserId);
+                ModelState.AddModelError("", "Could not find or create your student profile. Please try again.");
+                return View(model);
+            }
+        }
+
         var start = model.Date.Date + model.StartTime;
         var booking = new Booking
         {
             RoomId = model.RoomId,
-            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
-            UserName = User.Identity?.Name ?? "",
+            StudentId = student.StudentId,
             Description = model.Description,
             StartTime = start,
             EndTime = start.AddMinutes(model.DurationMinutes)
@@ -99,7 +124,7 @@ public class BookingController : Controller
             ModelState.AddModelError("",
             "You already have another booking in this time period. " +
             "You can't be in two rooms at the same time, so please choose a different time.");
-            _logger.LogWarning("[BookingController] User {UserId} tried to double book at {StartTime}", booking.UserId, booking.StartTime);
+            _logger.LogWarning("[BookingController] Student {StudentId} tried to double book at {StartTime}", booking.StudentId, booking.StartTime);
             return View(model);
         }
         if (!await _bookingRepository.Create(booking))
@@ -139,7 +164,7 @@ public class BookingController : Controller
         if (booking == null) return NotFound();
         // Only the owner or admin can update the booking
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isOwner = booking.UserId == userId;
+        var isOwner = booking.Student?.IdentityUserId == userId;
         var isAdmin = User.IsInRole("Admin");
 
         if (!isOwner && !isAdmin)
@@ -175,7 +200,7 @@ public class BookingController : Controller
             ModelState.AddModelError("",
             "You already have another booking in this time period. " +
             "You can't be in two rooms at the same time, so please choose a different time.");
-            _logger.LogWarning("[BookingController] User {UserId} tried to double book at {StartTime}", booking.UserId, booking.StartTime);
+            _logger.LogWarning("[BookingController] Student {StudentId} tried to double book at {StartTime}", booking.StudentId, booking.StartTime);
         }
 
         if (ModelState.IsValid)
@@ -221,7 +246,7 @@ public class BookingController : Controller
         if (booking == null) return NotFound();
         // Only the owner or admin can delete the booking
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isOwner = booking.UserId == userId;
+        var isOwner = booking.Student?.IdentityUserId == userId;
         var isAdmin = User.IsInRole("Admin");
 
         if (!isOwner && !isAdmin)
