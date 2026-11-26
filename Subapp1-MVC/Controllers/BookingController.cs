@@ -47,7 +47,7 @@ public class BookingController : Controller
     //GET: /Booking/Create
     //Confirmation page shown after the user picks a room from the search results
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "Student")]
     public async Task<IActionResult> Create(int roomId, DateTime date, TimeSpan startTime, int DurationMinutes)
     {
         var room = await _roomRepository.GetRoomById(roomId);
@@ -66,7 +66,7 @@ public class BookingController : Controller
 
     // POST: /Booking/Create
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Student")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(BookingCreateViewModel model)
     {
@@ -138,7 +138,7 @@ public class BookingController : Controller
 
     // GET: /Booking/Update/5
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "Student")]
     public async Task<IActionResult> Update(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
@@ -156,7 +156,7 @@ public class BookingController : Controller
     // POST: /Booking/Update
     // Validates the changes, checks for overlap and saves
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Student")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Update(int bookingId, string? Description, string startTime, string EndTime)
     {
@@ -165,9 +165,8 @@ public class BookingController : Controller
         // Only the owner or admin can update the booking
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var isOwner = booking.Student?.IdentityUserId == userId;
-        var isAdmin = User.IsInRole("Admin");
 
-        if (!isOwner && !isAdmin)
+        if (!isOwner)
         {
             return Forbid();
         }
@@ -223,7 +222,7 @@ public class BookingController : Controller
     // GET: /Booking/Delete/5
     // Shows a confirmation page before deleting
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "Student")]
     public async Task<IActionResult> Delete(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
@@ -238,7 +237,7 @@ public class BookingController : Controller
     // POST: /Booking/DeleteConfirmed
     // Deletes the booking after the user has confirmed
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Student")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
@@ -247,9 +246,8 @@ public class BookingController : Controller
         // Only the owner or admin can delete the booking
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var isOwner = booking.Student?.IdentityUserId == userId;
-        var isAdmin = User.IsInRole("Admin");
 
-        if (!isOwner && !isAdmin)
+        if (!isOwner)
         {
             return Forbid();
         }
