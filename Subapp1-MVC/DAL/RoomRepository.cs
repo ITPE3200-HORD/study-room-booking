@@ -13,10 +13,10 @@ public class RoomRepository : IRoomRepository
     private readonly ILogger<RoomRepository> _logger;
 
     public RoomRepository(RoomDbContext db, ILogger<RoomRepository> logger)
-    {
-        _db = db;
-        _logger = logger;
-    }
+     {
+         _db = db;
+         _logger = logger;
+     }
 
     public async Task<IEnumerable<Room>?> GetAll()
     {
@@ -27,6 +27,49 @@ public class RoomRepository : IRoomRepository
         catch (Exception e)
         {
             _logger.LogError("[RoomRepository] GetAll() failed, error message: {e}", e.Message);
+            return null;
+        }
+    }
+
+    public async Task<IEnumerable<Room>?> GetAllOrdered()
+    {
+        try
+        {
+            return await _db.Rooms
+            .AsNoTracking()
+            .OrderBy(room => room.Status)
+            .ThenBy(Room => Room.RoomNumber)
+            .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed tto get ordered rooms");
+            return null;
+        }
+    }
+
+    public async Task <IEnumerable<Room>?> GetAvailableRooms(DateTime startTime, DateTime endTime, int groupSize, string? roomType)
+    {
+        try
+        {
+            return await _db.Rooms
+            .AsNoTracking()
+            .Where(room =>
+             room.Status == Room.Availability.Available && 
+             room.Capacity >= groupSize && 
+             (string.IsNullOrEmpty(roomType) || 
+             room.RoomType == roomType) && 
+             !_db.Bookings.Any(booking => 
+                booking.RoomId == room.RoomId && 
+                booking.StartTime < endTime &&
+                startTime < booking.EndTime))
+            .OrderBy(room => room.Capacity)
+            .ThenBy(room => room.RoomNumber)
+            .ToListAsync(); 
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to find available rooms for {Starttime} - {EndTime}", startTime, endTime);
             return null;
         }
     }

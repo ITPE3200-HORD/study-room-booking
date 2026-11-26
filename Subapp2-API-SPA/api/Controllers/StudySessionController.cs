@@ -68,7 +68,11 @@ public class StudySessionController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         var booking = await _bookingRepository.GetBookingById(dto.BookingId);
-        if (booking == null) return NotFound("Booking not found.");
+        if (booking == null)
+        {
+            _logger.LogWarning("[StudySessionController] Booking {BookingId} not found when creating study session", dto.BookingId);
+            return NotFound("Booking not found.");
+        }
 
         var student = await _studentRepository.GetByIdentityUserId(userId!);
         if (student == null)
@@ -90,10 +94,15 @@ public class StudySessionController : ControllerBase
 
         // Rule: the booking must be in the future
         if (booking.StartTime <= DateTime.Now)
-            return BadRequest("You can only create study sessions for future bookings.");
+        {
+            _logger.LogWarning("[StudySessionController] User {UserId} tried to create a session for booking {BookingId} - that has already started", userId, dto.BookingId);
+            return BadRequest("You can only create a study session for a booking that is in the future.");
+        }
 
         // Rule: there can't be more participants than the room has seats
         if (booking.Room != null && dto.MaxParticipants > booking.Room.Capacity)
+        {
+            _logger.LogWarning("[StudySessionController] MaxParticipants {Max} exceeds capacity {Capacity} for booking {BookingId}", dto.MaxParticipants, booking.Room.Capacity, dto.BookingId);
             return BadRequest($"Room {booking.Room.RoomNumber} only has room for {booking.Room.Capacity} people.");
         
         var session = new StudySession
@@ -116,7 +125,13 @@ public class StudySessionController : ControllerBase
         _logger.LogInformation("[StudySessionController] Study session created: {Id}", session.StudySessionId);
 
         var created = await _studySessionRepository.GetById(session.StudySessionId);
-        return CreatedAtAction(nameof(GetById), new { id = session.StudySessionId }, ToDto(created!, student.StudentId));
+        if (created == null)
+        {
+            _logger.LogError("[StudySessionController] Study session created but could not be retrieved: {Id}", session.StudySessionId);
+            return Problem("Study session was created but could not be retrieved.", statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        return CreatedAtAction(nameof(GetById), new { id = created.StudySessionId }, ToDto(created, student.StudentId));
     }
 
     // PUT: /api/StudySession/{id}
@@ -124,8 +139,14 @@ public class StudySessionController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Update(int id, [FromBody] StudySessionUpdateDto dto)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         var session = await _studySessionRepository.GetById(id);
-        if (session == null) return NotFound("Study session not found.");
+        if (session == null)
+        {
+            _logger.LogWarning("[StudySessionController] Study session {Id} not found when updating", id);
+            return NotFound("Study session not found.");
+        }
 
         var currentStudentId = await
         GetCurrentStudentId();
@@ -133,16 +154,22 @@ public class StudySessionController : ControllerBase
         // Rule: only the owner or an admin can edit
         if (!CanManage(session, currentStudentId))
         {
-            _logger.LogWarning("[StudySessionController] User tried to update study session {Id} without permission", id);
+            _logger.LogWarning("[StudySessionController] User {UserId} tried to update study session {Id} without permission", userId, id);
             return Forbid();
         }
 
         // Rule: you can't lower the limit below the number of people already joined
         if (dto.MaxParticipants < session.Participants.Count)
+        {
+            _logger.LogWarning("[StudySessionController] MaxParticipants {Max} is lower than current participants {Count} for session {Id}", dto.MaxParticipants, session.Participants.Count, id);
             return BadRequest($"The session already has {session.Participants.Count} participants.");
+        }
 
         if (session.Booking.Room != null && dto.MaxParticipants > session.Booking.Room.Capacity)
+        {
+            _logger.LogWarning("[StudySessionController] MaxParticipants {Max} exceeds room capacity {Capacity} for session {Id}", dto.MaxParticipants, session.Booking.Room.Capacity, id);
             return BadRequest($"The room only has room for {session.Booking.Room.Capacity} people.");
+        }
 
         session.Title = dto.Title.Trim();
         session.Subject = string.IsNullOrWhiteSpace(dto.Subject) ? null : dto.Subject.Trim();
@@ -164,15 +191,21 @@ public class StudySessionController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
         var session = await _studySessionRepository.GetById(id);
-        if (session == null) return NotFound("Study session not found.");
+        if (session == null)
+        {
+            _logger.LogWarning("[StudySessionController] Study session {Id} not found when deleting", id);
+            return NotFound("Study session not found.");
+        }
 
         var currentStudentId = await
         GetCurrentStudentId();
 
         if (!CanManage(session, currentStudentId))
         {
-            _logger.LogWarning("[StudySessionController] User tried to delete study session {Id} without permission", id);
+            _logger.LogWarning("[StudySessionController] User {UserId} tried to delete study session {Id} without permission", userId, id);
             return Forbid();
         }
 
@@ -194,10 +227,18 @@ public class StudySessionController : ControllerBase
     public async Task<IActionResult> Join(int id)
     {
         var session = await _studySessionRepository.GetById(id);
-        if (session == null) return NotFound("Study session not found.");
+        if (session == null)
+        {
+            _logger.LogWarning("[StudySessionController] Study session {Id} not found when joining", id);
+            return NotFound("Study session not found.");
+        }
 
         var student = await GetCurrentStudent();
-        if (student == null) return BadRequest("Only students can join study sessions.");
+        if (student == null)
+        {
+            _logger.LogWarning("[StudySessionController] User without student profile tried to join session {Id}", id);
+            return BadRequest("Only students can join study sessions.");
+        }
 
         // Domain rules for joining
         if (!session.IsOpen)
@@ -238,15 +279,25 @@ public class StudySessionController : ControllerBase
     public async Task<IActionResult> Leave(int id)
     {
         var session = await _studySessionRepository.GetById(id);
-        if (session == null) return NotFound("Study session not found.");
+        if (session == null)
+        {
+            _logger.LogWarning("[StudySessionController] Study session {Id} not found when leaving", id);
+            return NotFound("Study session not found.");
+        }
 
         var student = await GetCurrentStudent();
         if (student == null || !session.Participants.Any(participant => participant.StudentId == student.StudentId))
+        {
+            _logger.LogWarning("[StudySessionController] Student {StudentId} tried to leave session {Id} without being a participant", student?.StudentId, id);
             return BadRequest("You are not a participant in this study session.");
+        }
 
         // Rule: the owner can't leave their own session, they must delete it instead
-        if (IsOwner(session, student.StudentId))
+        if (IsOwner(session))
+        {
+            _logger.LogWarning("[StudySessionController] Student {StudentId} tried to leave their own session {Id}", student.StudentId, id);
             return BadRequest("You own this session. Delete it instead of leaving.");
+        }
 
         if (!await _studySessionRepository.RemoveParticipant(id, student.StudentId))
         {

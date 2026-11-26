@@ -6,6 +6,7 @@ public interface IStudentRepository
 {
     Task<IEnumerable<Student>?> GetAll();
     Task<Student?> GetById(int id);
+    Task<Student?> GetByIdentityUserId(string identityUserrId);
     Task<bool> Create(Student student);
     Task<bool> Update(Student student);
     Task<bool> Delete(int id);

@@ -170,7 +170,7 @@
                     @* Card content *@
                     <div class="card-top">
                         <span class="course-tag sage">
-                            @session.Subject ?? "Study session"
+                            @(session.Subject ?? "Study session")
                         </span>
                     </div>
 
@@ -190,7 +190,7 @@
 
                     <div class="session-info">
                         <span>
-                            Room @session.Booking.Room?.RoomNumber ?? "-"
+                            Room @(session.Booking.Room?.RoomNumber ?? "-")
                         </span>
                     </div>
 

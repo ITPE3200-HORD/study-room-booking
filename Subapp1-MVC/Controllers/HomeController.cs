@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using study_room_booking.DAL;
 using study_room_booking.Models;
 using study_room_booking.ViewModels;
 
@@ -7,64 +8,48 @@ namespace study_room_booking.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly RoomDbContext _roomDbContext;
+    private readonly IRoomRepository _roomRepository;
+    //private readonly IStudySessionRepository _studySessionRepository,
     private readonly ILogger<HomeController> _logger;
 
-    public HomeController(RoomDbContext roomDbContext, ILogger<HomeController> logger)
+    public HomeController(IRoomRepository roomRepository, ILogger<HomeController> logger)
     {
-        _roomDbContext = roomDbContext;
+        _roomRepository= roomRepository;
         _logger = logger;
     }
 
+    // GET: /Home/Index
     // First available room is displayed on the home page
+    [HttpGet]
     public async Task<IActionResult> Index()
     {
-        List<Room> rooms;
-        List<StudySession> openStudySessions;
-
         try
         {
-            rooms = await _roomDbContext.Rooms
-                .AsNoTracking()
-                .OrderBy(room => room.Status)
-                .ThenBy(room => room.RoomNumber)
-                .ToListAsync();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "[HomeController] Index failed to fetch rooms.");
-            return StatusCode(500, "Internal server error");
-        }
+            var rooms = await _roomRepository.GetAllOrdered();
+            //var openStudySession = await _studySessionRepositiry.GetOpenSessions(DateTime.Now);
 
-        try{
-            openStudySessions = await _roomDbContext.StudySessions
-                .AsNoTracking()
-                .Where(session =>
-                    session.IsOpen &&
-                    session.Booking.StartTime >= DateTime.Now &&
-                    session.Participants.Count < session.MaxParticipants)
-                .Include(session => session.Booking)
-                    .ThenInclude(booking => booking.Room)
-                .Include(session => session.Participants)
-                .OrderBy(session => session.Booking.StartTime)
-                .ToListAsync();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "[HomeController] Index failed to fetch open study sessions.");
-            return StatusCode(500, "Internal server error");
-        }
+            if (rooms == null) // || openStudySession == null)
+            {
+                _logger.LogError("Could nott load data for the homepage.");
+                return StatusCode(500, "Data could nott be rettrrieved.");
+            }
 
-       
-        var viewModel = new HomeIndexViewModel
+            var viewModel = new HomeIndexViewModel
+            {
+                Rooms = rooms.ToList()
+                //OpenStudySessions = openStudySession.ToList()
+            };
+            
+            return View(viewModel);
+        }
+        catch(Exception e)
         {
-            Rooms = rooms,
-            OpenStudySessions = openStudySessions
-        };
-
-        return View(viewModel);
+            _logger.LogError(e, "Failed to load tthe home page.");
+            return StatusCode(500, "An unexpected error occured");
+        }
     }
 
+    // GET: /Home/Book
     [HttpGet]
     public async Task<IActionResult> Book([FromQuery] BookViewModel model)
     {
@@ -85,40 +70,29 @@ public class HomeController : Controller
 
         try
         {
-            model.AvailableRooms = await _roomDbContext.Rooms
-                .AsNoTracking()
-                .Where(room =>
-                    room.Status == Room.Availability.Available &&
-                    room.Capacity >= model.GroupSize &&
-                    // Room type filter: if no type is selected ("All room types"), all rooms pass.
-                    // Otherwise, only rooms with the selected type are included.
-                    (string.IsNullOrEmpty(model.RoomType) || room.RoomType == model.RoomType) &&
-                    // Exclude rooms that have bookings overlapping with the requested time slot
-                    !_roomDbContext.Bookings.Any(booking =>
-                        booking.RoomId == room.RoomId &&
-                        booking.StartTime < endTime &&
-                        startTime < booking.EndTime))
-                .OrderBy(room => room.Capacity)
-                .ThenBy(room => room.RoomNumber)
-                .ToListAsync();
+            var availableRooms = await _roomRepository.GetAvailableRooms(
+                startTime, endTime, model.GroupSize, model.RoomType);
+        
+            if (availableRooms == null)
+            {
+                _logger.LogError("Could not find available rooms for {StartTime} - {EndTime}.", startTime, endTime);
+
+                return StatusCode (500, "Available rooms could not be retrieved. Please ttry again later.");
+            }
+            model.AvailableRooms = availableRooms.ToList();
+            return View(model);
         }
         catch (Exception e)
         {
-            _logger.LogError(
-                e,
-                "[HomeController] Book failed to fetch available rooms for date {Date}, start time {StartTime}, group size {GroupSize}, room type {RoomType}.",
-                model.Date,
-                model.StartTime,
-                model.GroupSize,
-                model.RoomType);
+            _logger.LogError(e, "Failed to find available rooms for {StartTime} - {EndTime}.", startTime, endTime);
 
             return StatusCode(500, "Available rooms could not be retrieved. Please try again later.");
-        }
-        return View(model);
+        };
     }
 
     // GET: /Home/Error
     // Shown when an unexpected error occurs in production (see UseExceptionHandler in Program.cs)
+    [HttpGet]
     public IActionResult Error()
     {
         return View();
