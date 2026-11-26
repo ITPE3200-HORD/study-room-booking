@@ -12,7 +12,7 @@ public class BookViewModel
     public TimeOnly StartTime { get; set; } =
         new(14, 0);
 
-    [Range(30, 240, ErrorMessage = "Choose a duration between 30 minutes and 4 hours.")]
+    [Range(60, 180, ErrorMessage = "Choose a duration between 1 and 3 hours.")]
     public int DurationMinutes { get; set; } = 120;
 
     [Range(1, 25, ErrorMessage = "Group size must be between 1 and 25.")]
