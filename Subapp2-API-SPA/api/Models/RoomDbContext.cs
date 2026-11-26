@@ -25,5 +25,9 @@ public class RoomDbContext : IdentityDbContext<IdentityUser>
             .HasOne(booking => booking.StudySession)
             .WithOne(studySession => studySession.Booking)
             .HasForeignKey<StudySession>(studySession => studySession.BookingId);
+        // One IdentityUser can have at most one Student profile
+        modelBuilder.Entity<Student>()
+            .HasIndex(student => student.IdentityUserId)
+            .IsUnique();
     }
 }

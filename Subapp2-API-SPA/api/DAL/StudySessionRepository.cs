@@ -20,6 +20,7 @@ public class StudySessionRepository : IStudySessionRepository
         {
             var query = _db.StudySessions
                 .Include(session => session.Booking).ThenInclude(booking => booking.Room)
+                .Include(session => session.Booking).ThenInclude(booking => booking.Student)
                 .Include(session => session.Participants)
                 .Where(session => session.IsOpen && session.Booking.StartTime >= DateTime.Now);
 
@@ -53,6 +54,7 @@ public class StudySessionRepository : IStudySessionRepository
         {
             return await _db.StudySessions
                     .Include(session => session.Booking).ThenInclude(booking => booking.Room)
+                    .Include(session => session.Booking).ThenInclude(booking => booking.Student)
                     .Include(session => session.Participants)
                     .FirstOrDefaultAsync(session => session.StudySessionId == id);
         }
