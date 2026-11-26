@@ -23,7 +23,6 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login"; // Redirect to login page if not authenticated
-    options.LogoutPath = "/Account/Logout"; // Redirect to logout page
     options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect to access denied page
 });
 
