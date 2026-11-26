@@ -1,3 +1,8 @@
+// Here we implement the Student repository,
+// which handles all database access for students.
+// Each method wraps the database call in try/catch, so errors are logged
+// instead of crashing the application.
+
 using Microsoft.EntityFrameworkCore;
 using study_room_booking.Models;
 

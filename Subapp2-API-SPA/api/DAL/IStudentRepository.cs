@@ -1,3 +1,7 @@
+// Interface for the Student repository.
+// Defines which database operations the controllers can use for students,
+// including finding the student profile linked to a logged-in IdentityUser.
+
 using study_room_booking.Models;
 
 namespace study_room_booking.DAL;

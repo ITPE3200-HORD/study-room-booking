@@ -1,7 +1,4 @@
-// Here we implement the Booking repository, 
-// which handles all database access for bookings.
-// Each method wraps the database call in try/catch, so errors are logged
-// instead of crashing the application.
+// Include loads the related Room, so RoomNumber can be returned
 
 using Microsoft.EntityFrameworkCore;
 using study_room_booking.Models;

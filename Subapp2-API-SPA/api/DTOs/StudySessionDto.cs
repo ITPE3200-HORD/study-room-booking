@@ -4,7 +4,7 @@ public class StudySessionDto
 {
     public int StudySessionId { get; set; }
     public string Title { get; set; } = string.Empty;
-    public string? Subject { get; set; } = string.Empty;
+    public string? Subject { get; set; }
     public int MaxParticipants { get; set; }
     public int ParticipantCount { get; set; }
     public bool IsOpen { get; set; }

@@ -1,5 +1,5 @@
-// Inte// Interface for the Booking repository.
-// Defines which database operations the BookingController can use.
+// Interface for the Booking repository.
+// Defines which database operations the controllers can use for bookings.
 
 using study_room_booking.Models;
 

@@ -1,7 +1,5 @@
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SQLitePCL;
 using study_room_booking.Models;
 
 namespace study_room_booking.DAL;

@@ -1,3 +1,8 @@
+// Here we implement the StudySession repository,
+// which handles all database access for study sessions and their participants.
+// Each method wraps the database call in try/catch, so errors are logged
+// instead of crashing the application.
+
 using Microsoft.EntityFrameworkCore;
 using study_room_booking.Models;
 

@@ -2,9 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using study_room_booking.DAL;
-using StudentEntity = study_room_booking.Models.Student;
-using StudentResponseDto = study_room_booking.DTOs.StudentDto;
-using StudentUpdateDto = study_room_booking.DTOs.StudentUpdateDto;
+using study_room_booking.Models;
+using study_room_booking.DTOs;
 
 namespace study_room_booking.Controllers;
 
@@ -158,9 +157,9 @@ public class StudentController : ControllerBase
         }
     }
 
-    private static StudentResponseDto ToDto(StudentEntity student)
+    private static StudentDto ToDto(Student student)
     {
-        return new StudentResponseDto
+        return new StudentDto
         {
             StudentId = student.StudentId,
             UserName = student.IdentityUser?.UserName ?? string.Empty,
