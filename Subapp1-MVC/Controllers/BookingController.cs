@@ -108,14 +108,14 @@ public class BookingController : Controller
         _logger.LogInformation("[BookingController] Booking created for Room {roomId}", booking.RoomId);
         return RedirectToAction("MyPage", "MyPage");
     }
-    
+
     // GET: /Booking/Update/5
     [HttpGet]
     [Authorize]
     public async Task<IActionResult> Update(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
-    
+
         if (booking == null)
         {
             _logger.LogError("[BookingController] Booking not found when updating BookingId {id}", id);
@@ -135,6 +135,15 @@ public class BookingController : Controller
     {
         var booking = await _bookingRepository.GetBookingById(bookingId);
         if (booking == null) return NotFound();
+        // Only the owner or admin can update the booking
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isOwner = booking.UserId == userId;
+        var isAdmin = User.IsInRole("Admin");
+
+        if (!isOwner && !isAdmin)
+        {
+            return Forbid();
+        }
 
         //Parse time from drop-down 
         if (!TimeOnly.TryParse(startTime, out var start) || !TimeOnly.TryParse(EndTime, out var end))
@@ -143,7 +152,7 @@ public class BookingController : Controller
         }
         else if (end <= start)
         {
-            ModelState.AddModelError("","End time must be after start time");
+            ModelState.AddModelError("", "End time must be after start time");
         }
         else
         {
@@ -152,7 +161,7 @@ public class BookingController : Controller
             booking.EndTime = date + end.ToTimeSpan();
             booking.Description = Description;
         }
-        
+
         if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
         {
             ModelState.AddModelError("", "The room is already booked in this time period");
@@ -206,6 +215,18 @@ public class BookingController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
+        var booking = await _bookingRepository.GetBookingById(id);
+        if (booking == null) return NotFound();
+        // Only the owner or admin can delete the booking
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isOwner = booking.UserId == userId;
+        var isAdmin = User.IsInRole("Admin");
+
+        if (!isOwner && !isAdmin)
+        {
+            return Forbid();
+        }
+
         bool deleted = await _bookingRepository.Delete(id);
         if (!deleted)
         {
