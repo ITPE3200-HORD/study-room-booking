@@ -18,7 +18,9 @@ public class HomeController : Controller
         _logger = logger;
     }
 
+    // GET: /Home/Index
     // First available room is displayed on the home page
+    [HttpGet]
     public async Task<IActionResult> Index()
     {
         try
@@ -47,6 +49,7 @@ public class HomeController : Controller
         }
     }
 
+    // GET: /Home/Book
     [HttpGet]
     public async Task<IActionResult> Book([FromQuery] BookViewModel model)
     {
@@ -89,6 +92,7 @@ public class HomeController : Controller
 
     // GET: /Home/Error
     // Shown when an unexpected error occurs in production (see UseExceptionHandler in Program.cs)
+    [HttpGet]
     public IActionResult Error()
     {
         return View();

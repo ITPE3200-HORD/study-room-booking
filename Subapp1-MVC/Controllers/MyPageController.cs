@@ -21,6 +21,8 @@ public class MyPageController : Controller
         _logger = logger;
     }
 
+    // GET: /MyPage/MyPage
+    [HttpGet]
     public async Task<IActionResult> MyPage()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

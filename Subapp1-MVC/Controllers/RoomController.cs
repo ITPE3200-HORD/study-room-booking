@@ -22,7 +22,9 @@ public class RoomController : Controller
 
 
     // GET: /Room/Table
-    // Shows all rooms in a table
+    // Shows all rooms in a table. Room management is only available to admins
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Table()
     {
         var rooms = await _roomRepository.GetAll();
@@ -39,7 +41,7 @@ public class RoomController : Controller
     // GET: /Room/Create
     // Shows the empty form for creating a new room
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public IActionResult Create()
     {
         return View();
@@ -48,7 +50,7 @@ public class RoomController : Controller
     // POST: /Room/Create
     // Saves the new room to the database if the form is valid
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(Room room)
     {
         if (ModelState.IsValid)
@@ -75,7 +77,7 @@ public class RoomController : Controller
     // GET: /Room/Update/{id}
     // Shows the form for updating an existing room
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id)
     {
         var room = await _roomRepository.GetRoomById(id);
@@ -91,7 +93,7 @@ public class RoomController : Controller
     // POST: /Room/Update
     // Updates an existing room in the database if the form is valid
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(Room room)
     {
         if (ModelState.IsValid)
@@ -117,7 +119,7 @@ public class RoomController : Controller
     // GET: /Room/Delete/{id}
     // Shows the confirmation page for deleting a room
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var room = await _roomRepository.GetRoomById(id);
@@ -133,7 +135,7 @@ public class RoomController : Controller
     // POST: /Room/DeleteConfirmed/{id}
     // Deletes a room from the database
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         bool returnOk = await _roomRepository.Delete(id);
