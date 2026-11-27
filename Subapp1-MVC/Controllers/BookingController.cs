@@ -44,11 +44,15 @@ public class BookingController : Controller
         return View(bookings);
     }
 
-    //GET: /Booking/Create
-    //Confirmation page shown after the user picks a room from the search results
+    // GET: /Booking/Create
+    // Confirmation page shown after the user picks a room from the search results
     [HttpGet]
     [Authorize(Roles = "Student")]
-    public async Task<IActionResult> Create(int roomId, DateTime date, TimeSpan startTime, int DurationMinutes)
+    public async Task<IActionResult> Create(
+        int roomId,
+        DateTime date,
+        TimeSpan startTime,
+        int DurationMinutes)
     {
         var room = await _roomRepository.GetRoomById(roomId);
         if (room == null) return NotFound();
@@ -61,6 +65,7 @@ public class BookingController : Controller
             StartTime = startTime,
             DurationMinutes = DurationMinutes
         };
+
         return View(model);
     }
 
@@ -84,15 +89,40 @@ public class BookingController : Controller
                 IdentityUserId = identityUserId,
                 FullName = User.Identity?.Name ?? ""
             };
+
             if (!await _studentRepository.Create(student))
             {
-                _logger.LogError("[BookingController] Could not create Student for IdentityUser {IdentityUserId}", identityUserId);
-                ModelState.AddModelError("", "Could not find or create your student profile. Please try again.");
+                _logger.LogError(
+                    "[BookingController] Could not create Student for IdentityUser {IdentityUserId}",
+                    identityUserId);
+
+                ModelState.AddModelError(
+                    "",
+                    "Could not find or create your student profile. Please try again.");
+
+                return View(model);
+            }
+        }
+
+        // Check that the room can hold all participants in the study session.
+        if (model.CreateStudySession)
+        {
+            var room = await _roomRepository.GetRoomById(model.RoomId);
+
+            if (room == null) return NotFound("Room not found.");
+
+            if (model.SessionMaxParticipants > room.Capacity)
+            {
+                ModelState.AddModelError(
+                    nameof(model.SessionMaxParticipants),
+                    $"Room {room.RoomNumber} only has room for {room.Capacity} people.");
+
                 return View(model);
             }
         }
 
         var start = model.Date.Date + model.StartTime;
+
         var booking = new Booking
         {
             RoomId = model.RoomId,
@@ -111,9 +141,9 @@ public class BookingController : Controller
                 MaxParticipants = model.SessionMaxParticipants,
                 IsOpen = true,
                 Participants = new List<SessionParticipant>
-                {
-                    new() { StudentId = student.StudentId }
-                }
+            {
+                new() { StudentId = student.StudentId }
+            }
             };
         }
 
@@ -122,21 +152,36 @@ public class BookingController : Controller
             ModelState.AddModelError("", "The room is already booked.");
             return View(model);
         }
+
         // Prevent the user from booking two rooms at the same time
         if (await _bookingRepository.UserHasOverlappingBooking(booking))
         {
-            ModelState.AddModelError("",
-            "You already have another booking in this time period. " +
-            "You can't be in two rooms at the same time, so please choose a different time.");
-            _logger.LogWarning("[BookingController] Student {StudentId} tried to double book at {StartTime}", booking.StudentId, booking.StartTime);
+            ModelState.AddModelError(
+                "",
+                "You already have another booking in this time period. " +
+                "You can't be in two rooms at the same time, so please choose a different time.");
+
+            _logger.LogWarning(
+                "[BookingController] Student {StudentId} tried to double book at {StartTime}",
+                booking.StudentId,
+                booking.StartTime);
+
             return View(model);
         }
+
         if (!await _bookingRepository.Create(booking))
         {
-            ModelState.AddModelError("", "Something went wrong while saving the booking. Please try again.");
+            ModelState.AddModelError(
+                "",
+                "Something went wrong while saving the booking. Please try again.");
+
             return View(model);
         }
-        _logger.LogInformation("[BookingController] Booking created for Room {roomId}", booking.RoomId);
+
+        _logger.LogInformation(
+            "[BookingController] Booking created for Room {roomId}",
+            booking.RoomId);
+
         return RedirectToAction("MyPage", "MyPage");
     }
 

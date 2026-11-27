@@ -51,6 +51,6 @@ public class BookingCreateViewModel : IValidatableObject
     [StringLength(100, ErrorMessage = "Session subject cannot be longer than 100 characters.")]
     public string? SessionSubject { get; set; }
 
-    [Range(1, 50, ErrorMessage = "Maximum participants must be between 1 and 50.")]
+    [Range(2, 50, ErrorMessage = "Maximum participants must be between 2 and 50.")]
     public int SessionMaxParticipants { get; set; } = 2;
 }
