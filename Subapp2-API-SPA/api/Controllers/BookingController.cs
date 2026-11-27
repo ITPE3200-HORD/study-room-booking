@@ -5,6 +5,7 @@ using System.Security.Claims;
 using BookingEntity = study_room_booking.Models.Booking;
 using study_room_booking.Models;
 using study_room_booking.DTOs;
+using Microsoft.VisualBasic;
 
 namespace study_room_booking.Controllers;
 
@@ -212,10 +213,21 @@ public class BookingController : ControllerBase
     private async Task<int?> GetCurrentStudentId()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null) return null;
 
-        var student = await
-        _studentRepository.GetByIdentityUserId(userId);
+        if (userId == null || User.IsInRole ("Admin"))
+        {
+            return null;
+        }
+
+        var fullName = 
+        User.FindFirstValue(ClaimTypes.Email) ??
+        User.Identity?.Name ??
+        userId;
+
+        var student = await _studentRepository.GetOrCreateByIdentityUserId(
+            userId, 
+            fullName);
+        
         return student?.StudentId;
     }
 }

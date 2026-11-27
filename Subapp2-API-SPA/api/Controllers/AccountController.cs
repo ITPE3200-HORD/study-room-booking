@@ -113,6 +113,22 @@ public class AccountController : ControllerBase
                 _logger.LogWarning("[AccountController] Failed login attempt for user {Username}", model.Username);
                 return Unauthorized(new { message = "Invalid username or password." });
             }
+            var user = await _userManager.FindByNameAsync(model.Username);
+            if (user == null)
+            {
+                await _signInManager.SignOutAsync();
+                return Unauthorized(new { message = "Invalid username or password" });
+            }
+            if (!await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                var student = await _studentRepository.GetOrCreateByIdentityUserId(user.Id, user.UserName ?? user.Email ?? model.Username);
+
+                if (student == null)
+                {
+                    await _signInManager.SignOutAsync();
+                    return Problem("The student profile could not be created", statusCode: StatusCodes.Status500InternalServerError);
+                }
+            }
 
             return Ok(new AuthResponseDto
             {

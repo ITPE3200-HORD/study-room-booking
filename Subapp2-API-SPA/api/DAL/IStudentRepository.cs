@@ -14,5 +14,6 @@ public interface IStudentRepository
     Task<bool> Create(Student student);
     Task<bool> Update(Student student);
     Task<bool> Delete(int id);
+    Task<Student?> GetOrCreateByIdentityUserId(string userId, string fullName);
 }
 

@@ -116,4 +116,25 @@ public class StudentRepository : IStudentRepository
             return false;
         }
     }
+
+    public async Task<Student?> GetOrCreateByIdentityUserId(string userId, string fullName)
+    {
+        var existing = await GetByIdentityUserId(userId);
+        if (existing != null)
+        {
+            return existing;
+        }
+
+        var student = new Student
+        {
+            IdentityUserId = userId,
+            FullName = string.IsNullOrWhiteSpace(fullName) ? userId : fullName
+        };
+
+        if (await Create(student))
+        {
+            return student;
+        }
+        return await GetByIdentityUserId(userId);
+    }
 }
