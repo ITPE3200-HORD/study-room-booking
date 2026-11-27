@@ -52,6 +52,7 @@ export default function NavMenu() {
                     {isAdmin && (
                         <>
                             <Nav.Link href="/rooms">Manage rooms</Nav.Link>
+                            <Nav.Link href="/bookings">Manage bookings</Nav.Link>
                             <Nav.Link href="/students">Manage students</Nav.Link>
                             <Nav.Link href="/sessions">Manage sessions</Nav.Link>
                         </>

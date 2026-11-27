@@ -4,6 +4,7 @@ import Container from 'react-bootstrap/Container'
 import HomePage from './home/HomePage.js'
 import RoomListPage from './rooms/RoomListPage.js'
 import BookingPage from './booking/BookingPage.js'
+import AdminBookingsPage from './booking/AdminBookingsPage.js'
 import NavMenu from './shared/NavMenu.js'
 import MyPagePage from './account/MyPagePage.js'
 import LoginPage from './account/LoginPage.js'
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/rooms" element={<AdminRoute><RoomListPage /></AdminRoute>}/>
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/students" element={<AdminRoute><StudentListPage /></AdminRoute>} />
+            <Route path="/bookings" element={<AdminRoute><AdminBookingsPage /></AdminRoute>} />
             <Route path="/sessions" element={<SessionsListPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/logout" element={<Navigate to="/" replace />} />
