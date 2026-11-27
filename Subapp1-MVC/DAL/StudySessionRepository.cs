@@ -27,6 +27,7 @@ public class StudySessionRepository : IStudySessionRepository
                 .Include(session => session.Booking).ThenInclude(booking => booking.Room)
                 .Include(session => session.Booking).ThenInclude(booking => booking.Student)
                 .Include(session => session.Participants)
+                    .ThenInclude(participant => participant.Student)
                 .Where(session => session.IsOpen && 
                 session.Booking.StartTime >= DateTime.Now &&
                 session.Participants.Count < session.MaxParticipants);

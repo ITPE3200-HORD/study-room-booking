@@ -13,7 +13,7 @@ namespace study_room_booking.Models {
     [StringLength(100)]
     public string? Subject { get; set; }
 
-    [Range(1, 50)]
+    [Range(2, 50)]
     public int MaxParticipants { get; set; }
 
     public bool IsOpen { get; set; } = true; // Indicates if the session is open for new participants
