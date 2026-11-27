@@ -22,7 +22,7 @@ type SessionForm = {
 const emptySessionForm: SessionForm = { title: '', subject: '', maxParticipants: 4, isOpen: true }
 
 function formatDate(value: string): string {
-    return new Date(value).toLocaleString('nb-NO')
+    return new Date(value).toLocaleString('nb-NO', {dateStyle: 'short', timeStyle: 'short'})
 }
 
 function MyPagePage() {
@@ -146,13 +146,15 @@ function MyPagePage() {
                 {bookings.length === 0 ? (
                     <p>You have no bookings. <Link to="/booking">Book a room</Link></p>
                 ) : (
-                    <Table responsive striped hover>
+            <div className="content-card table-scroll">
+                    <Table hover>
                         <thead>
                             <tr>
                                 <th>Room</th>
                                 <th>Description</th>
                                 <th>From</th>
                                 <th>To</th>
+                                <th>Study session</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -167,8 +169,9 @@ function MyPagePage() {
                                     <td>{formatDate(booking.endTime)}</td>
                                     <td>
                                         {booking.studySessionId !== null ? (
-                                            <span className="status-badge is-available">Open for others</span>
+                                            <span className="status-badge is-available">Study session</span>
                                         ) : isFuture && data?.hasStudentProfile ? (
+                                    <div className="table.actions">
                                                 <Button
                                                     size="sm"
                                                     variant="outline-success"
@@ -176,6 +179,7 @@ function MyPagePage() {
                                                 >
                                                     Open as study session
                                                 </Button>
+                                        </div>
                                         ) : (
                                             '-'
                                         )}
@@ -185,6 +189,7 @@ function MyPagePage() {
                             })}
                         </tbody>
                     </Table>
+                </div>
                 )}
             </section>
 
@@ -196,7 +201,8 @@ function MyPagePage() {
                 ) : sessions.length === 0 ? (
                     <p>You have no study sessions.</p>
                 ) : (
-                    <Table responsive striped hover>
+            <div className="content-card table-scroll">
+                    <Table hover>
                         <thead>
                             <tr>
                                 <th>Session</th>
@@ -260,6 +266,7 @@ function MyPagePage() {
                             ))}
                         </tbody>
                     </Table>
+                </div>
                 )}
             </section>
 

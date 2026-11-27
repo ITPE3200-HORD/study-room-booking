@@ -1,13 +1,13 @@
 import { useState, type ChangeEvent, type SubmitEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Alert, Button, Card, Col, Form, Row, Spinner } from 'react-bootstrap'
-import type { SearchForm, SearchParams } from '../types/booking'
+import { Alert, Button, Card, Col, Form, Modal, Row, Spinner } from 'react-bootstrap'
+import type { AvailableRoom, SearchForm, SearchParams } from '../types/booking'
 import * as BookingService from './BookingService'
 
 function toLocalDate(date: Date): string {
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2 ,'0')
+    const day = String(date.getDate()).padStart(2, '0')
     return `${year}-${month}-${day}`
 }
 
@@ -22,10 +22,28 @@ const initialForm: SearchForm = {
     roomType: '',
 }
 
+type BookingDetails = {
+    description: string
+    createStudySession: boolean
+    sessionTitle: string
+    sessionSubject: string
+    sessionMaxParticipants: string
+}
+
+const emptyDetails: BookingDetails = {
+    description: '',
+    createStudySession: false,
+    sessionTitle: '',
+    sessionSubject: '',
+    sessionMaxParticipants: '2',
+}
+
 export default function BookingPage() {
     const queryClient = useQueryClient()
     const [form, setForm] = useState<SearchForm>(initialForm)
     const [search, setSearch] = useState<SearchParams | null>(null)
+    const [selectedRoom, setSelectedRoom] = useState<AvailableRoom | null>(null)
+    const [details, setDetails] = useState<BookingDetails>(emptyDetails)
 
     const { data, isFetching, error } = useQuery({
         queryKey: ['availableRooms', search],
@@ -39,7 +57,7 @@ export default function BookingPage() {
     })
 
     const bookingMutation = useMutation({
-        mutationFn: ({ roomId, searchParams }: { roomId: number; searchParams: SearchParams }) => {
+        mutationFn: ({ roomId, searchParams, details }: { roomId: number; searchParams: SearchParams; details: BookingDetails }) => {
             const start = new Date(`${searchParams.date}T${searchParams.startTime}`)
             const end = new Date(start.getTime() + Number(searchParams.durationMinutes) * 60_000)
             const toLocalDateTime = (value: Date) =>
@@ -48,12 +66,22 @@ export default function BookingPage() {
                 roomId,
                 startTime: toLocalDateTime(start),
                 endTime: toLocalDateTime(end),
-                description: '',
+                description: details.description.trim(),
+                createStudySession: details.createStudySession,
+                sessionTitle: details.createStudySession ? details.sessionTitle.trim() : undefined,
+                sessionSubject: details.createStudySession ? details.sessionSubject.trim() : undefined,
+                sessionMaxParticipants: details.createStudySession ? Number(details.sessionMaxParticipants) : undefined,
             })
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: ['myPage'] })
-            await queryClient.invalidateQueries({ queryKey: ['availableRooms'] })
+            setSelectedRoom(null)
+            // A new session also appears on the sessions page and the home page
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['myPage'] }),
+                queryClient.invalidateQueries({ queryKey: ['availableRooms'] }),
+                queryClient.invalidateQueries({ queryKey: ['sessions'] }),
+                queryClient.invalidateQueries({ queryKey: ['home'] }),
+            ])
         },
     })
 
@@ -68,6 +96,21 @@ export default function BookingPage() {
         event.preventDefault()
         bookingMutation.reset()
         setSearch({ ...form, requestId: Date.now() })
+    }
+
+    // Opens the confirmation modal for the chosen room
+    function openBooking(room: AvailableRoom) {
+        if (!search) return
+        bookingMutation.reset()
+        // Suggest the group size as max participants, but never more than the room has seats
+        const suggested = Math.min(Math.max(Number(search.groupSize), 2), room.capacity, 50)
+        setDetails({ ...emptyDetails, sessionMaxParticipants: String(suggested) })
+        setSelectedRoom(room)
+    }
+
+    function handleDetailsChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+        const { name, value, type, checked } = event.target as HTMLInputElement
+        setDetails(current => ({ ...current, [name]: type === 'checkbox' ? checked : value }))
     }
 
     const rooms = data?.availableRooms ?? []
@@ -169,9 +212,13 @@ export default function BookingPage() {
             </Form>
 
             {bookingMutation.isSuccess && (
-                <div className="booking-success" role="status">Room booked successfully. You can see it under My Page.</div>
+                <div className="booking-success" role="status">
+                    {bookingMutation.variables?.details.createStudySession
+                        ? 'Room booked and opened as a study session. You can see it under My Page.'
+                        : 'Room booked successfully. You can see it under My Page.'}
+                </div>
             )}
-            {bookingMutation.error && (
+            {bookingMutation.error && !selectedRoom && (
                 <Alert className="search-error" variant="danger" role="alert">
                     {bookingMutation.error.message}
                 </Alert>
@@ -179,7 +226,7 @@ export default function BookingPage() {
 
             {error && (
                 <Alert className="search-error" variant="danger" role="alert">
-                   {error.message}
+                    {error.message}
                 </Alert>
             )}
 
@@ -220,10 +267,10 @@ export default function BookingPage() {
                                         </Card.Body>
                                         <Card.Footer className="booking-card-footer">
                                             <Button
-                                                disabled={bookingMutation.isPending || !search}
-                                                onClick={() => search && bookingMutation.mutate({ roomId: room.roomId, searchParams: search })}
+                                                disabled={!search}
+                                                onClick={() => openBooking(room)}
                                             >
-                                                {bookingMutation.isPending ? 'Booking…' : 'Book this room'}
+                                                Book this room
                                             </Button>
                                         </Card.Footer>
                                     </Card>
@@ -233,6 +280,65 @@ export default function BookingPage() {
                     )}
                 </section>
             )}
+            <Modal show={selectedRoom != null} onHide={() => setSelectedRoom(null)}>
+                <Form onSubmit={event => {
+                    event.preventDefault()
+                    if (selectedRoom && search) {
+                        bookingMutation.mutate({ roomId: selectedRoom.roomId, searchParams: search, details })
+                    }
+                }}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Book room {selectedRoom?.roomNumber}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {search && (
+                            <p>
+                                {search.date}, {search.startTime.slice(0, 5)}, {Number(search.durationMinutes) / 60} hours</p>
+                        )}
+                        {bookingMutation.error && (
+                            <Alert variant="danger">
+                                {bookingMutation.error.message}</Alert>
+                        )}
+
+                        <Form.Group className="mb-3" controlId="description">
+                            <Form.Label>Description (optional)</Form.Label>
+                            <Form.Control as="textarea" rows={2} maxLength={200} name="description" value={details.description} onChange={handleDetailsChange} />
+                        </Form.Group>
+                        <Form.Check className="mb-3" type="switch" id="createStudySession"
+                            name="createStudySession" label="Open this booking as a study session"
+                            checked={details.createStudySession} onChange={handleDetailsChange} />
+                        {details.createStudySession && (
+                            <>
+                                <Form.Group className="mb-3" controlId="sessionTitle">
+                                    <Form.Label>Title</Form.Label>
+                                    <Form.Control required maxLength={100} name="sessionTitle"
+                                        value={details.sessionTitle} onChange={handleDetailsChange} />
+                                </Form.Group>
+                                <Form.Group className="mb-3" controlId="sessionSubject">
+                                    <Form.Label>Subject (optional)</Form.Label>
+                                    <Form.Control maxLength={100} name="sessionSubject"
+                                        value={details.sessionSubject} onChange={handleDetailsChange} />
+                                </Form.Group>
+                                <Form.Group controlId="sessionMaxParticipants">
+                                    <Form.Label>Max participants (including you)</Form.Label>
+                                    <Form.Control type="number" required min={2}
+                                        max={Math.min(selectedRoom?.capacity ?? 50, 50)}
+                                        name="sessionMaxParticipants"
+                                        value={details.sessionMaxParticipants} onChange={handleDetailsChange} />
+                                    <Form.Text>The room has {selectedRoom?.capacity} seats.</Form.Text>
+                                </Form.Group>
+                            </>
+                        )}
+
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setSelectedRoom(null)}>Cancel</Button>
+                        <Button type="submit" disabled={bookingMutation.isPending}>
+                            {bookingMutation.isPending ? 'Booking…' : 'Confirm booking'}
+                        </Button>
+                    </Modal.Footer>
+                </Form>
+            </Modal>
         </main>
     )
 }

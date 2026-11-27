@@ -97,7 +97,7 @@ export default function HomePage() {
                         <p>{rooms.length} rooms in the system.</p>
                     </div>
                     {!isUserLoading && (
-                        <Link to={roomLink.to} className="text-link">
+                        <Link to={roomLink.to} className="button-outline">
                             Book a room
                         </Link>
                     )}
@@ -151,7 +151,7 @@ export default function HomePage() {
                         <p>Join a session and study with other students.</p>
                     </div>
                     {!isUserLoading && (
-                        <Link to="/sessions" className="text-link">
+                        <Link to="/sessions" className="button-outline">
                             Join an open session
                         </Link>
                     )}

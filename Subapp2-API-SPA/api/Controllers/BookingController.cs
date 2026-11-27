@@ -89,6 +89,12 @@ public class BookingController : ControllerBase
         {
             return Forbid(); // Only students can create bookings, admins cannot be owners
         }
+        //Rule: a study session can't have more participants than the room has seats
+        if (bookingDto.CreateStudySession && bookingDto.SessionMaxParticipants > room.Capacity) 
+        {
+            _logger.LogWarning("[BookingController] MaxParticipants {Max} exceeds capacity {Capacity} for room {RoomId}", bookingDto.SessionMaxParticipants, room.Capacity, room.RoomId);
+            return BadRequest($"Room {room.RoomNumber} only has room for {room.Capacity} people");
+        }
 
         var booking = new BookingEntity
         {
@@ -98,6 +104,20 @@ public class BookingController : ControllerBase
             StartTime = bookingDto.StartTime,
             EndTime = bookingDto.EndTime
         };
+
+        // The booking and its study session are saved together in one SaveChangesAsync()
+        if (bookingDto.CreateStudySession)
+        {
+            booking.StudySession = new StudySession
+            {
+                Title = bookingDto.SessionTitle!.Trim(),
+                Subject = string.IsNullOrWhiteSpace(bookingDto.SessionSubject) ? null : bookingDto.SessionSubject.Trim(),
+                MaxParticipants = bookingDto.SessionMaxParticipants!.Value,
+                IsOpen = true, 
+                // The student who books the room joins the session automatically
+                Participants = { new SessionParticipant { StudentId = studentId.Value } }
+            };
+        }
 
         if (await _bookingRepository.IsOverlapping(booking))
         {
@@ -112,7 +132,7 @@ public class BookingController : ControllerBase
             return Problem("Something went wrong while saving the booking.", statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        _logger.LogInformation("[BookingController] Booking created: {BookingId}", booking.BookingId);
+        _logger.LogInformation("[BookingController] Booking created: {BookingId} (study session: {HasSession})", booking.BookingId, bookingDto.CreateStudySession);
 
         return CreatedAtAction(nameof(GetById), new { id = booking.BookingId }, booking.ToDto());
     }

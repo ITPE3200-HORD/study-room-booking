@@ -367,6 +367,29 @@
   color: white;
 }
 
+.button-outline {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border: 2px solid var(--green);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--green);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.button-outline:hover,
+.button-outline:focus-visible {
+  transform: translateY(-1px);
+  background: var(--green);
+  color: white;
+}
+
 /* Forms */
 .form-control,
 .form-select {
