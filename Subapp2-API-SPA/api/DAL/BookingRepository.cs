@@ -16,16 +16,22 @@ public class BookingRepository : IBookingRepository
         _logger = logger;
     }
 
-    public async Task<IEnumerable<Booking>?> GetAll()
+    public async Task<IEnumerable<Booking>?> GetActive()
     {
         try
         {
-            // Include loads the related Room, so the room name can be shown in the table
-            return await _db.Bookings.Include(b => b.Room).ToListAsync();
+            return await _db.Bookings
+                .AsNoTracking()
+                .Include(booking => booking.Room)
+                .Include(booking => booking.Student)
+                .Include(booking => booking.StudySession)
+                .Where(booking => booking.EndTime >= DateTime.Now)
+                .OrderBy(booking => booking.StartTime)
+                .ToListAsync();
         }
         catch (Exception e)
         {
-            _logger.LogError("[BookingRepository] GetAll() failed, error message: {e}", e.Message);
+            _logger.LogError("[BookingRepository] GetActive() failed, error message: {e}", e.Message);
             return null;
         }
     }
@@ -34,7 +40,11 @@ public class BookingRepository : IBookingRepository
     {
         try
         {
-            return await _db.Bookings.Include(b => b.Room).FirstOrDefaultAsync(b => b.BookingId == id);
+            return await _db.Bookings
+                .Include(booking => booking.Room)
+                .Include(booking => booking.Student)
+                .Include(booking => booking.StudySession)
+            .FirstOrDefaultAsync(booking => booking.BookingId == id);
         }
         catch (Exception e)
         {

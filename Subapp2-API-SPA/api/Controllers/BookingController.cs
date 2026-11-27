@@ -30,17 +30,17 @@ public class BookingController : ControllerBase
     }
 
     // GET: /api/Booking
-    // Shows all bookings in a table
+    // Admin only: all bookings that have not ended yet
     [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> GetAll()
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetActive()
     {
-        var bookings = await _bookingRepository.GetAll();
+        var bookings = await _bookingRepository.GetActive();
 
         if (bookings == null)
         {
-            _logger.LogError("[BookingController] Booking list not found while executing GetAll()");
-            return NotFound("Booking list not found");
+            _logger.LogError("[BookingController] Failed to retrieve active bookings");
+            return Problem("Bookings could not be retrieved.", statusCode: StatusCodes.Status500InternalServerError);
         }
         return Ok(bookings.Select(booking => booking.ToDto()));
     }
@@ -57,58 +57,16 @@ public class BookingController : ControllerBase
             return NotFound("Booking not found.");
         }
 
+        var currentStudentId = await GetCurrentStudentId();
+        var isOwner = currentStudentId != null && booking.StudentId == currentStudentId;
+        var isAdmin = User.IsInRole("Admin");
+
+        if (!isOwner && !isAdmin)
+        {
+            return Forbid();
+        }
+
         return Ok(booking.ToDto());
-    }
-
-    //GET: /api/Booking/creation-options?roomId=1&date=2026-11-10&startTime=09:00:00&durationMinutes=60
-    //Gets information about booking and validates starttime and availability
-    [HttpGet("creation-options")]
-    [Authorize]
-    public async Task<IActionResult> GetCreationOptions(
-        [FromQuery] int roomId,
-        [FromQuery] DateTime date,
-        [FromQuery] TimeSpan startTime,
-        [FromQuery] int durationMinutes)
-    {
-        if (roomId <= 0 || durationMinutes <= 0 || startTime < TimeSpan.Zero || startTime >= TimeSpan.FromDays(1))
-        {
-            return BadRequest("Room, start time or duration is invalid.");
-        }
-
-        var start = date.Date.Add(startTime);
-
-        if (start <= DateTime.Now)
-        {
-            return BadRequest("The booking must start in the future.");
-        }
-
-        var room = await _roomRepository.GetRoomById(roomId);
-
-        if (room == null)
-        {
-            return NotFound("Room not found.");
-        }
-
-        var end = start.AddMinutes(durationMinutes);
-
-        var proposedBooking = new BookingEntity
-        {
-            RoomId = roomId,
-            StartTime = start,
-            EndTime = end
-        };
-
-        var isAvailable = !await _bookingRepository.IsOverlapping(proposedBooking);
-
-        return Ok(new BookingOptionsDto
-        {
-            RoomId = room.RoomId,
-            RoomNumber = room.RoomNumber,
-            StartTime = start,
-            EndTime = end,
-            DurationMinutes = durationMinutes,
-            IsAvailable = isAvailable
-        });
     }
 
     // POST: /api/Booking/Create
@@ -128,7 +86,7 @@ public class BookingController : ControllerBase
 
         if (studentId == null)
         {
-            return Forbid(); //Only students can book
+            return Forbid(); // Only students can create bookings, admins cannot be owners
         }
 
         var booking = new BookingEntity
@@ -170,11 +128,11 @@ public class BookingController : ControllerBase
             return NotFound("Booking not found.");
         }
 
-        var currentStudentId = await
-            GetCurrentStudentId();
+        var currentStudentId = await GetCurrentStudentId();
         var isOwner = currentStudentId != null && booking.StudentId == currentStudentId;
+        var isAdmin = User.IsInRole("Admin");
 
-        if (!isOwner)
+        if (!isOwner && !isAdmin)
         {
             return Forbid();
         }
@@ -225,11 +183,11 @@ public class BookingController : ControllerBase
             return NotFound("Booking not found.");
         }
 
-        var currentStudentId = await
-            GetCurrentStudentId();
+        var currentStudentId = await GetCurrentStudentId();
         var isOwner = currentStudentId != null && booking.StudentId == currentStudentId;
+        var isAdmin = User.IsInRole("Admin");
 
-        if (!isOwner)
+        if (!isOwner && !isAdmin)
         {
             return Forbid();
         }

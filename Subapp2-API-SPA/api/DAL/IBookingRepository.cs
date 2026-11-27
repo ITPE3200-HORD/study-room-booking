@@ -7,7 +7,7 @@ namespace study_room_booking.DAL;
 
 public interface IBookingRepository
 {
-    Task<IEnumerable<Booking>?> GetAll();
+    Task<IEnumerable<Booking>?> GetActive(); // bookings that have not ended yet (admin)
     Task<IEnumerable<Booking>?> GetByStudentId(int studentId);
     Task<Booking?> GetBookingById(int id);
     Task<bool> Create(Booking booking);

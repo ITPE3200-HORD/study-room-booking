@@ -29,3 +29,22 @@ export interface BookingCreateDto {
     endTime: string
     description: string
 }
+
+export type AdminBooking = {
+    bookingId: number
+    roomId: number
+    roomNumber: string | null
+    studentId: number
+    studentName: string
+    studySessionId: number | null
+    description: string | null
+    startTime: string
+    endTime: string
+}
+
+export interface BookingUpdateDto {
+    roomId: number
+    startTime: string
+    endTime: string
+    description: string
+}

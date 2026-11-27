@@ -20,6 +20,7 @@ public static class DtoMapper
         RoomId = booking.RoomId,
         RoomNumber = booking.Room?.RoomNumber,
         StudentId = booking.StudentId,
+        StudentName = booking.Student?.FullName ?? string.Empty,
         StudySessionId = booking.StudySession?.StudySessionId,
         Description = booking.Description,
         StartTime = booking.StartTime,
