@@ -28,6 +28,10 @@ export interface BookingCreateDto {
     startTime: string
     endTime: string
     description: string
+    createStudySession?: boolean
+    sessionTitle?: string
+    sessionSubject?: string
+    sessionMaxParticipants?: number
 }
 
 export type AdminBooking = {

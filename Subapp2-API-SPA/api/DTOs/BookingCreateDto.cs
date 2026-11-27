@@ -13,6 +13,19 @@ public class BookingCreateDto : IValidatableObject
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
 
+    // open the booking as a study session in the same request
+    public bool CreateStudySession { get; set; }
+
+    [StringLength(100)]
+    public string? SessionTitle { get; set; }
+    
+    [StringLength(100)]
+    public string? SessionSubject { get; set; }
+
+    [Range(2, 50, ErrorMessage = "Max participants must be between 2 and 50.")]
+    public int? SessionMaxParticipants { get; set; }
+
+    
     public IEnumerable<ValidationResult> Validate(ValidationContext context)
     {
         if (EndTime <= StartTime)
@@ -27,6 +40,19 @@ public class BookingCreateDto : IValidatableObject
             yield return new ValidationResult(
                 "The booking must start in the future.",
                 new[] { nameof(StartTime) });
+        }
+
+        if (CreateStudySession)
+        {
+            if (string.IsNullOrWhiteSpace(SessionTitle))
+            {
+                yield return new ValidationResult("Session title is required.", new [] { nameof(SessionTitle) });
+            }
+
+            if (SessionMaxParticipants == null)
+            {
+                yield return new ValidationResult("Max participants is required.", new [] { nameof(SessionMaxParticipants) });
+            }
         }
     }
 }
