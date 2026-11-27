@@ -69,7 +69,7 @@ public class BookingController : ControllerBase
         return Ok(booking.ToDto());
     }
 
-    // POST: /api/Booking/Create
+    // POST: /api/Booking
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Create(
