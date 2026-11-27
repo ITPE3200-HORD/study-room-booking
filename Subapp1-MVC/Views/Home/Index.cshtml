@@ -21,9 +21,7 @@
         <p>
             Find an available room, meet other students and make the study session easier.
         </p>
-        <a class="btn btn-primary btn-lg" 
-            asp-controller="Home" 
-            asp-action="Book">
+        <a class="btn btn-primary btn-lg" asp-controller="Home" asp-action="Book">
             Book a room
         </a>
     </div>
@@ -42,9 +40,7 @@
                 }
 
                 <p>Capacity: @featuredRoom.Capacity</p>
-                <a class="outline-button" 
-                    asp-controller="Home" 
-                    asp-action="Book">
+                <a class="outline-button" asp-controller="Home" asp-action="Book">
                     Check booking times
                 </a>
             </div>
@@ -133,9 +129,7 @@
 </section>
 
 
-<section id="sessions" 
-        class="sessions-section" 
-        aria-labelledby="sessions-title">
+<section id="sessions" class="sessions-section" aria-labelledby="sessions-title">
 
     <div class="section-heading">
         <div>
@@ -147,62 +141,88 @@
     
     <div class="results-meta">
         <span id="resultCount" aria-live="polite">Showing @Model.OpenStudySessions.Count study sessions</span>
-        <span> Available spots</span>
     </div>
 
-<!-- Study session cards -->
-     @if (Model.OpenStudySessions.Count == 0)
+    <!-- Study session cards -->
+    @if (Model.OpenStudySessions.Count == 0)
     {
         <div class="empty-state" role="status">
             <h3>There are no open study sessions available</h3>
-            <p>Please check back later or book a room to create a new study session <a asp-controller="Home" asp-action="Book">here</a>.</p>
-        </div>
-    }
+            <p>Please check back later or book a room to create a new study session <a asp-controller="Home"
+                                                                                           asp-action="Book">here</a>.</p>
+            </div>
+        }
     else
-    {
-        <div class="session-grid">
-            @foreach (var session in Model.OpenStudySessions)
-            {
-                <article class="session-card" 
-                        data-subject="@session.Subject" 
-                        data-start="@session.Booking.StartTime.ToString("yyyy.MM.dd HH:mm")" 
-                        data-search="@($"{session.Title} {session.Subject} {session.Booking.Description} {session.Booking.Room?.RoomNumber} {session.Booking.Room?.Location}")">
-                    @* Card content *@
-                    <div class="card-top">
-                        <span class="course-tag sage">
-                            @(session.Subject ?? "Study session")
-                        </span>
-                    </div>
-
-                    <h3>@session.Title</h3>
-
-                    <p class="session-description">
-                        @(session.Booking.Description ?? "No description provided.")
-                    </p>
-
-                    <div class="session-info">
-                        <span>
-                             @session.Booking.StartTime.ToString("yyyy.MM.dd HH:mm")
-                             -
-                             @session.Booking.EndTime.ToString("HH:mm")
-                        </span>
-                    </div>
-
-                    <div class="session-info">
-                        <span>
-                            Room @(session.Booking.Room?.RoomNumber ?? "-")
-                        </span>
-                    </div>
-
-                    <div class="card-bottom">
-                        <div class="attendees">
-                            <span>
-                                <b>@(session.MaxParticipants - session.Participants.Count)</b> of @session.MaxParticipants spots available
+        {
+            <div class="session-grid">
+                @foreach (var session in Model.OpenStudySessions)
+                {
+                    <article class="session-card" data-subject="@session.Subject"
+                             data-start="@session.Booking.StartTime.ToString("yyyy.MM.dd HH:mm")"
+                             data-search="@($"{session.Title} {session.Subject} {session.Booking.Description} {session.Booking.Room?.RoomNumber} {session.Booking.Room?.Location}")">
+                        @* Card content *@
+                        <div class="card-top">
+                            <span class="course-tag sage">
+                                @(session.Subject ?? "Study session")
                             </span>
                         </div>
-                    </div>
-                </article>
-            }
-        </div>
-    }
-</section>
+
+                        <h3>@session.Title</h3>
+
+                        <p class="session-description">
+                            @(session.Booking.Description ?? "No description provided.")
+                        </p>
+
+                        <div class="session-info">
+                            <span>
+                                @session.Booking.StartTime.ToString("yyyy.MM.dd HH:mm")
+                                -
+                                @session.Booking.EndTime.ToString("HH:mm")
+                            </span>
+                        </div>
+
+                        <div class="session-info">
+                            <span>
+                                Room @(session.Booking.Room?.RoomNumber ?? "-")
+                            </span>
+                        </div>
+
+                        <div class="card-bottom">
+                            <div class="attendees">
+                                <span>
+                                    <b>@(session.MaxParticipants - session.Participants.Count)</b> of @session.MaxParticipants spots
+                                    available
+                                </span>
+                            </div>
+                        </div>
+
+                        @{
+                            var currentUserId =
+                                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                            var isOwner = session.Booking.Student?.IdentityUserId == currentUserId;
+                            var hasJoined = currentUserId != null &&
+                                session.Participants.Any(
+                    participant => participant.Student?.IdentityUserId == currentUserId);
+                        }
+                        @if (User.IsInRole("Student"))
+                        {
+                            if (isOwner)
+                            {
+                                <span class="status-badge is-available">Your session</span>
+                            }
+                            else if (hasJoined)
+                            {
+                                <span class="status-badge is-joined">Joined</span>
+                            }
+                            else
+                            {
+                                <form asp-controller="StudySession" asp-action="Join" asp-route-id="@session.StudySessionId" method="post">
+                                    <button type="submit" class="btn btn-primary">Join</button>
+                                </form>
+                            }
+                        }
+                    </article>
+                }
+            </div>
+        }
+    </section>
