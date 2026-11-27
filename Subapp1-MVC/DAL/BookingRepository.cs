@@ -37,7 +37,10 @@ public class BookingRepository : IBookingRepository
     {
         try
         {
-            return await _db.Bookings.Include(b => b.Room).FirstOrDefaultAsync(b => b.BookingId == id);
+            return await _db.Bookings
+                .Include(b => b.Room)
+                .Include(b => b.Student)
+                .FirstOrDefaultAsync(b => b.BookingId == id);
         }
         catch (Exception e)
         {
@@ -144,6 +147,7 @@ public class BookingRepository : IBookingRepository
             return await _db.Bookings
                 .Include(b => b.Room)
                 .Include(b => b.Student)
+                .Include(b => b.StudySession)
                 .Where(b => b.Student!.IdentityUserId == userId)
                 .ToListAsync();
         }

@@ -109,7 +109,11 @@ public class BookingController : Controller
                 Title = model.SessionTitle!.Trim(),
                 Subject = model.SessionSubject,
                 MaxParticipants = model.SessionMaxParticipants,
-                IsOpen = true
+                IsOpen = true,
+                Participants = new List<SessionParticipant>
+                {
+                    new() { StudentId = student.StudentId }
+                }
             };
         }
 

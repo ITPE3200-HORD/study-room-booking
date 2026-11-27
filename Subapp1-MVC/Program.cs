@@ -37,6 +37,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IStudySessionRepository, StudySessionRepository>();
 
 var app = builder.Build();
 
