@@ -44,10 +44,16 @@ public class MyPageController : Controller
                 return StatusCode(500, "Internal server error");
             }
 
+            var studySessions = bookings
+                .Where(booking => booking.StudySession != null)
+                .Select(booking => booking.StudySession!)
+                .ToList();
+
             var viewModel = new MyPageViewModel
             {
                 HasStudentProfile = student != null,
-                Bookings = bookings.ToList()
+                Bookings = bookings.ToList(),
+                StudySessions = studySessions
             };
 
             return View("~/Views/Account/MyPage.cshtml", viewModel);
