@@ -125,6 +125,13 @@ public class BookingController : ControllerBase
             return Conflict("The room is already booked for that time.");
         }
 
+        // Rule: a student can't be in two rooms at the same time
+        if (await _bookingRepository.UserHasOverlappingBooking(booking))
+        {
+            _logger.LogWarning("[BookingController] Student {StudentId} tried to double book at {StartTime}", booking.StudentId, booking.StartTime);
+            return Conflict("You already have another booking in this time period. You can't be in two rooms at the same time.");
+        }
+
         if (!await _bookingRepository.Create(booking))
         {
             _logger.LogError("[BookingController] Failed to create booking for RoomId {RoomId}", booking.RoomId);
@@ -175,6 +182,13 @@ public class BookingController : ControllerBase
         {
             _logger.LogWarning("[BookingController] Booking conflict when updating booking {BookingId}", id);
             return Conflict("The room is already booked for that time.");
+        }
+        
+        // Rule: a student can't be in two rooms at the same time
+        if (await _bookingRepository.UserHasOverlappingBooking(booking))
+        {
+            _logger.LogWarning("[BookingController] Student {StudentId} tried to double book at {StartTime}", booking.StudentId, booking.StartTime);
+            return Conflict("You already have another booking in this time period. You can't be in two rooms at the same time.");
         }
 
         if (!await _bookingRepository.Update(booking))
