@@ -42,7 +42,7 @@ public class StudySessionController : ControllerBase
         }
 
         var currentStudentId = await GetCurrentStudentId();
-        return Ok(sessions.Select(session => ToDto(session, currentStudentId)));
+        return Ok(sessions.Select(session => session.ToDto(currentStudentId)));
     }
 
     // GET /api/StudySession/{id}
@@ -56,7 +56,7 @@ public class StudySessionController : ControllerBase
             return NotFound("Study session not found.");
         }
 
-        return Ok(ToDto(session, await GetCurrentStudentId()));
+        return Ok(session.ToDto(await GetCurrentStudentId()));
     }
 
     // POST: /api/StudySession
@@ -65,8 +65,6 @@ public class StudySessionController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Create([FromBody] StudySessionCreateDto dto)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
         var booking = await _bookingRepository.GetBookingById(dto.BookingId);
         if (booking == null)
         {
@@ -74,10 +72,17 @@ public class StudySessionController : ControllerBase
             return NotFound("Booking not found.");
         }
 
-        // Rule: you can only create a session for your own booking
-        if (booking.UserId != userId)
+        var student = await GetCurrentStudent();
+        if (student == null)
         {
-            _logger.LogWarning("[StudySessionController] User {UserId} tried to create a session for booking {BookingId} they do not own", userId, dto.BookingId);
+            _logger.LogWarning("[StudySessionController] User without student profile tried to create a study session");
+            return BadRequest("You need a student profile to create a study session.");
+        }
+
+        // rule: you can only create a session for your own booking
+        if (booking.StudentId != student.StudentId)
+        {
+            _logger.LogWarning("[StudySessionController] Student {StudentId} tried to create a session for booking {BookingId} they do not own", student.StudentId, dto.BookingId);
             return Forbid();
         }
 
@@ -91,7 +96,7 @@ public class StudySessionController : ControllerBase
         // Rule: the booking must be in the future
         if (booking.StartTime <= DateTime.Now)
         {
-            _logger.LogWarning("[StudySessionController] User {UserId} tried to create a session for booking {BookingId} - that has already started", userId, dto.BookingId);
+            _logger.LogWarning("[StudySessionController] Student {StudentId} tried to create a session for booking {BookingId} - that has already started", student.StudentId, dto.BookingId);
             return BadRequest("You can only create a study session for a booking that is in the future.");
         }
 
@@ -100,13 +105,6 @@ public class StudySessionController : ControllerBase
         {
             _logger.LogWarning("[StudySessionController] MaxParticipants {Max} exceeds capacity {Capacity} for booking {BookingId}", dto.MaxParticipants, booking.Room.Capacity, dto.BookingId);
             return BadRequest($"Room {booking.Room.RoomNumber} only has room for {booking.Room.Capacity} people.");
-        }
-
-        var student = await _studentRepository.GetByIdentityUserId(userId!);
-        if (student == null)
-        {
-            _logger.LogWarning("[StudySessionController] User {UserId} has no student profile and cannot create a study session", userId);
-            return BadRequest("You need a student profile to create a study session.");
         }
 
         var session = new StudySession
@@ -135,7 +133,7 @@ public class StudySessionController : ControllerBase
             return Problem("Study session was created but could not be retrieved.", statusCode: StatusCodes.Status500InternalServerError);
         }
 
-        return CreatedAtAction(nameof(GetById), new { id = created.StudySessionId }, ToDto(created, student.StudentId));
+        return CreatedAtAction(nameof(GetById), new { id = created.StudySessionId }, created.ToDto(student.StudentId));
     }
 
     // PUT: /api/StudySession/{id}
@@ -152,8 +150,10 @@ public class StudySessionController : ControllerBase
             return NotFound("Study session not found.");
         }
 
+        var currentStudentId = await GetCurrentStudentId();
+
         // Rule: only the owner or an admin can edit
-        if (!CanManage(session))
+        if (!CanManage(session, currentStudentId))
         {
             _logger.LogWarning("[StudySessionController] User {UserId} tried to update study session {Id} without permission", userId, id);
             return Forbid();
@@ -201,7 +201,10 @@ public class StudySessionController : ControllerBase
             return NotFound("Study session not found.");
         }
 
-        if (!CanManage(session))
+        var currentStudentId = await
+        GetCurrentStudentId();
+
+        if (!CanManage(session, currentStudentId))
         {
             _logger.LogWarning("[StudySessionController] User {UserId} tried to delete study session {Id} without permission", userId, id);
             return Forbid();
@@ -291,7 +294,7 @@ public class StudySessionController : ControllerBase
         }
 
         // Rule: the owner can't leave their own session, they must delete it instead
-        if (IsOwner(session))
+        if (IsOwner(session, student.StudentId))
         {
             _logger.LogWarning("[StudySessionController] Student {StudentId} tried to leave their own session {Id}", student.StudentId, id);
             return BadRequest("You own this session. Delete it instead of leaving.");
@@ -317,26 +320,9 @@ public class StudySessionController : ControllerBase
 
     private async Task<int?> GetCurrentStudentId() => (await GetCurrentStudent())?.StudentId;
 
-    private bool IsOwner(StudySession session) =>
-        session.Booking.UserId == User.FindFirstValue(ClaimTypes.NameIdentifier);
+    private static bool IsOwner(StudySession session, int? currentStudentId) =>
+        currentStudentId != null && session.Booking.StudentId == currentStudentId;
 
-    private bool CanManage(StudySession session) => IsOwner(session) || User.IsInRole("Admin");
-
-    private StudySessionDto ToDto(StudySession session, int? currentStudentId) => new()
-    {
-        StudySessionId = session.StudySessionId,
-        Title = session.Title,
-        Subject = session.Subject,
-        MaxParticipants = session.MaxParticipants,
-        ParticipantCount = session.Participants.Count,
-        IsOpen = session.IsOpen,
-        BookingId = session.BookingId,
-        RoomNumber = session.Booking.Room?.RoomNumber ?? string.Empty,
-        StartTime = session.Booking.StartTime,
-        EndTime = session.Booking.EndTime,
-        OwnerUserName = session.Booking.UserName ?? string.Empty,
-        IsOwner = IsOwner(session),
-        HasJoined = currentStudentId != null &&
-            session.Participants.Any(participant => participant.StudentId == currentStudentId)
-    };
+    private bool CanManage(StudySession session, int? currentStudentId) =>
+        IsOwner(session, currentStudentId) || User.IsInRole("Admin");
 }

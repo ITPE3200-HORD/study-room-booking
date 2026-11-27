@@ -129,6 +129,9 @@ public class AccountControllerTests
                 return Task.FromResult(IdentityResult.Success);
             });
 
+        userManager.AddToRoleAsync(Arg.Any<IdentityUser>(), "Student")
+            .Returns(Task.FromResult(IdentityResult.Success));
+
         var httpContextAccessor = Substitute.For<IHttpContextAccessor>();
         var claimsFactory = Substitute.For<IUserClaimsPrincipalFactory<IdentityUser>>();
         var signInLogger = Substitute.For<ILogger<SignInManager<IdentityUser>>>();

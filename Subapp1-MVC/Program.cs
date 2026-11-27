@@ -23,7 +23,6 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login"; // Redirect to login page if not authenticated
-    options.LogoutPath = "/Account/Logout"; // Redirect to logout page
     options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect to access denied page
 });
 
@@ -38,6 +37,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IStudySessionRepository, StudySessionRepository>();
 
 var app = builder.Build();
 

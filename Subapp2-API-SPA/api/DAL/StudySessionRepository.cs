@@ -1,3 +1,8 @@
+// Here we implement the StudySession repository,
+// which handles all database access for study sessions and their participants.
+// Each method wraps the database call in try/catch, so errors are logged
+// instead of crashing the application.
+
 using Microsoft.EntityFrameworkCore;
 using study_room_booking.Models;
 
@@ -20,8 +25,11 @@ public class StudySessionRepository : IStudySessionRepository
         {
             var query = _db.StudySessions
                 .Include(session => session.Booking).ThenInclude(booking => booking.Room)
+                .Include(session => session.Booking).ThenInclude(booking => booking.Student)
                 .Include(session => session.Participants)
-                .Where(session => session.IsOpen && session.Booking.StartTime >= DateTime.Now);
+                .Where(session => session.IsOpen && 
+                session.Booking.StartTime >= DateTime.Now &&
+                session.Participants.Count < session.MaxParticipants);
 
             if (!string.IsNullOrWhiteSpace(subject))
             {
@@ -47,12 +55,33 @@ public class StudySessionRepository : IStudySessionRepository
         }
     }
 
+    public async Task<IEnumerable<StudySession>?> GetForStudent(int studentId)
+    {
+        try
+        {
+            return await _db.StudySessions
+                .AsNoTracking()
+                .Include(session => session.Booking).ThenInclude(booking => booking.Room)
+                .Include(session => session.Booking).ThenInclude(booking => booking.Student)
+                .Include(session => session.Participants)
+                .Where(session => session.Participants.Any(participant => participant.StudentId == studentId))
+                .OrderBy(session => session.Booking.StartTime)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("[StudySessionRepository] GetForStudent() failed for StudentId {studentId}, error message: {e}", studentId, e.Message);
+            return null;
+        }
+    }
+
     public async Task<StudySession?> GetById(int id)
     {
         try
         {
             return await _db.StudySessions
                     .Include(session => session.Booking).ThenInclude(booking => booking.Room)
+                    .Include(session => session.Booking).ThenInclude(booking => booking.Student)
                     .Include(session => session.Participants)
                     .FirstOrDefaultAsync(session => session.StudySessionId == id);
         }

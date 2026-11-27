@@ -6,7 +6,7 @@ public class BookingCreateDto : IValidatableObject
 {
     [Range(1, int.MaxValue)]
     public int RoomId { get; set; }
-    
+
     [StringLength(200)]
     public string? Description { get; set; }
 

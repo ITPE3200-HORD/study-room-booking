@@ -27,9 +27,19 @@ public class BookingControllerTests
         var roomRepository = Substitute.For<IRoomRepository>();
         var logger = Substitute.For<ILogger<BookingController>>();
 
+        var studentRepository = Substitute.For<IStudentRepository>();
+        studentRepository.GetByIdentityUserId("student-123")
+            .Returns(new Student
+            {
+                StudentId = 1,
+                IdentityUserId = "student-123",
+                FullName = "Test Student"
+            });
+
         var controller = new BookingController(
             bookingRepository,
             roomRepository,
+            studentRepository,
             logger);
 
         var user = new ClaimsPrincipal(
@@ -81,10 +91,20 @@ public class BookingControllerTests
         var roomRepository = Substitute.For<IRoomRepository>();
         var logger = Substitute.For<ILogger<BookingController>>();
 
+        var studentRepository = Substitute.For<IStudentRepository>();
+    studentRepository.GetByIdentityUserId("student-123")
+        .Returns(new Student
+        {
+            StudentId = 1,
+            IdentityUserId = "student-123",
+            FullName = "Test Student"
+        });
+
         var controller = new BookingController(
-            bookingRepository,
-            roomRepository,
-            logger);
+        bookingRepository,
+        roomRepository,
+        studentRepository,
+        logger);
 
         var user = new ClaimsPrincipal(
             new ClaimsIdentity(
@@ -117,7 +137,7 @@ public class BookingControllerTests
         await bookingRepository.Received(1).Create(
             Arg.Is<Booking>(booking =>
                 booking.RoomId == model.RoomId &&
-                booking.UserId == "student-123" &&
+                booking.StudentId == 1 &&
                 booking.StartTime == model.Date.Date + model.StartTime &&
                 booking.EndTime == model.Date.Date + model.StartTime
                     .Add(TimeSpan.FromMinutes(model.DurationMinutes))));
@@ -137,10 +157,21 @@ public class BookingControllerTests
 
         var roomRepository = Substitute.For<IRoomRepository>();
         var logger = Substitute.For<ILogger<BookingController>>();
+
+        var studentRepository = Substitute.For<IStudentRepository>();
+        studentRepository.GetByIdentityUserId("student-123")
+            .Returns(new Student
+            {
+                StudentId = 1,
+                IdentityUserId = "student-123",
+                FullName = "Test Student"
+            });
+
         var controller = new BookingController(
-            bookingRepository,
-            roomRepository,
-            logger);
+             bookingRepository,
+             roomRepository,
+            studentRepository,
+             logger);
 
         var user = new ClaimsPrincipal(
             new ClaimsIdentity(
@@ -190,10 +221,21 @@ public class BookingControllerTests
 
         var roomRepository = Substitute.For<IRoomRepository>();
         var logger = Substitute.For<ILogger<BookingController>>();
+       
+        var studentRepository = Substitute.For<IStudentRepository>();
+    studentRepository.GetByIdentityUserId("student-123")
+        .Returns(new Student
+        {
+            StudentId = 1,
+            IdentityUserId = "student-123",
+            FullName = "Test Student"
+        });
+       
         var controller = new BookingController(
-            bookingRepository,
-            roomRepository,
-            logger);
+        bookingRepository,
+        roomRepository,
+        studentRepository,
+        logger);
 
         var user = new ClaimsPrincipal(
             new ClaimsIdentity(
@@ -229,7 +271,7 @@ public class BookingControllerTests
         await bookingRepository.Received(1).Create(
             Arg.Is<Booking>(booking =>
                 booking.RoomId == model.RoomId &&
-                booking.UserId == "student-123" &&
+                booking.StudentId == 1 &&
                 booking.StudySession != null &&
                 booking.StudySession.Title == "Study group" &&
                 booking.StudySession.Subject == "Statistics" &&

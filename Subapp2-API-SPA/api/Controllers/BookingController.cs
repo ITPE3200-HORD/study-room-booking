@@ -1,13 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using study_room_booking.DAL;
 using System.Security.Claims;
 using BookingEntity = study_room_booking.Models.Booking;
-using BookingCreateDto = study_room_booking.DTOs.BookingCreateDto;
-using BookingUpdateDto = study_room_booking.DTOs.BookingUpdateDto;
 using study_room_booking.Models;
-
+using study_room_booking.DTOs;
 
 namespace study_room_booking.Controllers;
 
@@ -17,35 +14,40 @@ public class BookingController : ControllerBase
 {
     private readonly IBookingRepository _bookingRepository;
     private readonly IRoomRepository _roomRepository;
+    private readonly IStudentRepository _studentRepository;
     private readonly ILogger<BookingController> _logger;
 
     public BookingController(
         IBookingRepository bookingRepository,
         IRoomRepository roomRepository,
+        IStudentRepository studentRepository,
         ILogger<BookingController> logger)
     {
         _bookingRepository = bookingRepository;
         _roomRepository = roomRepository;
+        _studentRepository = studentRepository;
         _logger = logger;
     }
 
     // GET: /api/Booking
-    // Shows all bookings in a table
+    // Admin only: all bookings that have not ended yet
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetActive()
     {
-        var bookings = await _bookingRepository.GetAll();
+        var bookings = await _bookingRepository.GetActive();
 
         if (bookings == null)
         {
-            _logger.LogError("[BookingController] Booking list not found while executing GetAll()");
-            return NotFound("Booking list not found");
+            _logger.LogError("[BookingController] Failed to retrieve active bookings");
+            return Problem("Bookings could not be retrieved.", statusCode: StatusCodes.Status500InternalServerError);
         }
-        return Ok(bookings);
+        return Ok(bookings.Select(booking => booking.ToDto()));
     }
 
     // GET: /api/Booking/{id}
     [HttpGet("{id:int}")]
+    [Authorize]
     public async Task<IActionResult> GetById(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
@@ -55,69 +57,19 @@ public class BookingController : ControllerBase
             return NotFound("Booking not found.");
         }
 
-        return Ok(new
+        var currentStudentId = await GetCurrentStudentId();
+        var isOwner = currentStudentId != null && booking.StudentId == currentStudentId;
+        var isAdmin = User.IsInRole("Admin");
+
+        if (!isOwner && !isAdmin)
         {
-            bookingId = booking.BookingId,
-            roomId = booking.RoomId,
-            roomNumber = booking.Room?.RoomNumber,
-            booking.StartTime,
-            booking.EndTime,
-            booking.Description
-        });
+            return Forbid();
+        }
+
+        return Ok(booking.ToDto());
     }
 
-    //GET: /api/Booking/creation-options?roomId=1&date=2026-11-10&startTime=09:00:00&durationMinutes=60
-    //Gets information about booking and validates starttime and availability
-    [HttpGet("creation-options")]
-    [Authorize]
-    public async Task<IActionResult> GetCreationOptions(
-        [FromQuery] int roomId,
-        [FromQuery] DateTime date,
-        [FromQuery] TimeSpan startTime,
-        [FromQuery] int durationMinutes)
-    {
-        if (roomId <= 0 || durationMinutes <= 0 || startTime < TimeSpan.Zero || startTime >= TimeSpan.FromDays(1))
-        {
-            return BadRequest("Room, start time or duration is invalid.");
-        }
-
-        var start = date.Date.Add(startTime);
-
-        if (start <= DateTime.Now)
-        {
-            return BadRequest("The booking must start in the future.");
-        }
-
-        var room = await _roomRepository.GetRoomById(roomId);
-
-        if (room == null)
-        {
-            return NotFound("Room not found.");
-        }
-
-        var end = start.AddMinutes(durationMinutes);
-
-        var proposedBooking = new BookingEntity
-        {
-            RoomId = roomId,
-            StartTime = start,
-            EndTime = end
-        };
-
-        var isAvailable = !await _bookingRepository.IsOverlapping(proposedBooking);
-
-        return Ok(new
-        {
-            roomId = room.RoomId,
-            roomNumber = room.RoomNumber,
-            startTime = start,
-            endTime = end,
-            durationMinutes,
-            isAvailable
-        });
-    }
-
-    // POST: /api/Booking/Create
+    // POST: /api/Booking
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Create(
@@ -130,19 +82,17 @@ public class BookingController : ControllerBase
             return NotFound("Room not found.");
         }
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var userName = User.Identity?.Name;
+        var studentId = await GetCurrentStudentId();
 
-        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(userName))
+        if (studentId == null)
         {
-            return Unauthorized();
+            return Forbid(); // Only students can create bookings, admins cannot be owners
         }
 
         var booking = new BookingEntity
         {
             RoomId = bookingDto.RoomId,
-            UserId = userId,
-            UserName = userName,
+            StudentId = studentId.Value,
             Description = bookingDto.Description?.Trim(),
             StartTime = bookingDto.StartTime,
             EndTime = bookingDto.EndTime
@@ -163,18 +113,7 @@ public class BookingController : ControllerBase
 
         _logger.LogInformation("[BookingController] Booking created: {BookingId}", booking.BookingId);
 
-        return CreatedAtAction(
-            nameof(GetById),
-            new { id = booking.BookingId },
-            new
-            {
-                bookingId = booking.BookingId,
-                roomId = booking.RoomId,
-                roomNumber = room.RoomNumber,
-                booking.StartTime,
-                booking.EndTime,
-                booking.Description
-            });
+        return CreatedAtAction(nameof(GetById), new { id = booking.BookingId }, booking.ToDto());
     }
 
     // PUT: /api/Booking/{id}
@@ -189,8 +128,8 @@ public class BookingController : ControllerBase
             return NotFound("Booking not found.");
         }
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isOwner = booking.UserId == userId;
+        var currentStudentId = await GetCurrentStudentId();
+        var isOwner = currentStudentId != null && booking.StudentId == currentStudentId;
         var isAdmin = User.IsInRole("Admin");
 
         if (!isOwner && !isAdmin)
@@ -244,8 +183,8 @@ public class BookingController : ControllerBase
             return NotFound("Booking not found.");
         }
 
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isOwner = booking.UserId == userId;
+        var currentStudentId = await GetCurrentStudentId();
+        var isOwner = currentStudentId != null && booking.StudentId == currentStudentId;
         var isAdmin = User.IsInRole("Admin");
 
         if (!isOwner && !isAdmin)
@@ -268,5 +207,15 @@ public class BookingController : ControllerBase
             id);
 
         return NoContent();
+    }
+
+    private async Task<int?> GetCurrentStudentId()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return null;
+
+        var student = await
+        _studentRepository.GetByIdentityUserId(userId);
+        return student?.StudentId;
     }
 }

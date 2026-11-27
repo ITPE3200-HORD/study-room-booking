@@ -1,7 +1,4 @@
-// Here we implement the Booking repository, 
-// which handles all database access for bookings.
-// Each method wraps the database call in try/catch, so errors are logged
-// instead of crashing the application.
+// Include loads the related Room, so RoomNumber can be returned
 
 using Microsoft.EntityFrameworkCore;
 using study_room_booking.Models;
@@ -19,16 +16,22 @@ public class BookingRepository : IBookingRepository
         _logger = logger;
     }
 
-    public async Task<IEnumerable<Booking>?> GetAll()
+    public async Task<IEnumerable<Booking>?> GetActive()
     {
         try
         {
-            // Include loads the related Room, so the room name can be shown in the table
-            return await _db.Bookings.Include(b => b.Room).ToListAsync();
+            return await _db.Bookings
+                .AsNoTracking()
+                .Include(booking => booking.Room)
+                .Include(booking => booking.Student)
+                .Include(booking => booking.StudySession)
+                .Where(booking => booking.EndTime >= DateTime.Now)
+                .OrderBy(booking => booking.StartTime)
+                .ToListAsync();
         }
         catch (Exception e)
         {
-            _logger.LogError("[BookingRepository] GetAll() failed, error message: {e}", e.Message);
+            _logger.LogError("[BookingRepository] GetActive() failed, error message: {e}", e.Message);
             return null;
         }
     }
@@ -37,11 +40,34 @@ public class BookingRepository : IBookingRepository
     {
         try
         {
-            return await _db.Bookings.Include(b => b.Room).FirstOrDefaultAsync(b => b.BookingId == id);
+            return await _db.Bookings
+                .Include(booking => booking.Room)
+                .Include(booking => booking.Student)
+                .Include(booking => booking.StudySession)
+            .FirstOrDefaultAsync(booking => booking.BookingId == id);
         }
         catch (Exception e)
         {
             _logger.LogError("[BookingRepository] GetBookingById() failed for BookingId {id}, error message: {e}", id, e.Message);
+            return null;
+        }
+    }
+
+    public async Task<IEnumerable<Booking>?> GetByStudentId(int studentId)
+    {
+        try
+        {
+            return await _db.Bookings
+                .AsNoTracking()
+                .Include(booking => booking.Room)
+                .Include(booking => booking.StudySession)
+                .Where(booking => booking.StudentId == studentId)
+                .OrderBy(booking => booking.StartTime)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("[BookingRepository] GetByStudentId() failed for StudentId {studentId}, error message: {e}", studentId, e.Message);
             return null;
         }
     }

@@ -86,6 +86,22 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // Add the user to the "Student" role
+        var roleResult = await _userManager.AddToRoleAsync(user, "Student");
+
+        // If adding the user to the role fails, roll back the student and user creation
+        if (!roleResult.Succeeded)
+        {
+            foreach (var error in roleResult.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+            // Roll back the profile and account
+            await _studentRepository.Delete(student.StudentId);
+            await _userManager.DeleteAsync(user);
+
+            return View(model);
+        }
+
         await _signInManager.SignInAsync(user, isPersistent: false);
         return RedirectToAction("Index", "Home");
     }
@@ -128,5 +144,10 @@ public class AccountController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-
+    // GET: /Account/AccessDenied
+    [HttpGet]
+    public IActionResult AccessDenied()
+    {
+        return View();
+    }
 };

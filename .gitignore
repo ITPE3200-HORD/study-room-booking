@@ -6,3 +6,7 @@ obj/
 *.db
 *.db-*
 RoomDatabase.db
+
+node_modules/
+build/
+dist/

@@ -15,7 +15,7 @@ namespace study_room_booking.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.15");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -232,17 +232,14 @@ namespace study_room_booking.Migrations
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                    b.Property<int>("StudentId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("BookingId");
 
                     b.HasIndex("RoomId");
+
+                    b.HasIndex("StudentId");
 
                     b.ToTable("Bookings");
                 });
@@ -310,7 +307,8 @@ namespace study_room_booking.Migrations
 
                     b.HasKey("StudentId");
 
-                    b.HasIndex("IdentityUserId");
+                    b.HasIndex("IdentityUserId")
+                        .IsUnique();
 
                     b.ToTable("Students");
                 });
@@ -406,7 +404,15 @@ namespace study_room_booking.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("study_room_booking.Models.Student", "Student")
+                        .WithMany("Bookings")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Room");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("study_room_booking.Models.SessionParticipant", b =>
@@ -453,6 +459,11 @@ namespace study_room_booking.Migrations
             modelBuilder.Entity("study_room_booking.Models.Booking", b =>
                 {
                     b.Navigation("StudySession");
+                });
+
+            modelBuilder.Entity("study_room_booking.Models.Student", b =>
+                {
+                    b.Navigation("Bookings");
                 });
 
             modelBuilder.Entity("study_room_booking.Models.StudySession", b =>

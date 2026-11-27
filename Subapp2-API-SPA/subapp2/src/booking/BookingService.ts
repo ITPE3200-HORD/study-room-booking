@@ -1,4 +1,4 @@
-import type { BookingCreateDto, SearchForm, SearchResult } from '../types/booking';
+import type { AdminBooking, BookingCreateDto, BookingUpdateDto, SearchForm, SearchResult } from '../types/booking';
 import { handleResponse, safeFetch } from '../shared/handleResponse';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -27,4 +27,27 @@ export async function createBooking(booking: BookingCreateDto): Promise<void> {
         body: JSON.stringify(booking),
     })
     return handleResponse<void>(response, 'Could not create the booking.')
+}
+
+export async function fetchActiveBookings(): Promise<AdminBooking[]> {
+    const response = await safeFetch(`${API_URL}/api/Booking`, { credentials: 'include' })
+    return handleResponse<AdminBooking[]>(response, 'Could not load bookings.')
+}
+
+export async function updateBooking(bookingId: number, booking: BookingUpdateDto): Promise<void> {
+    const response = await safeFetch(`${API_URL}/api/Booking/${bookingId}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(booking),
+    })
+    return handleResponse<void>(response, 'Could not update the booking.')
+}
+
+export async function deleteBooking(bookingId: number): Promise<void> {
+    const response = await safeFetch(`${API_URL}/api/Booking/${bookingId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+    })
+    return handleResponse<void>(response, 'Could not delete the booking.')
 }

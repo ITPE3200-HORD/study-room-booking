@@ -2,8 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using study_room_booking.Models;
 using study_room_booking.DAL;
-using RegisterRequestDto = study_room_booking.DTOs.RegisterRequestDto;
-using LoginRequestDto = study_room_booking.DTOs.LoginRequestDto;
+using study_room_booking.DTOs;
 
 
 namespace study_room_booking.Controllers;
@@ -81,10 +80,10 @@ public class AccountController : ControllerBase
 
             await _signInManager.SignInAsync(user, isPersistent: false);
 
-            return Ok(new
+            return Ok(new AuthResponseDto
             {
-                message = "Account created.",
-                username = user.UserName
+                Message = "Account created.",
+                Username = user.UserName ?? string.Empty
             });
         }
         catch (Exception e)
@@ -115,10 +114,10 @@ public class AccountController : ControllerBase
                 return Unauthorized(new { message = "Invalid username or password." });
             }
 
-            return Ok(new
+            return Ok(new AuthResponseDto
             {
-                message = "Logged in.",
-                username = model.Username
+                Message = "Logged in.",
+                Username = model.Username
             });
         }
         catch (Exception e)
@@ -139,11 +138,11 @@ public class AccountController : ControllerBase
             return Unauthorized();
         }
 
-        return Ok(new
+        return Ok(new CurrentUserDto
         {
-            username = User.Identity.Name,
-            userId = _userManager.GetUserId(User),
-            isAdmin = User.IsInRole("Admin")
+            Username = User.Identity.Name ?? string.Empty,
+            UserId = _userManager.GetUserId(User) ?? string.Empty,
+            IsAdmin = User.IsInRole("Admin")
         });
     }
 
@@ -154,4 +153,4 @@ public class AccountController : ControllerBase
         await _signInManager.SignOutAsync();
         return NoContent();
     }
-};
+}
