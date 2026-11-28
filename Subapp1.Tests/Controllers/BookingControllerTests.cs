@@ -220,6 +220,7 @@ public class BookingControllerTests
         bookingRepository.Create(Arg.Any<Booking>()).Returns(true);
 
         var roomRepository = Substitute.For<IRoomRepository>();
+        roomRepository.GetRoomById(1).Returns(new Room { RoomId = 1, RoomNumber = "101", Capacity = 6 });
         var logger = Substitute.For<ILogger<BookingController>>();
        
         var studentRepository = Substitute.For<IStudentRepository>();
