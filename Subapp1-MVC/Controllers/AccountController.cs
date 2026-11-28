@@ -50,6 +50,7 @@ public class AccountController : Controller
 
         if (!identityResult.Succeeded)
         {
+            _logger.LogWarning("[AccountController] Registration failed for user {Username}", model.Username);
             foreach (var error in identityResult.Errors)
                 ModelState.AddModelError(string.Empty, error.Description);
 
@@ -67,11 +68,13 @@ public class AccountController : Controller
 
         if (!studentSaved)
         {
+            _logger.LogError("[AccountController] Failed to create student profile for user {UserId}", user.Id);
             // Remove the account so registration doesn't leave an unlinked user behind.
             var rollbackResult = await _userManager.DeleteAsync(user);
 
             if (!rollbackResult.Succeeded)
             {
+                _logger.LogError("[AccountController] Failed to roll back user {UserId}", user.Id);
                 ModelState.AddModelError(
                     string.Empty,
                     "The student profile could not be saved, and the account could not be removed.");
@@ -92,6 +95,7 @@ public class AccountController : Controller
         // If adding the user to the role fails, roll back the student and user creation
         if (!roleResult.Succeeded)
         {
+            _logger.LogError("[AccountController] Failed to add user {UserId} to the Student role", user.Id);
             foreach (var error in roleResult.Errors)
                 ModelState.AddModelError(string.Empty, error.Description);
 
@@ -102,6 +106,7 @@ public class AccountController : Controller
             return View(model);
         }
 
+        _logger.LogInformation("[AccountController] New user registered: {Username}", user.UserName);
         await _signInManager.SignInAsync(user, isPersistent: false);
         return RedirectToAction("Index", "Home");
     }
@@ -131,6 +136,7 @@ public class AccountController : Controller
             {
                 return Redirect(targetUrl);
             }
+            _logger.LogWarning("[AccountController] Failed login attempt for user {Username}", model.Username);
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
         }
         return View(model);
