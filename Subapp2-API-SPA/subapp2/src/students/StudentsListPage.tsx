@@ -88,9 +88,11 @@ export default function StudentsListPage() {
                                                 variant="outline-danger"
                                                 disabled={deleteMutation.isPending}
                                                 onClick={() => {
-                                                    if (window.confirm(`Delete ${student.fullName} and their account?`)) {
-                                                    setActionError('')
-                                                    deleteMutation.mutate(student.studentId)
+                                                    if (window.confirm(`Delete ${student.fullName} and their account?\n\n` +
+                                                        `All their bookings and the study sessions they own will also be deleted, ` +
+                                                        `and they will be removed from sessions they have joined. This cannot be undone.`)) {
+                                                        setActionError('')
+                                                        deleteMutation.mutate(student.studentId)
                                                     }
                                                 }}
                                             >Delete</Button>

@@ -1,7 +1,7 @@
 import { Alert, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchCurrentUser, logout } from '../account/AccountService';
 
 export default function NavMenu() {
@@ -20,8 +20,9 @@ export default function NavMenu() {
         setIsLoggingOut(true)
 
         try {
-            // The API call and error handling are done in AccountService
             await logout()
+            // Removes all cached data from the previous user (My Page, sessions, bookings)
+            queryClient.clear()
             queryClient.setQueryData(['current-user'], null)
             navigate('/', { replace: true })
         }
@@ -37,24 +38,24 @@ export default function NavMenu() {
     const isStudent = user !== null && user !== undefined && !isAdmin
 
     return (
-        <Navbar expand="lg" className="site-navbar">
-            <Navbar.Brand href="/">Study Room Booking</Navbar.Brand>
+        <Navbar expand="lg" className="site-navbar" collapseOnSelect>
+            <Navbar.Brand as={Link} to="/">Study Room Booking</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="me-auto">
                     {isStudent && (
                         <>
-                            <Nav.Link href="/booking">Book a room</Nav.Link>
-                            <Nav.Link href="/sessions">Join a session</Nav.Link>
+                            <Nav.Link as={Link} to="/booking" eventKey="/booking">Book a room</Nav.Link>
+                            <Nav.Link as={Link} to="/sessions" eventKey="/sessions">Join a session</Nav.Link>
                         </>
                     )}
 
                     {isAdmin && (
                         <>
-                            <Nav.Link href="/rooms">Manage rooms</Nav.Link>
-                            <Nav.Link href="/bookings">Manage bookings</Nav.Link>
-                            <Nav.Link href="/students">Manage students</Nav.Link>
-                            <Nav.Link href="/sessions">Manage sessions</Nav.Link>
+                            <Nav.Link as={Link} to="/rooms" eventKey="/rooms">Manage rooms</Nav.Link>
+                            <Nav.Link as={Link} to="/bookings" eventKey="/bookings">Manage bookings</Nav.Link>
+                            <Nav.Link as={Link} to="/students" eventKey="/students">Manage students</Nav.Link>
+                            <Nav.Link as={Link} to="/sessions" eventKey="/sessions">Manage sessions</Nav.Link>
                         </>
                     )}
                 </Nav>
@@ -62,13 +63,13 @@ export default function NavMenu() {
                 <Nav className="ms-auto navbar-right">
                     {!user ? (
                         <>
-                            <Nav.Link href="/login">Log in</Nav.Link>
-                            <Nav.Link href="/register">Register</Nav.Link>
+                            <Nav.Link as={Link} to="/login" eventKey="/login">Log in</Nav.Link>
+                            <Nav.Link as={Link} to="/register" eventKey="/register">Register</Nav.Link>
                         </>
                     ) : (
                         <NavDropdown title="Account" id="account-dropdown" align="end">
                             {isStudent && (
-                                <NavDropdown.Item href="/my-page">My page</NavDropdown.Item>
+                                <NavDropdown.Item as={Link} to="/my-page" eventKey="/my-page">My page</NavDropdown.Item>
                             )}
                             <NavDropdown.Item
                                 as="button"

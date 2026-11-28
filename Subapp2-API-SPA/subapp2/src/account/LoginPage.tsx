@@ -21,7 +21,8 @@ function LoginPage() {
         try {
             // The API call and error handling are done in AccountService
             await login({ username, password, rememberMe })
-            await queryClient.invalidateQueries({ queryKey: ['current-user'] })
+            // A new user is signed in, so cached data from a guest or the previous user is removed
+            queryClient.clear()
             navigate('/')
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed.')

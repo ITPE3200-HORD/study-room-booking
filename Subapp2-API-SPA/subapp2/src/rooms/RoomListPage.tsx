@@ -120,7 +120,8 @@ export default function RoomListPage() {
                                                 variant="outline-danger"
                                                 disabled={deleteMutation.isPending}
                                                 onClick={() => {
-                                                    if (window.confirm(`Delete room ${room.roomNumber}?`)) {
+                                                    if (window.confirm(`Delete room ${room.roomNumber}?\n\n` + `All bookings in this room will also be deleted, including their study sessions. ` +
+                                                        `This cannot be undone.`)) {
                                                         setActionError('')
                                                         deleteMutation.mutate(room.roomId)
                                                     }

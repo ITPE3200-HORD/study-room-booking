@@ -23,7 +23,8 @@ function RegisterPage() {
         try {
             // The API call and error handling are done in AccountService
             await register({ userName, email, fullName, password, confirmPassword })
-            await queryClient.invalidateQueries({ queryKey: ['current-user'] })
+            // A new user is signed in, so cached data from a guest or the previous user is removed
+            queryClient.clear()
             navigate('/')
         } catch (err) {
             // Shows the message from the API, or a network error from safeFetch
