@@ -186,48 +186,83 @@ public class BookingController : Controller
     }
 
     // GET: /Booking/Update/5
+    // Lets admins update any booking, while students can only update their own
     [HttpGet]
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Admin,Student")]
     public async Task<IActionResult> Update(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
 
         if (booking == null)
         {
-            _logger.LogError("[BookingController] Booking not found when updating BookingId {id}", id);
+            _logger.LogError(
+                "[BookingController] Booking not found when updating BookingId {id}",
+                id);
+
             return NotFound("Booking not found for the BookingId");
         }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isOwner = booking.Student?.IdentityUserId == userId;
+
+        if (!User.IsInRole("Admin") && !isOwner)
+        {
+            _logger.LogWarning(
+                "[BookingController] User {IdentityUserId} attempted to update booking {BookingId} without permission",
+                userId, id);
+
+            return Forbid();
+        }
+
         await PopulateRooms();
         return View(booking);
     }
 
 
     // POST: /Booking/Update
-    // Validates the changes, checks for overlap and saves
+    // Validates the changes, checks ownership and booking conflicts, then saves
     [HttpPost]
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Admin,Student")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Update(int bookingId, string? Description, string startTime, string EndTime)
+    public async Task<IActionResult> Update(
+        int bookingId,
+        string? Description,
+        string startTime,
+        string EndTime)
     {
         var booking = await _bookingRepository.GetBookingById(bookingId);
-        if (booking == null) return NotFound();
-        // Only the owner or admin can update the booking
+
+        if (booking == null)
+        {
+            _logger.LogWarning(
+                "[BookingController] Booking not found when updating BookingId {BookingId}",
+                bookingId);
+
+            return NotFound();
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var isOwner = booking.Student?.IdentityUserId == userId;
 
-        if (!isOwner)
+        if (!User.IsInRole("Admin") && !isOwner)
         {
+            _logger.LogWarning(
+                "[BookingController] User {IdentityUserId} attempted to update booking {BookingId} without permission",
+                userId,
+                bookingId);
+
             return Forbid();
         }
 
-        //Parse time from drop-down 
-        if (!TimeOnly.TryParse(startTime, out var start) || !TimeOnly.TryParse(EndTime, out var end))
+        // Parse the selected times from the form
+        if (!TimeOnly.TryParse(startTime, out var start) ||
+            !TimeOnly.TryParse(EndTime, out var end))
         {
             ModelState.AddModelError("", "Invalid time selected.");
         }
         else if (end <= start)
         {
-            ModelState.AddModelError("", "End time must be after start time");
+            ModelState.AddModelError("", "End time must be after start time.");
         }
         else
         {
@@ -237,77 +272,146 @@ public class BookingController : Controller
             booking.Description = Description;
         }
 
-        if (ModelState.IsValid && await _bookingRepository.IsOverlapping(booking))
+        if (ModelState.IsValid &&
+            await _bookingRepository.IsOverlapping(booking))
         {
-            ModelState.AddModelError("", "The room is already booked in this time period");
+            _logger.LogInformation(
+                "[BookingController] Update rejected because Room {RoomId} is already booked for the selected time",
+                booking.RoomId);
+
+            ModelState.AddModelError(
+                "",
+                "The room is already booked in this time period.");
         }
 
-        // Prevent the user from having two bookings at the same time
-        if (ModelState.IsValid && await _bookingRepository.UserHasOverlappingBooking(booking))
+        // Prevent a student from having two bookings at the same time
+        if (ModelState.IsValid &&
+            await _bookingRepository.UserHasOverlappingBooking(booking))
         {
-            ModelState.AddModelError("",
-            "You already have another booking in this time period. " +
-            "You can't be in two rooms at the same time, so please choose a different time.");
-            _logger.LogWarning("[BookingController] Student {StudentId} tried to double book at {StartTime}", booking.StudentId, booking.StartTime);
+            _logger.LogWarning(
+                "[BookingController] Student {StudentId} tried to double book at {StartTime}",
+                booking.StudentId,
+                booking.StartTime);
+
+            ModelState.AddModelError(
+                "",
+                "You already have another booking in this time period. " +
+                "You can't be in two rooms at the same time, so please choose a different time.");
         }
 
         if (ModelState.IsValid)
         {
-            bool updated = await _bookingRepository.Update(booking);
+            var updated = await _bookingRepository.Update(booking);
+
             if (updated)
             {
-                _logger.LogInformation("[BookingController] Booking updated: {id}", booking.BookingId);
+                _logger.LogInformation(
+                    "[BookingController] Booking updated: {BookingId}",
+                    booking.BookingId);
+
+                if (User.IsInRole("Admin"))
+                {
+                    return RedirectToAction(nameof(Table));
+                }
+
                 return RedirectToAction("MyPage", "MyPage");
             }
 
-            ModelState.AddModelError("", "Something went wrong while updating the booking. Please try again.");
+            _logger.LogError(
+                "[BookingController] Repository failed to update BookingId {BookingId}",
+                bookingId);
+
+            ModelState.AddModelError(
+                "",
+                "Something went wrong while updating the booking. Please try again.");
         }
 
-        _logger.LogWarning("[BookingController] Booking update failed {@booking}", booking);
         await PopulateRooms();
         return View(booking);
     }
 
     // GET: /Booking/Delete/5
-    // Shows a confirmation page before deleting
+    // Lets admins delete any booking, while students can only delete their own
     [HttpGet]
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Admin,Student")]
     public async Task<IActionResult> Delete(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
+
         if (booking == null)
         {
-            _logger.LogError("[BookingController] Booking not found for BookingId {id}", id);
+            _logger.LogWarning(
+                "[BookingController] Booking not found when deleting BookingId {BookingId}",
+                id);
+
             return NotFound("Booking not found for the BookingId");
         }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isOwner = booking.Student?.IdentityUserId == userId;
+
+        if (!User.IsInRole("Admin") && !isOwner)
+        {
+            _logger.LogWarning(
+                "[BookingController] User {IdentityUserId} attempted to access delete page for BookingId {BookingId} without permission",
+                userId,
+                id);
+
+            return Forbid();
+        }
+
         return View(booking);
     }
 
     // POST: /Booking/DeleteConfirmed
-    // Deletes the booking after the user has confirmed
+    // Deletes the booking after permission and confirmation checks
     [HttpPost]
-    [Authorize(Roles = "Student")]
+    [Authorize(Roles = "Admin,Student")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var booking = await _bookingRepository.GetBookingById(id);
-        if (booking == null) return NotFound();
-        // Only the owner or admin can delete the booking
+
+        if (booking == null)
+        {
+            _logger.LogWarning(
+                "[BookingController] Booking not found when confirming deletion of BookingId {BookingId}",
+                id);
+
+            return NotFound();
+        }
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var isOwner = booking.Student?.IdentityUserId == userId;
 
-        if (!isOwner)
+        if (!User.IsInRole("Admin") && !isOwner)
         {
+            _logger.LogWarning(
+                "[BookingController] User {IdentityUserId} attempted to delete BookingId {BookingId} without permission",
+                userId,
+                id);
+
             return Forbid();
         }
 
-        bool deleted = await _bookingRepository.Delete(id);
-        if (!deleted)
+        if (!await _bookingRepository.Delete(id))
         {
-            _logger.LogError("[BookingController] Booking deletion failed for BookingId {id}", id);
+            _logger.LogError(
+                "[BookingController] Booking deletion failed for BookingId {BookingId}",
+                id);
+
             return BadRequest("Booking deletion failed");
         }
-        _logger.LogInformation("[BookingController] Booking deleted: {id}", id);
+
+        _logger.LogInformation(
+            "[BookingController] Booking deleted: {BookingId}",
+            id);
+
+        if (User.IsInRole("Admin"))
+        {
+            return RedirectToAction(nameof(Table));
+        }
+
         return RedirectToAction("MyPage", "MyPage");
     }
 

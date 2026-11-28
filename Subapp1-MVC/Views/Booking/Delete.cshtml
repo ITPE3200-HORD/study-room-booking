@@ -14,6 +14,12 @@
                     <p class="alert alert-warning" role="alert">
                         Are you sure you want to delete this booking? This action cannot be undone.
                     </p>
+                    @if (Model.StudySession != null)
+                    {
+                        <p class="alert alert-warning" role="alert">
+                            This also deletes the study session for this booking.
+                        </p>
+                    }
 
                     <dl class="row mb-4">
                         <dt class="col-sm-4">Room</dt>
@@ -23,7 +29,8 @@
                         <dd class="col-sm-8">@(Model.Student?.FullName ?? "—")</dd>
 
                         <dt class="col-sm-4">Description</dt>
-                        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Description) ? "—" : Model.Description)</dd>
+                        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Description) ? "—" : Model.Description)
+                        </dd>
 
                         <dt class="col-sm-4">Start</dt>
                         <dd class="col-sm-8">@Model.StartTime.ToString("dd.MM.yyyy HH:mm")</dd>
@@ -39,12 +46,20 @@
                             <button type="submit" class="btn btn-danger crud-btn">Delete booking</button>
                         </div>
                     </form>
-                    <form asp-action="Cancel" method="post">
-                        <input type="hidden" name="id" value="@Model.BookingId"/>
-                        <div class="d-flex flex-wrap gap-2">
-                            <a asp-action="Table" class="btn btn-outline-secondary crud-btn">Cancel</a>
-                        </div>
-                    </form>
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="Booking" asp-action="Table" class="btn btn-outline-secondary crud-btn">
+                                Cancel
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="MyPage" asp-action="MyPage" class="btn btn-outline-secondary crud-btn">
+                                Cancel
+                            </a>
+                        }
+                    </div>
                 </div>
             </div>
         </div>

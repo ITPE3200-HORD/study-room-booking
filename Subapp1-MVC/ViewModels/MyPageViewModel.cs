@@ -7,4 +7,5 @@ public class MyPageViewModel
     public List<Booking> Bookings { get; set; } = new();
     public List<StudySession> StudySessions { get; set; } = new();
     public bool HasStudentProfile { get; set; }
+    public int? CurrentStudentId { get; set; }
 }

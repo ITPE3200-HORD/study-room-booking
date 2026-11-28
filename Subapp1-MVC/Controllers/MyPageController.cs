@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using study_room_booking.Models;
 using study_room_booking.ViewModels;
 using study_room_booking.DAL;
 
@@ -13,12 +14,14 @@ public class MyPageController : Controller
     private readonly IStudentRepository _studentRepository;
     private readonly IBookingRepository _bookingRepository;
     private readonly ILogger<MyPageController> _logger;
+    private readonly IStudySessionRepository _studySessionRepository;
 
-    public MyPageController(IStudentRepository studentRepository, IBookingRepository bookingRepository, ILogger<MyPageController> logger) //Kan legge ttil IStudySession
+    public MyPageController(IStudentRepository studentRepository, IBookingRepository bookingRepository, ILogger<MyPageController> logger, IStudySessionRepository studySessionRepository)
     {
         _studentRepository = studentRepository;
         _bookingRepository = bookingRepository;
         _logger = logger;
+        _studySessionRepository = studySessionRepository;
     }
 
     // GET: /MyPage/MyPage
@@ -44,14 +47,22 @@ public class MyPageController : Controller
                 return StatusCode(500, "Internal server error");
             }
 
-            var studySessions = bookings
-                .Where(booking => booking.StudySession != null)
-                .Select(booking => booking.StudySession!)
-                .ToList();
+            var studySessions = student == null
+                ? new List<StudySession>() : (await _studySessionRepository.GetForStudent(student.StudentId))?.ToList();
+
+            if (studySessions == null)
+            {
+                _logger.LogError(
+                    "Failed to fetch study sessions for StudentId {StudentId}.",
+                    student!.StudentId);
+
+                return StatusCode(500, "Internal server error");
+            }
 
             var viewModel = new MyPageViewModel
             {
                 HasStudentProfile = student != null,
+                CurrentStudentId = student?.StudentId,
                 Bookings = bookings.ToList(),
                 StudySessions = studySessions
             };

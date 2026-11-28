@@ -191,4 +191,52 @@ public class StudySessionController : Controller
         TempData["SuccessMessage"] = "You joined the study session.";
         return RedirectToAction("Index", "Home");
     }
+
+    // POST: /StudySession/Leave/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Leave(int id)
+    {
+        var session = await _studySessionRepository.GetById(id);
+
+        if (session == null)
+            return NotFound();
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var student = userId == null
+            ? null
+            : await _studentRepository.GetByIdentityUserId(userId);
+
+        if (student == null ||
+            !session.Participants.Any(p => p.StudentId == student.StudentId))
+        {
+            TempData["ErrorMessage"] = "You are not a participant in this study session.";
+            return RedirectToAction("MyPage", "MyPage");
+        }
+
+        if (IsOwner(session))
+        {
+            TempData["ErrorMessage"] = "You own this session. Delete it instead of leaving.";
+            return RedirectToAction("MyPage", "MyPage");
+        }
+
+        if (!await _studySessionRepository.RemoveParticipant(id, student.StudentId))
+        {
+            _logger.LogError(
+                "[StudySessionController] Student {StudentId} could not leave session {SessionId}",
+                student.StudentId,
+                id);
+
+            TempData["ErrorMessage"] = "Could not leave the study session.";
+            return RedirectToAction("MyPage", "MyPage");
+        }
+
+        _logger.LogInformation(
+            "[StudySessionController] Student {StudentId} left session {SessionId}",
+            student.StudentId,
+            id);
+
+        TempData["SuccessMessage"] = "You left the study session.";
+        return RedirectToAction("MyPage", "MyPage");
+    }
 }
