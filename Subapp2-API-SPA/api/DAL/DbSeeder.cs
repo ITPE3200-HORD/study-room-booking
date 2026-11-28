@@ -40,7 +40,7 @@ public static class DbSeeder
 
             var result = await userManager.CreateAsync(user, studentPassword);
             if (!result.Succeeded)
-                throw new InvalidOperationException(string.Join("; ", result.Errors.Select(exec_hook_info => exec_hook_info.Description)));
+                throw new InvalidOperationException(string.Join("; ", result.Errors.Select(error => error.Description)));
         }
 
         if (!await userManager.IsInRoleAsync(user, studentRole))

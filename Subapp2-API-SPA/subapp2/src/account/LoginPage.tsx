@@ -68,11 +68,16 @@ function LoginPage() {
                             onChange={event => setRememberMe(event.target.checked)}
                         />
 
-                        <Button type="submit" disabled={isSubmitting}>
+                        <Button type="submit" className="w-100" disabled={isSubmitting}>
                             {isSubmitting ? 'Logging in…' : 'Log in'}
                         </Button>
-                        <Link to="/register">Create an account</Link>
                     </Form>
+                    
+                    <div className="auth-switch">
+                    <p>Don´t have an account?</p>
+                        <Link to="/register" className="button-outline x-100">Create an account
+                        </Link>
+                    </div>
                 </Card.Body>
             </Card>
         </div>

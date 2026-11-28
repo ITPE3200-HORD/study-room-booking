@@ -1,6 +1,6 @@
 import { useState, type SubmitEvent } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { register } from './AccountService'
 
@@ -97,10 +97,14 @@ function RegisterPage() {
                             />
                         </Form.Group>
 
-                        <Button type="submit" disabled={isSubmitting}>
+                        <Button type="submit" className="w-100" disabled={isSubmitting}>
                             {isSubmitting ? 'Registering…' : 'Register'}
                         </Button>
                     </Form>
+                    <div className="auth-switch">
+                    <p>Already have an account?</p>
+                        <Link to="/login" className="button-outline w-100">Log in</Link>
+                    </div>
                 </Card.Body>
             </Card>
         </div>

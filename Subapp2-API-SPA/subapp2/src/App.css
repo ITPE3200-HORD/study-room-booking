@@ -243,8 +243,7 @@
   color: var(--muted);
 }
 
-.hero-card-link,
-.text-link {
+.hero-card-link {
   color: var(--green);
   font-weight: 700;
   text-decoration: none;
@@ -388,6 +387,19 @@
   transform: translateY(-1px);
   background: var(--green);
   color: white;
+}
+
+.auth-switch {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.auth-switch p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 /* Forms */
