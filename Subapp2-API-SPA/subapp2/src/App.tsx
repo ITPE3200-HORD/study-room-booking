@@ -13,6 +13,7 @@ import './App.css'
 import StudentListPage from './students/StudentsListPage.js'
 import AdminRoute from './shared/AdminRoute.js'
 import RegisterPage from './account/RegisterPage.js'
+import StudentRoute from './shared/StudentRoute.js'
 
 
 const queryClient = new QueryClient()
@@ -26,7 +27,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/rooms" element={<AdminRoute><RoomListPage /></AdminRoute>}/>
-            <Route path="/booking" element={<BookingPage />} />
+            <Route path="/booking" element={<StudentRoute><BookingPage /></StudentRoute>} />
             <Route path="/students" element={<AdminRoute><StudentListPage /></AdminRoute>} />
             <Route path="/bookings" element={<AdminRoute><AdminBookingsPage /></AdminRoute>} />
             <Route path="/sessions" element={<SessionsListPage />} />

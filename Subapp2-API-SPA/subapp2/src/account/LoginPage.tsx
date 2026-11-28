@@ -1,17 +1,21 @@
 import { useState, type SubmitEvent } from 'react'
 import { Alert, Button, Card, Form } from 'react-bootstrap'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { login } from './AccountService'
 
 function LoginPage() {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
+    const location = useLocation()
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [rememberMe, setRememberMe] = useState(false)
     const [error, setError] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const from = (location.state as { from?: { pathname: string; search?: string } } | null)?.from
+    const redirectTo = from ? `${from.pathname}${from.search ?? ''}` : '/'
 
     async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -19,10 +23,9 @@ function LoginPage() {
         setIsSubmitting(true)
 
         try {
-            // The API call and error handling are done in AccountService
             await login({ username, password, rememberMe })
             await queryClient.invalidateQueries({ queryKey: ['current-user'] })
-            navigate('/')
+            navigate(redirectTo, { replace: true })
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed.')
         } finally {

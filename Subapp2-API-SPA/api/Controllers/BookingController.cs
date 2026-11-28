@@ -70,6 +70,15 @@ public class BookingController : ControllerBase
         return Ok(booking.ToDto());
     }
 
+    //Helping metthod
+    private ObjectResult ForbiddenProblem(string detail) =>
+    StatusCode(StatusCodes.Status403Forbidden, new ProblemDetails
+    {
+        Status = StatusCodes.Status403Forbidden,
+        Title = "Forbidden",
+        Detail = detail
+    });
+
     // POST: /api/Booking
     [HttpPost]
     [Authorize]

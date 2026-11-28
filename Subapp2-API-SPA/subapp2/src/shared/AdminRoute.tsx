@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { fetchCurrentUser } from '../account/AccountService'
+
+
 
 export default function AdminRoute({ children }: { children: ReactNode }) {
     const { data: user, isLoading } = useQuery({
