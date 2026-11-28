@@ -40,79 +40,78 @@
                                             Edit
                                         </a>
                                         <a asp-controller="Booking" asp-action="Delete" asp-route-id="@booking.BookingId"
-                                           method="post" onsubmit="return confirm(" Delte this booking"?);">
+                                           class="btn btn-outline-danger btn-sm crud-btn">
+                                            Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p role="status">You have no upcoming bookings.</p>
+        }
+        
+    </section>
+
+    <section aria-labelledby="my-sessions-title">
+        <h2 id="my-sessions-title" class="h3">My study sessions</h2>
+
+        @if (!Model.HasStudentProfile)
+        {
+            <p role="status">You need to create a student profile before you can see your study sessions.</p>
+        }
+        else if (Model.StudySessions.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Session</th>
+                            <th scope="col">Subject</th>
+                            <th scope="col">Room</th>
+                            <th scope="col">From</th>
+                            <th scope="col">To</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var session in Model.StudySessions)
+                        {
+                            <tr>
+                                <th scope="row">@session.Title</th>
+                                <td>@(session.Subject ?? "-")</td>
+                                <td>@(session.Booking.Room?.RoomNumber ?? "-")</td>
+                                <td>@session.Booking.StartTime.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@session.Booking.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a asp-controller="StudySession" asp-action="Update"
+                                           asp-route-id="@session.StudySessionId" class="btn btn-primary btn-sm crud-btn">
+                                            Edit
+                                        </a>
+                                        <form asp-controller="StudySession" asp-action="Delete"
+                                              asp-route-id="@session.StudySessionId" method="post"
+                                              onsubmit="return confirm('Delete this study session?');">
                                             <button type="submit" class="btn btn-outline-danger btn-sm crud-btn">
                                                 Delete
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-        else
-            {
-                <p role="status">You have no upcoming bookings.</p>
-            }
-        
-        </section>
-
-        <section aria-labelledby="my-sessions-title">
-            <h2 id="my-sessions-title" class="h3">My study sessions</h2>
-
-            @if (!Model.HasStudentProfile)
-            {
-                <p role="status">You need to create a student profile before you can see your study sessions.</p>
-            }
-            else if (Model.StudySessions.Count > 0)
-            {
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col">Session</th>
-                                <th scope="col">Subject</th>
-                                <th scope="col">Room</th>
-                                <th scope="col">From</th>
-                                <th scope="col">To</th>
-                                <th scope="col">Actions</th>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var session in Model.StudySessions)
-                            {
-                                <tr>
-                                    <th scope="row">@session.Title</th>
-                                    <td>@(session.Subject ?? "-")</td>
-                                    <td>@(session.Booking.Room?.RoomNumber ?? "-")</td>
-                                    <td>@session.Booking.StartTime.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@session.Booking.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            <a asp-controller="StudySession" asp-action="Update"
-                                               asp-route-id="@session.StudySessionId" class="btn btn-primary btn-sm crud-btn">
-                                                Edit
-                                            </a>
-                                            <form asp-controller="StudySession" asp-action="Delete"
-                                                  asp-route-id="@session.StudySessionId" method="post"
-                                                  onsubmit="return confirm('Delete this study session?');">
-                                                <button type="submit" class="btn btn-outline-danger btn-sm crud-btn">
-                                                    Delete
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <p role="status">You have no upcoming study sessions.</p>
-            }
-        </section>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p role="status">You have no upcoming study sessions.</p>
+        }
     </section>
+</section>

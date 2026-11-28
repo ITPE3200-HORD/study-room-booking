@@ -40,6 +40,7 @@ public class BookingRepository : IBookingRepository
             return await _db.Bookings
                 .Include(b => b.Room)
                 .Include(b => b.Student)
+                .Include(b => b.StudySession)
                 .FirstOrDefaultAsync(b => b.BookingId == id);
         }
         catch (Exception e)
