@@ -82,6 +82,7 @@
                     <tbody>
                         @foreach (var session in Model.StudySessions)
                         {
+                            var isOwner = session.Booking.StudentId == Model.CurrentStudentId;
                             <tr>
                                 <th scope="row">@session.Title</th>
                                 <td>@(session.Subject ?? "-")</td>
@@ -90,17 +91,30 @@
                                 <td>@session.Booking.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>
                                     <div class="d-flex flex-wrap gap-2">
-                                        <a asp-controller="StudySession" asp-action="Update"
-                                           asp-route-id="@session.StudySessionId" class="btn btn-primary btn-sm crud-btn">
-                                            Edit
-                                        </a>
-                                        <form asp-controller="StudySession" asp-action="Delete"
-                                              asp-route-id="@session.StudySessionId" method="post"
-                                              onsubmit="return confirm('Delete this study session?');">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm crud-btn">
-                                                Delete
-                                            </button>
-                                        </form>
+                                        @if (isOwner)
+                                        {
+                                            <a asp-controller="StudySession" asp-action="Update"
+                                               asp-route-id="@session.StudySessionId" class="btn btn-primary btn-sm crud-btn">
+                                                Edit
+                                            </a>
+
+                                            <form asp-controller="StudySession" asp-action="Delete"
+                                                  asp-route-id="@session.StudySessionId" method="post"
+                                                  onsubmit="return confirm('Delete this study session?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm crud-btn">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-controller="StudySession" asp-action="Leave"
+                                                  asp-route-id="@session.StudySessionId" method="post">
+                                                <button type="submit" class="btn btn-outline-secondary btn-sm crud-btn">
+                                                    Leave
+                                                </button>
+                                            </form>
+                                        }
                                     </div>
                                 </td>
                             </tr>
