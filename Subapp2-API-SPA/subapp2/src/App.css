@@ -243,8 +243,7 @@
   color: var(--muted);
 }
 
-.hero-card-link,
-.text-link {
+.hero-card-link {
   color: var(--green);
   font-weight: 700;
   text-decoration: none;

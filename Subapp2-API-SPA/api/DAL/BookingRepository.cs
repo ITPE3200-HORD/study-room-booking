@@ -154,7 +154,7 @@ public class BookingRepository : IBookingRepository
         }
         catch (Exception e)
         {
-            _logger.LogError("[BookingRepository] UserHasOverlappingBooking() failed for StudentId {@StudentId}, error message: {e}", booking.StudentId, e.Message);
+            _logger.LogError("[BookingRepository] UserHasOverlappingBooking() failed for StudentId {StudentId}, error message: {e}", booking.StudentId, e.Message);
             // Treat errors as overlap, so we never accidentally double-book a room
             return true;
         }

@@ -2,13 +2,14 @@ import { useState, type SubmitEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Button, Form, Modal, Spinner, Table } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-import type { MyPageData, MyStudySession } from '../types/myPage'
+import type { MyBooking, MyPageData, MyStudySession } from '../types/myPage'
 import * as AccountService from './AccountService'
+import * as BookingService from '../booking/BookingService'
 import * as SessionService from '../sessions/SessionService'
 import { ApiError } from '../shared/handleResponse'
 
 // The modal is used both to create a new session for a booking and to edit an existing session
-type SessionModal = 
+type SessionModal =
     | { mode: 'create'; bookingId: number; roomNumber: string | null }
     | { mode: 'edit'; session: MyStudySession }
 
@@ -22,8 +23,11 @@ type SessionForm = {
 const emptySessionForm: SessionForm = { title: '', subject: '', maxParticipants: 4, isOpen: true }
 
 function formatDate(value: string): string {
-    return new Date(value).toLocaleString('nb-NO', {dateStyle: 'short', timeStyle: 'short'})
+    return new Date(value).toLocaleString('nb-NO', { dateStyle: 'short', timeStyle: 'short' })
 }
+
+// "2026-11-27T10:00:00" -> "2026-11-27T10:00", the format <input type="datetime-local"> expects
+const toInputValue = (value: string) => value.slice(0, 16)
 
 function MyPagePage() {
     const queryClient = useQueryClient()
@@ -31,18 +35,21 @@ function MyPagePage() {
     const [form, setForm] = useState<SessionForm>(emptySessionForm)
     const [modalError, setModalError] = useState('')
     const [actionError, setActionError] = useState('')
+    const [editingBooking, setEditingBooking] = useState<MyBooking | null>(null)
+    const [bookingForm, setBookingForm] = useState({ startTime: '', endTime: '', description: '' })
 
     const { data, isLoading, error } = useQuery<MyPageData, ApiError>({
-    queryKey: ['myPage'],
-    queryFn: AccountService.fetchMyPage,
+        queryKey: ['myPage'],
+        queryFn: AccountService.fetchMyPage,
     })
 
-    // Sessions are shown on My page, the sessions page and the home page
+    // Bookings and sessions are shown on My page, the sessions page, the home page and in the room search
     async function refreshSessions() {
         await Promise.all([
             queryClient.invalidateQueries({ queryKey: ['myPage'] }),
             queryClient.invalidateQueries({ queryKey: ['sessions'] }),
             queryClient.invalidateQueries({ queryKey: ['home'] }),
+            queryClient.invalidateQueries({ queryKey: ['availableRooms'] }),
         ])
     }
 
@@ -77,6 +84,25 @@ function MyPagePage() {
         onError: err => setActionError(err.message),
     })
 
+    const updateBookingMutation = useMutation({
+        mutationFn: (booking: MyBooking) => BookingService.updateBooking(booking.bookingId, {
+            roomId: booking.roomId,
+            startTime: bookingForm.startTime,
+            endTime: bookingForm.endTime,
+            description: bookingForm.description,
+        }),
+        onSuccess: async () => {
+            setEditingBooking(null)
+            await refreshSessions()
+        },
+    })
+
+    const deleteBookingMutation = useMutation({
+        mutationFn: BookingService.deleteBooking,
+        onSuccess: refreshSessions,
+        onError: err => setActionError(err.message),
+    })
+
     function openCreate(bookingId: number, roomNumber: string | null) {
         setModal({ mode: 'create', bookingId, roomNumber })
         setForm(emptySessionForm)
@@ -92,6 +118,27 @@ function MyPagePage() {
             isOpen: session.isOpen,
         })
         setModalError('')
+    }
+
+    function openEditBooking(booking: MyBooking) {
+        updateBookingMutation.reset()
+        setBookingForm({
+            startTime: toInputValue(booking.startTime),
+            endTime: toInputValue(booking.endTime),
+            description: booking.description ?? '',
+        })
+        setEditingBooking(booking)
+    }
+
+    function handleDeleteBooking(booking: MyBooking) {
+        // Deleting a booking also deletes its study session and participants (cascade delete)
+        const warning = booking.studySessionId !== null
+            ? ' This also deletes the study session and removes its participants.'
+            : ''
+        if (window.confirm(`Delete your booking of room ${booking.roomNumber}?${warning}`)) {
+            setActionError('')
+            deleteBookingMutation.mutate(booking.bookingId)
+        }
     }
 
     function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
@@ -125,7 +172,7 @@ function MyPagePage() {
     const bookings = data?.bookings ?? []
     const sessions = data?.studySessions ?? []
     const now = new Date()
-    const isBusy = deleteMutation.isPending || leaveMutation.isPending
+    const isBusy = deleteMutation.isPending || leaveMutation.isPending || deleteBookingMutation.isPending
 
     return (
         <main className="page-content">
@@ -146,50 +193,69 @@ function MyPagePage() {
                 {bookings.length === 0 ? (
                     <p>You have no bookings. <Link to="/booking">Book a room</Link></p>
                 ) : (
-            <div className="content-card table-scroll">
-                    <Table hover>
-                        <thead>
-                            <tr>
-                                <th>Room</th>
-                                <th>Description</th>
-                                <th>From</th>
-                                <th>To</th>
-                                <th>Study session</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {bookings.map(booking => {
-                                const isFuture = new Date(booking.startTime) > now
-
-                                return (
-                                <tr key={booking.bookingId}>
-                                    <td>{booking.roomNumber ?? '—'}</td>
-                                    <td>{booking.description || '—'}</td>
-                                    <td>{formatDate(booking.startTime)}</td>
-                                    <td>{formatDate(booking.endTime)}</td>
-                                    <td>
-                                        {booking.studySessionId !== null ? (
-                                            <span className="status-badge is-available">Study session</span>
-                                        ) : isFuture && data?.hasStudentProfile ? (
-                                    <div className="table.actions">
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline-success"
-                                                    onClick={() => openCreate(booking.bookingId, booking.roomNumber)}
-                                                >
-                                                    Open as study session
-                                                </Button>
-                                        </div>
-                                        ) : (
-                                            '-'
-                                        )}
-                                    </td>
+                    <div className="content-card table-scroll">
+                        <Table hover>
+                            <thead>
+                                <tr>
+                                    <th>Room</th>
+                                    <th>Description</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Study session</th>
+                                    <th>Actions</th>
                                 </tr>
-                                )
-                            })}
-                        </tbody>
-                    </Table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {bookings.map(booking => {
+                                    const isFuture = new Date(booking.startTime) > now
+
+                                    return (
+                                        <tr key={booking.bookingId}>
+                                            <td>{booking.roomNumber ?? '—'}</td>
+                                            <td>{booking.description || '—'}</td>
+                                            <td>{formatDate(booking.startTime)}</td>
+                                            <td>{formatDate(booking.endTime)}</td>
+                                            <td>
+                                                {booking.studySessionId !== null ? (
+                                                    <span className="status-badge is-available">Study session</span>
+                                                ) : isFuture && data?.hasStudentProfile ? (
+                                                    <div className="table-actions">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline-success"
+                                                            onClick={() => openCreate(booking.bookingId, booking.roomNumber)}
+                                                        >
+                                                            Open as study session
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    '-'
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className="table-actions">
+                                                    {/* Bookings that have started cannot be edited (the API requires a future start time) */}
+                                                    {isFuture && (
+                                                        <Button size="sm" variant="outline-success" onClick={() => openEditBooking(booking)}>
+                                                            Edit
+                                                        </Button>
+                                                    )}
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline-danger"
+                                                        disabled={isBusy}
+                                                        onClick={() => handleDeleteBooking(booking)}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )
+                                })}
+                            </tbody>
+                        </Table>
+                    </div>
                 )}
             </section>
 
@@ -201,74 +267,105 @@ function MyPagePage() {
                 ) : sessions.length === 0 ? (
                     <p>You have no study sessions.</p>
                 ) : (
-            <div className="content-card table-scroll">
-                    <Table hover>
-                        <thead>
-                            <tr>
-                                <th>Session</th>
-                                <th>Subject</th>
-                                <th>Room</th>
-                                <th>From</th>
-                                <th>To</th>
-                                <th>Participant</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {sessions.map(session => (
-                                <tr key={session.studySessionId}>
-                                    <td>
-                                        {session.title}
-                                        {!session.isOpen && <span className="text-muted"> (closed)</span>}
-                                    </td>
-                                    <td>{session.subject || '—'}</td>
-                                    <td>{session.roomNumber || '—'}</td>
-                                    <td>{formatDate(session.startTime)}</td>
-                                    <td>{formatDate(session.endTime)}</td>
-                                    <td>{session.participantCount} / {session.maxParticipants}</td>
-                                    <td>
-                                        <div className="table-actions">
-                                            {session.isOwner ? (
-                                                <>
-                                                    <Button size="sm" variant="outline-success" onClick={() => openEdit(session)}>
-                                                        Edit
-                                                    </Button>
+                    <div className="content-card table-scroll">
+                        <Table hover>
+                            <thead>
+                                <tr>
+                                    <th>Session</th>
+                                    <th>Subject</th>
+                                    <th>Room</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Participant</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {sessions.map(session => (
+                                    <tr key={session.studySessionId}>
+                                        <td>
+                                            {session.title}
+                                            {!session.isOpen && <span className="text-muted"> (closed)</span>}
+                                        </td>
+                                        <td>{session.subject || '—'}</td>
+                                        <td>{session.roomNumber || '—'}</td>
+                                        <td>{formatDate(session.startTime)}</td>
+                                        <td>{formatDate(session.endTime)}</td>
+                                        <td>{session.participantCount} / {session.maxParticipants}</td>
+                                        <td>
+                                            <div className="table-actions">
+                                                {session.isOwner ? (
+                                                    <>
+                                                        <Button size="sm" variant="outline-success" onClick={() => openEdit(session)}>
+                                                            Edit
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline-danger"
+                                                            disabled={isBusy}
+                                                            onClick={() => {
+                                                                if (window.confirm(`Delete the study session "${session.title}"? The participants will be removed.`)) {
+                                                                    setActionError('')
+                                                                    deleteMutation.mutate(session.studySessionId)
+                                                                }
+                                                            }}
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                    </>
+                                                ) : (
                                                     <Button
                                                         size="sm"
-                                                        variant="outline-danger"
+                                                        variant="outline-secondary"
                                                         disabled={isBusy}
                                                         onClick={() => {
-                                                            if (window.confirm(`Delete the study session "${session.title}"? The participants will be removed.`)) {
-                                                                setActionError('')
-                                                                deleteMutation.mutate(session.studySessionId)
-                                                            }
+                                                            setActionError('')
+                                                            leaveMutation.mutate(session.studySessionId)
                                                         }}
                                                     >
-                                                        Delete
+                                                        Leave
                                                     </Button>
-                                                </>
-                                            ) : (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline-secondary"
-                                                    disabled={isBusy}
-                                                    onClick={() => {
-                                                        setActionError('')
-                                                        leaveMutation.mutate(session.studySessionId)
-                                                    }}
-                                                >
-                                                    Leave
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
-                </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+                    </div>
                 )}
             </section>
+
+            <Modal show={editingBooking != null} onHide={() =>
+                setEditingBooking(null)} centered>
+                <Form onSubmit={event => {
+                    event.preventDefault()
+                    if (editingBooking)
+                        updateBookingMutation.mutate(editingBooking)
+                }}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Edit booking: room {editingBooking?.roomNumber}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>{updateBookingMutation.error && (<Alert variant="danger">{updateBookingMutation.error.message}</Alert>)}
+                        <Form.Group className="mb-3" controlId="bookingStartTime">
+                            <Form.Label>Start</Form.Label>
+                            <Form.Control type="datetime-local" required value={bookingForm.startTime} onChange={event => setBookingForm({ ...bookingForm, startTime: event.target.value })} />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="bookingEndTime">
+                            <Form.Label>End</Form.Label>
+                            <Form.Control type="datetime-local" required value={bookingForm.endTime} onChange={event => setBookingForm({ ...bookingForm, endTime: event.target.value })} />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="bookingDescription">
+                            <Form.Label>Description (optional)</Form.Label>
+                            <Form.Control as="textarea" rows={2} maxLength={200} value={bookingForm.description} onChange={event => setBookingForm({ ...bookingForm, description: event.target.value })} />
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="outline-secondary" onClick={() => setEditingBooking(null)}>Cancel</Button>
+                        <Button type="submit" disabled={updateBookingMutation.isPending}>{updateBookingMutation.isPending ? 'Saving...' : 'Save'} </Button>
+                    </Modal.Footer>
+                    </Form>
+            </Modal>
 
             <Modal show={modal !== null} onHide={() => setModal(null)} centered>
                 <Form onSubmit={handleSubmit}>
